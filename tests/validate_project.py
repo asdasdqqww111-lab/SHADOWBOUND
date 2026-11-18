@@ -529,6 +529,9 @@ def validate_phase3_combat() -> None:
           "Guard mitigates damage at a positive stamina cost")
     check(cfg["defense"]["revive_delay"] > 0 and cfg["defense"]["hurt_invuln_duration"] > 0,
           "Revive and hurt immunity durations are positive")
+    camera_zone_src = (ROOT / "scripts/camera/camera_zone_trigger.gd").read_text()
+    check("@export var camera_priority: int" in camera_zone_src and "var priority:" not in camera_zone_src,
+          "Camera zone priority does not redeclare native Area2D.priority")
     base_src = (ROOT / "scripts/enemies/enemy_base.gd").read_text()
     inherited_paths = re.findall(r'@onready\s+var\s+\w+[^=]*=\s*\$([A-Za-z0-9_/]+)', base_src)
     loc = json.loads((ROOT / "data/localization/en.json").read_text())

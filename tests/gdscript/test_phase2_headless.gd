@@ -101,11 +101,11 @@ func _test_dual_mode_camera_and_vista_zones() -> void:
 	# Priority-stacked CameraZoneTrigger vista override
 	var low_zone: CameraZoneTrigger = CameraZoneTrigger.new()
 	low_zone.zone_id = "low"
-	low_zone.priority = 1
+	low_zone.camera_priority = 1
 	low_zone.zoom_scale_override = 0.94
 	var high_zone: CameraZoneTrigger = CameraZoneTrigger.new()
 	high_zone.zone_id = "high_vista"
-	high_zone.priority = 3
+	high_zone.camera_priority = 3
 	high_zone.zoom_scale_override = 0.85
 	add_child(low_zone)
 	add_child(high_zone)

@@ -34,7 +34,6 @@ Artists can replace the procedural Phase 3 sprite sheets with hand-animated PNGs
 | 5 | `attack` | 6 (cols 0–5) | `640` | 16.0 | No | Katana slash; crescent arc active on frames 2–4 |
 | 6 | `block` | 4 (cols 0–3) | `768` | 9.0 | Yes | Shadow Guard diagonal katana ward + cyan/violet rune barrier |
 | 7 | `wall_slide` | 4 (cols 0–3) | `896` | 10.0 | Yes | Wall brace descend with cyan/gold friction sparks |
-
 | 8 | `attack_2` | 5 (cols 0–4) | `1024` | 18.0 | No | Crescent Reverse |
 | 9 | `attack_3` | 6 (cols 0–5) | `1152` | 18.0 | No | Eclipse Finisher |
 | 10 | `hurt` | 3 (cols 0–2) | `1280` | 12.0 | No | Stagger recoil |

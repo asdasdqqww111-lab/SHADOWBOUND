@@ -123,7 +123,7 @@ func get_active_camera_zone() -> CameraZoneTrigger:
 	var best: CameraZoneTrigger = null
 	for z: CameraZoneTrigger in _active_zones:
 		if is_instance_valid(z):
-			if best == null or z.priority >= best.priority:
+			if best == null or z.camera_priority >= best.camera_priority:
 				best = z
 	return best
 

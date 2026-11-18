@@ -273,13 +273,13 @@ shape = SubResource("RectangleShape2D_wall_pillar")
 [node name="OverlookVistaZone" parent="SideScrollZone" instance=ExtResource("17_camzone")]
 position = Vector2(920, -270)
 zone_id = "cliff_overlook"
-priority = 2
+camera_priority = 2
 zoom_scale_override = 0.85
 
 [node name="EastRiftVistaZone" parent="SideScrollZone" instance=ExtResource("17_camzone")]
 position = Vector2(2350, -110)
 zone_id = "east_rift"
-priority = 1
+camera_priority = 1
 zoom_scale_override = 0.92
 use_focal_pull = true
 focal_pull_weight = 0.28
@@ -460,7 +460,7 @@ lore_key = "lore.east_tablet"
 [node name="NorthAltarVistaZone" parent="TopDownZone" instance=ExtResource("17_camzone")]
 position = Vector2(800, 1900)
 zone_id = "sanctum_altar"
-priority = 2
+camera_priority = 2
 zoom_scale_override = 0.86
 use_focal_pull = true
 focal_pull_weight = 0.25

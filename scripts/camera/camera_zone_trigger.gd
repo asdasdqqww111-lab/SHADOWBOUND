@@ -4,7 +4,7 @@ extends Area2D
 ## Automatically pushes/pops zoom overrides and soft focal-point attraction on DualModeCamera.
 
 @export var zone_id: String = "vista"
-@export var priority: int = 1
+@export var camera_priority: int = 1
 @export var zoom_scale_override: float = 0.88
 @export var use_focal_pull: bool = false
 @export var focal_pull_weight: float = 0.3
