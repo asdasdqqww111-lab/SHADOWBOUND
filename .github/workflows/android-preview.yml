@@ -39,6 +39,12 @@ jobs:
           curl -fL --retry 3 "$base/Godot_v4.3-stable_export_templates.tpz" -o "$RUNNER_TEMP/templates.tpz"
           unzip -p "$RUNNER_TEMP/templates.tpz" templates/android_debug.apk \
             > "$HOME/.local/share/godot/export_templates/$GODOT_VERSION/android_debug.apk"
+          unzip -p "$RUNNER_TEMP/templates.tpz" templates/android_source.zip > "$RUNNER_TEMP/android_source.zip"
+          mkdir -p android/build
+          unzip -q "$RUNNER_TEMP/android_source.zip" -d android/build
+          touch android/build/.gdignore
+          printf '%s\n' "$GODOT_VERSION" > android/.build_version
+          chmod +x android/build/gradlew
       - name: Configure Android SDK and local-only debug signing
         run: |
           set -euo pipefail

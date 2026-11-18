@@ -23,6 +23,7 @@ exports/
 # Android Gradle build & signing secrets (NEVER commit credentials or keys)
 android/build/
 android/.gradle/
+android/.build_version
 local.properties
 export_presets.cfg
 *.keystore
