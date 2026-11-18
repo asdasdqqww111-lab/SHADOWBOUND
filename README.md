@@ -92,11 +92,20 @@ python3 tests/test_gameplay_logic.py
 
 The Python suites validate static contracts and geometry; they do **not** replace native Godot execution or device playtesting. `.github/workflows/validate.yml` imports assets and runs all three native suites on Godot 4.3. See [Phase 3 verification report](docs/PHASE_3_TEST_REPORT.md) for actual results and remaining checks.
 
+## Download Android Preview — Phase 3
+
+[**Download SHADOWBOUND v0.3.0 APK**](https://github.com/asdasdqqww111-lab/SHADOWBOUND/releases/download/v0.3.0-android-preview-2/SHADOWBOUND-v0.3.0-preview.apk) · [Release and checksum](https://github.com/asdasdqqww111-lab/SHADOWBOUND/releases/tag/v0.3.0-android-preview-2)
+
+Experimental debug-signed build, approximately **160 MB**, for **Android 9+ ARM64/ARMv7** with OpenGL ES 3 support. Allow installation from your browser/file manager if Android asks. No Android permissions are requested; the game runs offline. Later previews may need a reinstall because the test signing key is disposable. This is not a production/store release, and physical-device visual testing is still needed.
+
+The APK was built and signature/manifest/resource-verified by [GitHub Actions](https://github.com/asdasdqqww111-lab/SHADOWBOUND/actions/runs/44422671140). See [Android preview report](docs/ANDROID_PREVIEW_TEST_REPORT.md) for exact verification details.
+
 ## Android APK Export Setup (Android 9.0 / API 28+)
 
 1. Install matching Godot 4 **Export Templates** and configure **Android SDK (API 34)** + **OpenJDK 17** + local debug keystore (never commit `.keystore` files).
 2. Copy `export_presets.cfg.example` to `export_presets.cfg` (`min_sdk="28"`, `target_sdk="34"`, `include_filter="*.json"`, zero network permissions for 100% offline play).
-3. Export via `Project -> Export -> Android APK -> Export Project`. *(Full Android APK export verification is scheduled in Phase 9.)*
+3. Choose `Project -> Install Android Build Template`. Keep **Use Gradle Build** enabled: Godot 4.3 requires Gradle to override minimum/target SDK versions.
+4. Set your local debug keystore in the preset, then export via `Project -> Export -> Android APK -> Export Project` using debug export. The Phase 3 preview APK is available above; production signing, optimization and device certification remain later work.
 
 ---
 

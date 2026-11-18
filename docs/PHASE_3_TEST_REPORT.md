@@ -82,3 +82,8 @@ godot --headless --path . res://tests/gdscript/test_phase3_runner.tscn
 - Check EN/AR text fit, boss/status panel layout, font shaping and five-button multitouch on a real Android 9+ device.
 - Verify mobile performance, resume/Back behavior and frame-rate-dependent projectile collision at low FPS.
 - No Android APK was built (export verification remains Phase 9). Audio, progression rewards and loot are outside this milestone.
+
+
+## Follow-up — Android Preview Now Available
+
+At the user's request, an installable Phase 3 APK was subsequently built, verified and published before Phase 4. See [Android preview build report](ANDROID_PREVIEW_TEST_REPORT.md) and [download the APK](https://github.com/asdasdqqww111-lab/SHADOWBOUND/releases/download/v0.3.0-android-preview-2/SHADOWBOUND-v0.3.0-preview.apk). Earlier statements above about APK export being pending describe the original Phase 3 handoff; the remaining limitation is physical-device/visual testing, not APK availability.
