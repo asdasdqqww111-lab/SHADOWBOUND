@@ -14,13 +14,13 @@
 
 ## 2. Drop-In Character Sprite Sheet Specifications
 
-Artists can replace the procedural Phase 1 sprite sheets with hand-animated PNGs (exported from Aseprite, Krita, Spine, or Blender Grease Pencil) **without modifying any GDScript or `.tscn` files**, provided the sheet grid and foot anchor match the tables below.
+Artists can replace the procedural Phase 3 sprite sheets with hand-animated PNGs (exported from Aseprite, Krita, Spine, or Blender Grease Pencil) **without modifying any GDScript or `.tscn` files**, provided the sheet grid and foot anchor match the tables below.
 
 ### 2.1 Side-Scrolling Stickman Sheet
 
 - **Path:** `assets/sprites/player/stickman_sidescroll_sheet.png`
-- **Image Size:** `1024 x 1024` px (RGBA PNG, transparent background)
-- **Grid:** `8 columns x 8 rows`, cell size `128 x 128` px
+- **Image Size:** `1024 x 1408` px (RGBA PNG, transparent background)
+- **Grid:** `8 columns x 11 rows`, cell size `128 x 128` px
 - **Default Facing:** Right (`+X`); engine mirrors automatically via `flip_h` for Left (`-X`)
 - **Foot Ground Anchor:** `x = 64, y = 114` inside each `128 x 128` cell
 
@@ -35,11 +35,15 @@ Artists can replace the procedural Phase 1 sprite sheets with hand-animated PNGs
 | 6 | `block` | 4 (cols 0–3) | `768` | 9.0 | Yes | Shadow Guard diagonal katana ward + cyan/violet rune barrier |
 | 7 | `wall_slide` | 4 (cols 0–3) | `896` | 10.0 | Yes | Wall brace descend with cyan/gold friction sparks |
 
+| 8 | `attack_2` | 5 (cols 0–4) | `1024` | 18.0 | No | Crescent Reverse |
+| 9 | `attack_3` | 6 (cols 0–5) | `1152` | 18.0 | No | Eclipse Finisher |
+| 10 | `hurt` | 3 (cols 0–2) | `1280` | 12.0 | No | Stagger recoil |
+
 ### 2.2 Top-Down (3/4 RPG) Stickman Sheet
 
 - **Path:** `assets/sprites/player/stickman_topdown_sheet.png`
-- **Image Size:** `768 x 1152` px (RGBA PNG, transparent background)
-- **Grid:** `6 columns x 9 rows`, cell size `128 x 128` px
+- **Image Size:** `768 x 1536` px (RGBA PNG, transparent background)
+- **Grid:** `6 columns x 12 rows`, cell size `128 x 128` px
 - **Foot Shadow Anchor:** `x = 64, y = 104` inside each `128 x 128` cell
 - **Side Facing:** Right (`+X`); engine mirrors via `flip_h` for Left (`-X`)
 
@@ -54,6 +58,9 @@ Artists can replace the procedural Phase 1 sprite sheets with hand-animated PNGs
 | 6 | `td_dodge` | 5 (cols 0–4) | `768` | 16.0 | No |
 | 7 | `td_attack` | 5 (cols 0–4) | `896` | 16.0 | No |
 | 8 | `td_block` | 4 (cols 0–3) | `1024` | 9.0 | Yes |
+| 9 | `td_attack_2` | 5 (cols 0–4) | `1152` | 18.0 | No |
+| 10 | `td_attack_3` | 5 (cols 0–4) | `1280` | 18.0 | No |
+| 11 | `td_hurt` | 3 (cols 0–2) | `1408` | 12.0 | No |
 
 ---
 
@@ -100,3 +107,12 @@ Whenever replacing or adding any third-party asset:
 2. Copy the full license text into `licenses/`.
 3. Record Asset Name, URL, Author, License, Modifications, and Attribution in `ASSET_CREDITS.md`.
 4. Re-run `python3 tests/validate_project.py` to confirm all `AtlasTexture` bounds fit the updated dimensions.
+
+
+## Phase 3 — Enemy/Boss Replacement Contract
+
+The three enemy sheets are **512×512**, four rows of four **128×128** cells: `idle`, `move`, `attack` (four frames each) and `hurt` (two frames; unused cells remain transparent). Boss sheet is **640×640**, four rows of four **160×160** cells: `idle`, `move`, `attack`, `phase_shift` (four frames each). All sheets face right and use RGBA transparency; horizontal facing is mirrored in code. Top-down currently shares these stylized silhouettes, not separate directional enemy sheets.
+
+Resources live in `resources/sprites/{umbral_hound,rift_wisp,obsidian_sentinel,eclipse_warden}_frames.tres`. Preserve their animation names and atlas rectangles when replacing PNGs. `shadow_orb.png` is **64×64** with a central pivot. Boss phase tints are applied by code, so preserve neutral original hues.
+
+Run `python3 assets/tools/generate_placeholder_art.py` to regenerate all 28 PNGs, or `python3 assets/tools/generate_enemy_art.py` for only the five new combat PNGs. Regeneration overwrites artist replacements: run it only on a clean worktree or back up custom art. Run both Python suites afterward and reimport in Godot; dimensions and atlas bounds must pass before export.

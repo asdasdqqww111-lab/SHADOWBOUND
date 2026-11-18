@@ -6,6 +6,7 @@ signal gameplay_mode_changed(new_mode: int)
 signal pause_state_changed(is_paused: bool)
 signal settings_changed
 signal profile_updated
+signal enemy_defeated_recorded(enemy_id: String, is_boss: bool, total_count: int)
 
 enum GameplayMode {
 	SIDE_SCROLL = 0,
@@ -27,6 +28,7 @@ const MAIN_MENU_SCENE: String = "res://scenes/ui/main_menu.tscn"
 const PLAYABLE_LEVEL_SCENE: String = "res://scenes/levels/twilight_sanctum.tscn"
 const DEFAULT_PROFILE_PATH: String = "res://resources/player/default_player_profile.tres"
 const MOVEMENT_CONFIG_PATH: String = "res://data/config/movement_config.json"
+const COMBAT_CONFIG_PATH: String = "res://data/config/combat_config.json"
 const SETTINGS_SAVE_PATH: String = "user://settings.cfg"
 
 var current_mode: int = GameplayMode.SIDE_SCROLL
@@ -36,12 +38,15 @@ var camera_zoom_preset: int = CameraZoomPreset.STANDARD
 var is_in_gameplay: bool = false
 var player_profile: PlayerProfile = null
 var movement_config: Dictionary = {}
+var combat_config: Dictionary = {}
+var defeated_enemy_counts: Dictionary = {}
 
 
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
 	get_tree().set_auto_accept_quit(true)
 	_load_movement_config()
+	_load_combat_config()
 	_ensure_player_profile()
 	load_settings()
 
@@ -76,6 +81,45 @@ func get_config_section(section_name: String) -> Dictionary:
 		var section: Dictionary = movement_config[section_name]
 		return section
 	return {}
+
+
+func _load_combat_config() -> void:
+	if not FileAccess.file_exists(COMBAT_CONFIG_PATH):
+		push_warning("GameState: Missing combat config at %s" % COMBAT_CONFIG_PATH)
+		combat_config = {}
+		return
+	var raw: String = FileAccess.get_file_as_string(COMBAT_CONFIG_PATH)
+	var parsed: Variant = JSON.parse_string(raw)
+	if parsed is Dictionary:
+		combat_config = parsed
+	else:
+		combat_config = {}
+
+
+func get_combat_config_section(section_name: String) -> Dictionary:
+	if combat_config.is_empty():
+		_load_combat_config()
+	if combat_config.has(section_name) and combat_config[section_name] is Dictionary:
+		var section: Dictionary = combat_config[section_name]
+		return section
+	return {}
+
+
+func record_enemy_defeated(enemy_id: String, is_boss: bool = false) -> int:
+	_ensure_player_profile()
+	player_profile.session_enemies_defeated += 1
+	if is_boss:
+		player_profile.session_bosses_defeated += 1
+	var prev: int = int(defeated_enemy_counts.get(enemy_id, 0))
+	var updated: int = prev + 1
+	defeated_enemy_counts[enemy_id] = updated
+	profile_updated.emit()
+	enemy_defeated_recorded.emit(enemy_id, is_boss, updated)
+	return updated
+
+
+func get_enemy_defeat_count(enemy_id: String) -> int:
+	return int(defeated_enemy_counts.get(enemy_id, 0))
 
 
 func _ensure_player_profile() -> void:

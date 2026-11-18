@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-SHADOWBOUND — Phase 2 Behavioral, Camera & Controller Verification Suite.
+SHADOWBOUND — Phase 3 Static Gameplay Contract & Geometry Verification Suite.
 
 Verifies:
 1. Side-Scrolling physics: jump/double-jump/apex-hang, platform & one-way skybridge
@@ -240,12 +240,56 @@ def test_touch_controls_ergonomics() -> None:
     check(len(overlaps) == 0, f"Zero pairwise circle overlaps across all 5 touch buttons (overlaps: {overlaps})")
 
 
+def test_combat_arena_geometry() -> None:
+    print("\n--- 5. Combat Arena Placement & Safety Contracts ---")
+    level = (ROOT / "scenes/levels/twilight_sanctum.tscn").read_text()
+    actors = re.findall(
+        r'\[node name="([^"]+)" parent="(SideScrollZone|TopDownZone)" instance=ExtResource\("(18_hound|19_wisp|20_sentinel|21_boss)"\)\]([^\[]+)',
+        level,
+    )
+    check(len(actors) == 8, "Level contains seven archetype enemies and one boss")
+    for mode in ["SideScrollZone", "TopDownZone"]:
+        kinds = {kind for _, zone, kind, _ in actors if zone == mode}
+        check({"18_hound", "19_wisp", "20_sentinel"} <= kinds, f"All three enemy archetypes appear in {mode}")
+    spawn_m = re.search(r'\[node name="TopDownSpawn"[^\n]+\]\nposition = Vector2\(([^,]+), ([^)]+)\)', level)
+    spawn_x, spawn_y = map(float, spawn_m.groups())
+    boss = next(entry for entry in actors if entry[2] == "21_boss")
+    boss_m = re.search(r'position = Vector2\(([^,]+), ([^)]+)\)', boss[3])
+    bx, by = map(float, boss_m.groups())
+    stats = parse_tres_floats(ROOT / "resources/combat/eclipse_warden_stats.tres")
+    check(math.hypot(bx - spawn_x, by - spawn_y) > float(stats["aggro_range"]) + 40,
+          "Courtyard spawn sits outside boss aggro with a safety margin")
+    pillars = [(420, 1880), (1180, 1880), (420, 2360), (1180, 2360)]
+    platforms = [(1430, 1064, 1576), (1920, 1564, 2076), (2190, 2024, 2536)]
+    for name, zone, kind, body in actors:
+        m = re.search(r'position = Vector2\(([^,]+), ([^)]+)\)', body)
+        x, y = map(float, m.groups())
+        span = float(re.search(r'patrol_half_span = ([0-9.]+)', body)[1])
+        check(f"gameplay_mode = {int(zone == 'TopDownZone')}" in body, f"{name}: matches zone gameplay mode")
+        if zone == "TopDownZone":
+            check(132 < x - span and x + span < 1468 and 1748 < y < 2548
+                  and all(abs(x - px) > 110 or abs(y - py) > 110 for px, py in pillars),
+                  f"{name}: patrol starts clear of enclosing walls and pillars")
+        elif kind != "19_wisp":
+            _, left, right = next(p for p in platforms if p[0] == x)
+            check(left + 16 < x - span and x + span < right - 16,
+                  f"{name}: ground patrol remains on its platform")
+    cfg = json.loads((ROOT / "data/config/combat_config.json").read_text())
+    check(cfg["player_combat"]["combo_buffer_window"] < min(s["duration"] for s in cfg["player_combat"]["combo_steps"]),
+          "Buffered follow-ups require an input within the late attack window")
+    check(cfg["player_combat"]["riposte_window"] > cfg["defense"]["parry_enemy_stagger"],
+          "Riposte remains available after enemy parry stagger")
+    check(cfg["projectile"]["reflected_speed_multiplier"] > 1 and cfg["defense"]["parry_reflect_damage_multiplier"] > 1,
+          "Reflected projectiles gain speed and damage")
+
+
 def main() -> int:
-    print("=== SHADOWBOUND Phase 2 Gameplay, Camera & Controller Tests ===")
+    print("=== SHADOWBOUND Phase 3 Static Gameplay, Combat & Geometry Tests ===")
     test_sidescroll_controller_and_level()
     test_topdown_8dir_controller_and_courtyard()
     test_dual_camera_profiles_and_zones()
     test_touch_controls_ergonomics()
+    test_combat_arena_geometry()
     print(f"\nSUMMARY: {passed} passed, {failed} failed")
     return 0 if failed == 0 else 1
 

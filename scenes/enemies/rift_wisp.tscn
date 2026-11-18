@@ -1,0 +1,37 @@
+[gd_scene load_steps=6 format=3]
+
+[ext_resource type="Script" path="res://scripts/enemies/rift_wisp.gd" id="1_script"]
+[ext_resource type="Resource" path="res://resources/combat/rift_wisp_stats.tres" id="2_stats"]
+[ext_resource type="SpriteFrames" path="res://resources/sprites/rift_wisp_frames.tres" id="3_frames"]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_body"]
+radius = 16.0
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_hurt"]
+radius = 30.0
+
+[node name="RiftWisp" type="CharacterBody2D"]
+z_index = 9
+collision_layer = 8
+collision_mask = 0
+script = ExtResource("1_script")
+stats = ExtResource("2_stats")
+hovers = true
+
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="."]
+position = Vector2(0, -48)
+sprite_frames = ExtResource("3_frames")
+animation = &"idle"
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+position = Vector2(0, -34)
+shape = SubResource("CircleShape2D_body")
+
+[node name="Hurtbox" type="Area2D" parent="." groups=["enemy_hurtbox"]]
+position = Vector2(0, -38)
+collision_layer = 16
+collision_mask = 0
+monitoring = false
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Hurtbox"]
+shape = SubResource("CircleShape2D_hurt")

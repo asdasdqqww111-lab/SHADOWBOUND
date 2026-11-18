@@ -1,15 +1,15 @@
 #!/usr/bin/env python3
 """
-SHADOWBOUND — Phase 1 Automated Project Validation Suite.
+SHADOWBOUND — Phase 3 Automated Project Validation Suite.
 
 Validates:
 1. Repository structure & security hygiene (zero secrets/keystores/APKs).
 2. `project.godot` syntax, version, main scene, autoloads, inputs, physics layers, RTL & Android settings.
-3. Official Godot 4 GDScript AST parsing (`gdparse`) and style/linting (`gdlint`) across all `.gd` scripts.
+3. GDScript AST parsing via gdtoolkit (not the native Godot compiler) (`gdparse`) and style/linting (`gdlint`) across all `.gd` scripts.
 4. Autoload vs `class_name` collision checks and strict Variant typing checks.
 5. Deep `.tscn` and `.tres` validation: format=3, exact `load_steps`, ExtResource file existence,
    SubResource reference integrity, node hierarchy resolution, script `@onready $NodePath` verification,
-   AtlasTexture bounds inside actual PNG dimensions, and all 14 Stickman animation definitions.
+   AtlasTexture bounds inside actual PNG dimensions, and all 23 Stickman animation definitions.
 6. JSON config & bilingual English/Arabic RTL string parity and Unicode validation.
 7. Asset integrity (PNG RGBA dimensions, Cairo TrueType font header, SVG icon XML, licenses & credits).
 """
@@ -73,6 +73,12 @@ REQUIRED_ANIMATIONS = [
     "td_dodge",
     "td_attack",
     "td_block",
+    "attack_2",
+    "attack_3",
+    "hurt",
+    "td_attack_2",
+    "td_attack_3",
+    "td_hurt",
 ]
 
 FORBIDDEN_SECRET_PATTERNS = (".keystore", ".jks", ".pem", ".key", ".p12", ".apk", ".aab")
@@ -392,7 +398,7 @@ def validate_scenes_and_resources() -> None:
                             f"{rel} ({scr_path.name}): all {len(dollar_paths)} @onready $NodePaths resolve (missing: {missing_nodes})",
                         )
 
-    # Specifically verify all 14 required animations inside stickman_sprite_frames.tres
+    # Specifically verify all required animations inside stickman_sprite_frames.tres
     sf_text = (ROOT / "resources/sprites/stickman_sprite_frames.tres").read_text(encoding="utf-8")
     defined_anims = set(re.findall(r'"name":\s*&"([^"]+)"', sf_text))
     missing_anims = [a for a in REQUIRED_ANIMATIONS if a not in defined_anims]
@@ -501,6 +507,52 @@ def validate_assets_and_licenses() -> None:
     check((ROOT / "licenses/CC0-1.0-Shadowbound-Art.txt").is_file(), "licenses/CC0-1.0-Shadowbound-Art.txt present")
 
 
+def validate_phase3_combat() -> None:
+    print("\n--- 7. Phase 3 Combat Resources & Scene Contracts ---")
+    cfg = json.loads((ROOT / "data/config/combat_config.json").read_text())
+    check(set(cfg) == {"player_combat", "defense", "projectile", "boss"}, "Combat config has all four sections")
+    steps = cfg["player_combat"]["combo_steps"]
+    check([x["step"] for x in steps] == [1, 2, 3], "Sword combo has exactly three ordered steps")
+    check([x["damage_multiplier"] for x in steps] == sorted(x["damage_multiplier"] for x in steps),
+          "Combo damage escalates through the finisher")
+    check([x["breaks_shield"] for x in steps] == [False, False, True], "Only the finisher naturally breaks shields")
+    check(all(x["duration"] > 0 and x["hitbox_scale"] >= 1 and x["stamina_cost"] >= 0 for x in steps),
+          "Combo timing, hitbox scales and stamina costs are valid")
+    for step in steps:
+        check(step["ss_anim"] in REQUIRED_ANIMATIONS and step["td_anim"] in REQUIRED_ANIMATIONS,
+              f"Combo step {step['step']} binds both player animation modes")
+    check(0 < cfg["boss"]["phase_3_hp_ratio"] < cfg["boss"]["phase_2_hp_ratio"] < 1,
+          "Boss phase thresholds descend strictly inside HP range")
+    check(cfg["boss"]["fan_orb_count"] == 3 and cfg["boss"]["nova_orb_count"] == 8,
+          "Boss fan and radial nova projectile counts are configured")
+    check(0 < cfg["defense"]["block_damage_reduction"] < 1 and cfg["defense"]["block_stamina_cost"] > 0,
+          "Guard mitigates damage at a positive stamina cost")
+    check(cfg["defense"]["revive_delay"] > 0 and cfg["defense"]["hurt_invuln_duration"] > 0,
+          "Revive and hurt immunity durations are positive")
+    base_src = (ROOT / "scripts/enemies/enemy_base.gd").read_text()
+    inherited_paths = re.findall(r'@onready\s+var\s+\w+[^=]*=\s*\$([A-Za-z0-9_/]+)', base_src)
+    loc = json.loads((ROOT / "data/localization/en.json").read_text())
+    actors = ["umbral_hound", "rift_wisp", "obsidian_sentinel", "eclipse_warden"]
+    for actor in actors:
+        scene_name = actor + ("_boss" if actor == "eclipse_warden" else "")
+        scene = parse_godot_text_resource(ROOT / f"scenes/enemies/{scene_name}.tscn")
+        check(all(path in scene["nodes"] for path in inherited_paths), f"{actor}: inherited EnemyBase NodePaths resolve")
+        hurtbox = re.search(r'\[node name="Hurtbox"[^\n]*\]([^\[]+)', scene["raw"])
+        check(hurtbox is not None and "collision_layer = 16" in hurtbox[1]
+              and "collision_mask = 0" in hurtbox[1] and 'groups=["enemy_hurtbox"]' in hurtbox[0],
+              f"{actor}: hurtbox is a monitorable layer-16 enemy_hurtbox")
+        stats = (ROOT / f"resources/combat/{actor}_stats.tres").read_text()
+        name = re.search(r'^name_key = "([^"]+)"', stats, re.M)[1]
+        check(name in loc, f"{actor}: EnemyStats display name is localized")
+        frames = (ROOT / f"resources/sprites/{actor}_frames.tres").read_text()
+        expected = {"idle", "move", "attack", "phase_shift" if actor == "eclipse_warden" else "hurt"}
+        check(set(re.findall(r'"name":\s*&"([^"]+)"', frames)) == expected,
+              f"{actor}: all four AI animation states are defined")
+    player = parse_godot_text_resource(ROOT / "scenes/player/player.tscn")
+    check("collision_mask = 88" in player["raw"], "Player slash sees enemy hurtboxes, totems, and hostile orbs")
+    check((ROOT / "tests/gdscript/test_phase3_runner.tscn").is_file(), "Native Phase 3 regression runner exists")
+
+
 def main() -> int:
     print("=======================================================")
     print("  SHADOWBOUND — Automated Project Validation Runner")
@@ -511,6 +563,7 @@ def main() -> int:
     validate_scenes_and_resources()
     validate_data_and_localization()
     validate_assets_and_licenses()
+    validate_phase3_combat()
 
     print("\n=======================================================")
     print(f"  SUMMARY: {passed} passed, {failed} failed")

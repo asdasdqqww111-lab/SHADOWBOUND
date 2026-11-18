@@ -1,4 +1,4 @@
-[gd_scene load_steps=7 format=3]
+[gd_scene load_steps=8 format=3]
 
 [ext_resource type="Script" path="res://scripts/ui/game_hud.gd" id="1_hud"]
 [ext_resource type="Theme" path="res://resources/themes/fantasy_ui_theme.tres" id="2_theme"]
@@ -20,6 +20,15 @@ corner_radius_bottom_left = 4
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_sp_fill"]
 bg_color = Color(0.28, 0.86, 0.72, 1)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_boss_fill"]
+bg_color = Color(0.84, 0.18, 0.42, 1)
+border_width_right = 2
+border_color = Color(1, 0.88, 0.54, 1)
 corner_radius_top_left = 4
 corner_radius_top_right = 4
 corner_radius_bottom_right = 4
@@ -213,6 +222,47 @@ layout_mode = 2
 focus_mode = 0
 theme_override_font_sizes/font_size = 14
 text = "Pause"
+
+[node name="BossPanel" type="PanelContainer" parent="HudRoot"]
+visible = false
+layout_mode = 1
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -195.0
+offset_top = 14.0
+offset_right = 195.0
+offset_bottom = 86.0
+grow_horizontal = 2
+mouse_filter = 2
+
+[node name="VBox" type="VBoxContainer" parent="HudRoot/BossPanel"]
+layout_mode = 2
+mouse_filter = 2
+theme_override_constants/separation = 3
+
+[node name="BossNameLabel" type="Label" parent="HudRoot/BossPanel/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.9, 0.62, 1)
+theme_override_font_sizes/font_size = 14
+text = "Vaelor, Warden of the Eclipse"
+horizontal_alignment = 1
+
+[node name="BossPhaseLabel" type="Label" parent="HudRoot/BossPanel/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.76, 0.68, 1, 1)
+theme_override_font_sizes/font_size = 11
+text = "Phase I · Sealed Blade"
+horizontal_alignment = 1
+
+[node name="BossHpBar" type="ProgressBar" parent="HudRoot/BossPanel/VBox"]
+custom_minimum_size = Vector2(0, 12)
+layout_mode = 2
+mouse_filter = 2
+theme_override_styles/fill = SubResource("StyleBoxFlat_boss_fill")
+max_value = 320.0
+value = 320.0
+show_percentage = false
 
 [node name="HintBanner" type="PanelContainer" parent="HudRoot"]
 layout_mode = 1

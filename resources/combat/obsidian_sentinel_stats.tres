@@ -1,0 +1,28 @@
+[gd_resource type="Resource" script_class="EnemyStats" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://resources/combat/enemy_stats.gd" id="1_estats"]
+
+[resource]
+script = ExtResource("1_estats")
+enemy_id = "obsidian_sentinel"
+archetype = "armored_guardian"
+name_key = "enemy.obsidian_sentinel"
+is_boss = false
+max_hp = 115.0
+defense = 6.0
+knockback_resistance = 0.52
+has_front_shield = true
+front_shield_reduction = 0.55
+attack_damage = 22.0
+attack_knockback = 310.0
+move_speed = 96.0
+aggro_range = 310.0
+leash_range = 470.0
+attack_range = 76.0
+preferred_min_range = 0.0
+telegraph_duration = 0.56
+attack_active_duration = 0.28
+attack_cooldown = 1.4
+hurt_stun_duration = 0.16
+xp_reward = 42
+gold_reward = 24

@@ -7,7 +7,7 @@
 ```text
 Player (CharacterBody2D — scripts/player/player_controller.gd)
 ├── shared PlayerProfile (Resource — resources/player/player_profile.gd)
-├── AnimatedSprite2D (17 unified animations / 85 frames in stickman_sprite_frames.tres)
+├── AnimatedSprite2D (23 unified animations / 112 frames in stickman_sprite_frames.tres)
 ├── CollisionShape2D (switches upright capsule [mask 129] vs. 3/4 foot collider [mask 2])
 ├── SideScrollController (MovementControllerBase — platform physics, jump/double-jump,
 │                         apex hang, wall slide & wall jump, one-way drop-through,
@@ -42,10 +42,10 @@ Player (CharacterBody2D — scripts/player/player_controller.gd)
 | 1 (`1`) | `world_sidescroll` | Solid side-scrolling platforms, wall-jump towers, and bounds |
 | 2 (`2`) | `world_topdown` | Top-down sanctum walls, pillars, and courtyard bounds |
 | 3 (`4`) | `player` | Unified Stickman `Player` body |
-| 4 (`8`) | `enemies` | Reserved for Phase 3 side-view and top-down enemy AI |
-| 5 (`16`) | `interactables` | Shadow Rift gates, Lore Runestones, Training Totems, Camera Vista Zones |
+| 4 (`8`) | `enemies` | Side-view and top-down enemy bodies |
+| 5 (`16`) | `interactables` | Shadow Rift gates, Lore Runestones, Training Totems, enemy hurtboxes |
 | 6 (`32`) | `player_hitbox` | Active sword-slash and skill hitboxes |
-| 7 (`64`) | `enemy_hitbox` | Reserved for Phase 3 enemy and boss attack hitboxes |
+| 7 (`64`) | `enemy_hitbox` | Hostile shadow-orb projectiles |
 | 8 (`128`) | `world_oneway` | Pass-through side-scroll skybridges (player temporarily drops bit 8 on `Down+Jump`) |
 
 ---
@@ -73,3 +73,19 @@ Player (CharacterBody2D — scripts/player/player_controller.gd)
 | **Phase 7** | Complete offline Guild simulation (HQ, NPC roster, ranks, missions, contribution, storage, shop, reputation, progression; extensible for future online) + full local save/load | Planned |
 | **Phase 8** | Visual VFX polish, audio/SFX/music, full Arabic RTL polish, Android touch customization | Planned |
 | **Phase 9** | End-to-end validation, mobile performance profiling, and verified Android 9+ APK export | Planned |
+
+
+## Phase 3 — Combat Architecture
+
+- `CombatResolver` is a stateless `RefCounted` utility: combo specs, critical/Riposte multipliers, armor/shield mitigation and directional incoming-hit outcomes. A supplied critical roll makes tests deterministic.
+- `MovementControllerBase` owns shared combo timers, late-input buffer, chain expiry, finisher recovery, swing IDs and hurt stun. Each mode maps those states to movement/animation without duplicating combat arithmetic.
+- `PlayerCharacter` owns the directional `SlashHitbox` (mask **88**), clears a per-target registry for each new swing and on controller changes, receives melee/projectile attack dictionaries, applies profile updates and publishes combat/Riposte/defeat signals.
+- `EnemyBase` owns stats, common patrol/chase/telegraph/attack/stagger states, front shield, gravity vs floating motion, non-destructive defeat and `reset_enemy()`. Derived Stalker/Arcanist/Sentinel classes supply lunge/kiting/armored behavior. Hurtboxes are monitorable layer **16**, mask **0**, group `enemy_hurtbox`.
+- `ShadowOrbProjectile`: hostile layer **64**, world/player mask; parried orbs become layer **32**, world/hurtbox mask with speed/damage bonuses. Lifetimes are finite. Combo finishers and ready Ripostes can slice hostile orbs.
+- `EclipseWardenBoss` extends the same enemy contract. Phase transitions at **65% / 30%** HP enter `PHASE_SHIFT` with temporary invulnerability. Phases add dash strikes, fan volleys and radial nova. Boss signals drive a localized top-center health/phase panel.
+- `TwilightSanctumLevel` connects combat signals, disables the inactive zone's processing, clears projectiles on mode change/reset/victory, automatically revives after **1.5s**, and resets all eight enemies through the Pause action. Enemy HP and boss phase persist across mode switches; reset restores them. Session kill/parry counters are cumulative until a new session, not reset by a retry.
+- `EnemyStats.xp_reward`/`gold_reward` are reserved data for later progression. No XP, loot, persistent encyclopedia UI, audio or APK export is claimed by Phase 3.
+
+### Tests
+
+`tests/validate_project.py` checks AST/lint/resource and inherited scene contracts; `tests/test_gameplay_logic.py` checks geometry/config contracts. Neither executes GDScript. `test_phase3_runner.tscn` exercises the actual resolver, combo buffer/recovery, hit registry, enemy defeat, projectile parry/reflection, boss phase immunity/nova/victory, revive/reset and Arabic HUD. CI installs Godot 4.3 to execute all native suites and rejects engine errors/warnings in their logs.

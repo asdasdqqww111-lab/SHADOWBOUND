@@ -36,8 +36,6 @@ var _dodge_timer: float = 0.0
 var _iframe_timer: float = 0.0
 var _dodge_cooldown_timer: float = 0.0
 var _block_elapsed: float = 0.0
-var _attack_timer: float = 0.0
-var _attack_cooldown_timer: float = 0.0
 
 
 static func vector_to_compass_8(vec: Vector2) -> String:
@@ -89,7 +87,6 @@ func activate(body: CharacterBody2D) -> void:
 	_dodge_timer = 0.0
 	_iframe_timer = 0.0
 	_block_elapsed = 0.0
-	_attack_timer = 0.0
 	_cardinal_facing = "down"
 	_facing_vector = Vector2.DOWN
 	_compass_dir = "S"
@@ -123,7 +120,7 @@ func physics_step(
 
 	_tick_timers(delta)
 
-	if input_mag > 0.1 and _dodge_timer <= 0.0 and _attack_timer <= 0.0:
+	if input_mag > 0.1 and _dodge_timer <= 0.0 and _active_attack_timer <= 0.0:
 		_facing_vector = move_vec.normalized()
 		_compass_dir = vector_to_compass_8(_facing_vector)
 		_update_cardinal_facing(_facing_vector)
@@ -140,7 +137,7 @@ func physics_step(
 			_dodge_timer = dodge_duration
 			_iframe_timer = dodge_iframe_duration
 			_dodge_cooldown_timer = dodge_cooldown
-			_attack_timer = 0.0
+			_cancel_combo_attack(false)
 			_sprint_active = false
 			_clear_block()
 			body.velocity = _dodge_dir * dodge_speed
@@ -163,18 +160,35 @@ func physics_step(
 	_dodge_active = false
 	_invulnerable_active = _iframe_timer > 0.0
 
+	# Hurt / guard-break stagger recoil
+	if _hurt_stun_timer > 0.0:
+		_clear_block()
+		_attack_active = false
+		_sprint_active = false
+		body.velocity = body.velocity.move_toward(Vector2.ZERO, friction * 0.7 * delta)
+		body.move_and_slide()
+		_desired_animation = &"td_hurt"
+		_animation_speed_scale = 1.0
+		_set_state_key("hurt")
+		return {"stamina_spent": stamina_spent, "drop_through": false}
+
 	# Directional Shadow Guard (can pivot in all 8 directions while holding ward)
 	stamina_spent = _update_block_state(block_held, profile, delta) or stamina_spent
 
-	# 8-direction sword slash
-	if not _block_active and attack_pressed and _attack_timer <= 0.0 and _attack_cooldown_timer <= 0.0:
-		_attack_timer = attack_duration
-		_attack_cooldown_timer = attack_cooldown
+	# 8-direction 3-Hit Sword Combo (Shadow Cut -> Crescent Reverse -> Eclipse Finisher)
+	var combo_res: Dictionary = _try_process_combo_attack(
+		attack_pressed,
+		not _block_active,
+		profile,
+		attack_duration
+	)
+	if bool(combo_res.get("started", false)):
+		stamina_spent = bool(combo_res.get("stamina_spent", false)) or stamina_spent
 		_sprint_active = false
-		body.velocity = _facing_vector * attack_step_speed
-		action_triggered.emit("attack")
+		var step_mult: float = float(combo_res.get("lunge_multiplier", 1.0))
+		body.velocity = _facing_vector * attack_step_speed * step_mult
 
-	if _attack_timer > 0.0:
+	if _active_attack_timer > 0.0:
 		_attack_active = true
 		_sprint_active = false
 		body.velocity = body.velocity.move_toward(Vector2.ZERO, friction * 0.65 * delta)
@@ -197,14 +211,15 @@ func physics_step(
 func _tick_timers(delta: float) -> void:
 	_iframe_timer = maxf(0.0, _iframe_timer - delta)
 	_dodge_cooldown_timer = maxf(0.0, _dodge_cooldown_timer - delta)
-	_attack_timer = maxf(0.0, _attack_timer - delta)
-	_attack_cooldown_timer = maxf(0.0, _attack_cooldown_timer - delta)
+	_tick_combat_timers(delta)
 
 
 func _update_block_state(block_held: bool, profile: PlayerProfile, delta: float) -> bool:
-	if not block_held or _attack_timer > 0.0:
+	if not block_held:
 		_clear_block()
 		return false
+	if _active_attack_timer > 0.0:
+		_cancel_combo_attack(true)
 
 	var min_req: float = 1.0 if _block_active else block_min_stamina
 	if profile != null and profile.current_stamina < min_req:
@@ -286,8 +301,8 @@ func _update_cardinal_facing(dir: Vector2) -> void:
 func _update_animation_and_state(vel: Vector2, input_mag: float) -> void:
 	_animation_speed_scale = 1.0
 	if _attack_active:
-		_desired_animation = &"td_attack"
-		_set_state_key("attack")
+		_desired_animation = _get_combo_animation(true)
+		_set_state_key(_get_combo_state_key())
 		return
 	if _block_active:
 		_desired_animation = &"td_block"

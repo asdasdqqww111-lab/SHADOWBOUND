@@ -1,0 +1,53 @@
+name: Validate Godot project
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install static validation tools
+        run: python -m pip install gdtoolkit==4.5.0 pillow==13.0.0
+      - name: Validate resources and gameplay contracts
+        run: |
+          python tests/validate_project.py
+          python tests/test_gameplay_logic.py
+      - name: Install Godot 4.3 stable
+        run: |
+          curl --fail --location --retry 3 -o "$RUNNER_TEMP/godot.zip" \
+            https://github.com/godotengine/godot-builds/releases/download/4.3-stable/Godot_v4.3-stable_linux.x86_64.zip
+          unzip -q "$RUNNER_TEMP/godot.zip" -d "$RUNNER_TEMP/godot"
+          mv "$RUNNER_TEMP/godot/Godot_v4.3-stable_linux.x86_64" "$RUNNER_TEMP/godot/godot"
+          chmod +x "$RUNNER_TEMP/godot/godot"
+          echo "$RUNNER_TEMP/godot" >> "$GITHUB_PATH"
+      - name: Import assets and run native regression suites
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/test-logs"
+          godot --headless --editor --path . --import --quit 2>&1 | tee "$RUNNER_TEMP/test-logs/import.log"
+          for phase in 1 2 3; do
+            timeout 90 godot --headless --path . "res://tests/gdscript/test_phase${phase}_runner.tscn" 2>&1 \
+              | tee "$RUNNER_TEMP/test-logs/phase${phase}.log"
+          done
+          if grep -En 'SCRIPT ERROR:|ERROR:|WARNING:' "$RUNNER_TEMP/test-logs/"*.log; then
+            echo 'Godot reported errors or warnings.'
+            exit 1
+          fi
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: godot-headless-logs
+          path: ${{ runner.temp }}/test-logs
+          if-no-files-found: ignore

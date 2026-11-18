@@ -1,4 +1,4 @@
-[gd_scene load_steps=27 format=3]
+[gd_scene load_steps=31 format=3]
 
 [ext_resource type="Script" path="res://scripts/world/twilight_sanctum_level.gd" id="1_level"]
 [ext_resource type="PackedScene" path="res://scenes/player/player.tscn" id="2_player"]
@@ -17,6 +17,10 @@
 [ext_resource type="Texture2D" path="res://assets/sprites/environment/oneway_bridge.png" id="15_oneway"]
 [ext_resource type="PackedScene" path="res://scenes/props/lore_runestone.tscn" id="16_lore"]
 [ext_resource type="PackedScene" path="res://scenes/props/camera_zone_trigger.tscn" id="17_camzone"]
+[ext_resource type="PackedScene" path="res://scenes/enemies/umbral_hound.tscn" id="18_hound"]
+[ext_resource type="PackedScene" path="res://scenes/enemies/rift_wisp.tscn" id="19_wisp"]
+[ext_resource type="PackedScene" path="res://scenes/enemies/obsidian_sentinel.tscn" id="20_sentinel"]
+[ext_resource type="PackedScene" path="res://scenes/enemies/eclipse_warden_boss.tscn" id="21_boss"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_vbound"]
 size = Vector2(64, 1100)
@@ -280,6 +284,26 @@ zoom_scale_override = 0.92
 use_focal_pull = true
 focal_pull_weight = 0.28
 
+[node name="RiftWispStep" parent="SideScrollZone" instance=ExtResource("19_wisp")]
+position = Vector2(880, -42)
+gameplay_mode = 0
+patrol_half_span = 70.0
+
+[node name="UmbralHoundShrine" parent="SideScrollZone" instance=ExtResource("18_hound")]
+position = Vector2(1430, -62)
+gameplay_mode = 0
+patrol_half_span = 110.0
+
+[node name="UmbralHoundBridge" parent="SideScrollZone" instance=ExtResource("18_hound")]
+position = Vector2(1920, 58)
+gameplay_mode = 0
+patrol_half_span = 110.0
+
+[node name="ObsidianSentinelEast" parent="SideScrollZone" instance=ExtResource("20_sentinel")]
+position = Vector2(2190, -42)
+gameplay_mode = 0
+patrol_half_span = 95.0
+
 [node name="TopDownZone" type="Node2D" parent="."]
 visible = false
 
@@ -297,7 +321,7 @@ position = Vector2(800, 2120)
 texture = ExtResource("13_rune")
 
 [node name="TopDownSpawn" type="Marker2D" parent="TopDownZone"]
-position = Vector2(800, 2165)
+position = Vector2(800, 2445)
 
 [node name="NorthWall" type="StaticBody2D" parent="TopDownZone"]
 position = Vector2(800, 1608)
@@ -434,13 +458,33 @@ position = Vector2(1360, 2120)
 lore_key = "lore.east_tablet"
 
 [node name="NorthAltarVistaZone" parent="TopDownZone" instance=ExtResource("17_camzone")]
-position = Vector2(800, 1835)
+position = Vector2(800, 1900)
 zone_id = "sanctum_altar"
 priority = 2
-zoom_scale_override = 0.88
+zoom_scale_override = 0.86
 use_focal_pull = true
-focal_pull_weight = 0.3
-focal_offset = Vector2(0, -35)
+focal_pull_weight = 0.25
+focal_offset = Vector2(0, -30)
+
+[node name="UmbralHoundCourtyard" parent="TopDownZone" instance=ExtResource("18_hound")]
+position = Vector2(235, 2360)
+gameplay_mode = 1
+patrol_half_span = 68.0
+
+[node name="RiftWispCourtyard" parent="TopDownZone" instance=ExtResource("19_wisp")]
+position = Vector2(1365, 2345)
+gameplay_mode = 1
+patrol_half_span = 68.0
+
+[node name="ObsidianSentinelCourtyard" parent="TopDownZone" instance=ExtResource("20_sentinel")]
+position = Vector2(235, 1915)
+gameplay_mode = 1
+patrol_half_span = 65.0
+
+[node name="VaelorEclipseBoss" parent="TopDownZone" instance=ExtResource("21_boss")]
+position = Vector2(800, 1945)
+gameplay_mode = 1
+patrol_half_span = 90.0
 
 [node name="Player" parent="." instance=ExtResource("2_player")]
 position = Vector2(120, 118)

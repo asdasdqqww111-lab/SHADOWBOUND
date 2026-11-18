@@ -1,0 +1,28 @@
+[gd_resource type="Resource" script_class="EnemyStats" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://resources/combat/enemy_stats.gd" id="1_estats"]
+
+[resource]
+script = ExtResource("1_estats")
+enemy_id = "rift_wisp"
+archetype = "ranged_caster"
+name_key = "enemy.rift_wisp"
+is_boss = false
+max_hp = 54.0
+defense = 1.0
+knockback_resistance = 0.0
+has_front_shield = false
+front_shield_reduction = 0.0
+attack_damage = 13.0
+attack_knockback = 195.0
+move_speed = 135.0
+aggro_range = 410.0
+leash_range = 580.0
+attack_range = 330.0
+preferred_min_range = 165.0
+telegraph_duration = 0.5
+attack_active_duration = 0.22
+attack_cooldown = 1.45
+hurt_stun_duration = 0.25
+xp_reward = 28
+gold_reward = 15

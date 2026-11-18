@@ -1,0 +1,28 @@
+[gd_resource type="Resource" script_class="EnemyStats" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://resources/combat/enemy_stats.gd" id="1_estats"]
+
+[resource]
+script = ExtResource("1_estats")
+enemy_id = "eclipse_warden"
+archetype = "multi_phase_boss"
+name_key = "boss.eclipse_warden"
+is_boss = true
+max_hp = 320.0
+defense = 5.0
+knockback_resistance = 0.75
+has_front_shield = false
+front_shield_reduction = 0.0
+attack_damage = 24.0
+attack_knockback = 325.0
+move_speed = 138.0
+aggro_range = 420.0
+leash_range = 700.0
+attack_range = 92.0
+preferred_min_range = 0.0
+telegraph_duration = 0.48
+attack_active_duration = 0.28
+attack_cooldown = 1.25
+hurt_stun_duration = 0.1
+xp_reward = 180
+gold_reward = 120

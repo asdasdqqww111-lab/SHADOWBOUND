@@ -1,7 +1,7 @@
 class_name PlayerProfile
 extends Resource
 ## Shared player profile Resource persisted across Side-Scrolling and Top-Down modes.
-## Designed as the modular data backbone for future RPG phases (XP, ranks, equipment, guild).
+## Serves as the unified data backbone for combat (Phase 3) and RPG progression (Phases 4–7).
 
 @export var character_name_en: String = "Kael"
 @export var character_name_ar: String = "كايل"
@@ -16,8 +16,16 @@ extends Resource
 @export var max_stamina: float = 100.0
 @export var current_stamina: float = 100.0
 
+@export var base_attack: float = 18.0
+@export var defense: float = 4.0
+@export var crit_chance: float = 0.12
+@export var crit_multiplier: float = 1.5
+
 var session_slash_hits: int = 0
 var session_mode_switches: int = 0
+var session_enemies_defeated: int = 0
+var session_bosses_defeated: int = 0
+var session_parries: int = 0
 
 
 func get_display_name(locale: String) -> String:
@@ -26,7 +34,33 @@ func get_display_name(locale: String) -> String:
 	return character_name_en
 
 
+func apply_damage(amount: float) -> float:
+	var clamped: float = maxf(0.0, amount)
+	var before: float = current_hp
+	current_hp = maxf(0.0, current_hp - clamped)
+	return before - current_hp
+
+
+func heal(amount: float) -> float:
+	var before: float = current_hp
+	current_hp = minf(max_hp, current_hp + maxf(0.0, amount))
+	return current_hp - before
+
+
+func consume_mp(amount: float) -> bool:
+	if current_mp < amount:
+		return false
+	current_mp = maxf(0.0, current_mp - amount)
+	return true
+
+
+func restore_mp(amount: float) -> void:
+	current_mp = minf(max_mp, current_mp + maxf(0.0, amount))
+
+
 func consume_stamina(amount: float) -> bool:
+	if amount <= 0.0:
+		return true
 	if current_stamina < amount:
 		return false
 	current_stamina = maxf(0.0, current_stamina - amount)
@@ -34,7 +68,11 @@ func consume_stamina(amount: float) -> bool:
 
 
 func regenerate_stamina(amount: float) -> void:
-	current_stamina = minf(max_stamina, current_stamina + amount)
+	current_stamina = minf(max_stamina, current_stamina + maxf(0.0, amount))
+
+
+func is_defeated() -> bool:
+	return current_hp <= 0.0
 
 
 func restore_all() -> void:
@@ -56,6 +94,13 @@ func to_dictionary() -> Dictionary:
 		"current_mp": current_mp,
 		"max_stamina": max_stamina,
 		"current_stamina": current_stamina,
+		"base_attack": base_attack,
+		"defense": defense,
+		"crit_chance": crit_chance,
+		"crit_multiplier": crit_multiplier,
 		"session_slash_hits": session_slash_hits,
 		"session_mode_switches": session_mode_switches,
+		"session_enemies_defeated": session_enemies_defeated,
+		"session_bosses_defeated": session_bosses_defeated,
+		"session_parries": session_parries,
 	}

@@ -52,8 +52,6 @@ var _dodge_timer: float = 0.0
 var _iframe_timer: float = 0.0
 var _dodge_cooldown_timer: float = 0.0
 var _block_elapsed: float = 0.0
-var _attack_timer: float = 0.0
-var _attack_cooldown_timer: float = 0.0
 
 
 func apply_config(cfg: Dictionary) -> void:
@@ -111,7 +109,6 @@ func activate(body: CharacterBody2D) -> void:
 	_dodge_timer = 0.0
 	_iframe_timer = 0.0
 	_block_elapsed = 0.0
-	_attack_timer = 0.0
 	_desired_animation = &"idle"
 	_update_facing_from_dir(_facing_dir)
 	_set_state_key("idle")
@@ -177,7 +174,7 @@ func physics_step(
 			_dodge_timer = dodge_duration
 			_iframe_timer = dodge_iframe_duration
 			_dodge_cooldown_timer = dodge_cooldown
-			_attack_timer = 0.0
+			_cancel_combo_attack(false)
 			_clear_block()
 			if not on_floor:
 				_air_dodges_used += 1
@@ -202,17 +199,37 @@ func physics_step(
 	_invulnerable_active = _iframe_timer > 0.0
 
 	# Shadow Guard / Block (grounded defensive stance + perfect-guard window)
+	# Hurt stagger recoil (still respects gravity & floor collision)
+	if _hurt_stun_timer > 0.0:
+		_clear_block()
+		_attack_active = false
+		_wall_slide_active = false
+		if not on_floor:
+			body.velocity.y = minf(body.velocity.y + gravity * delta, max_fall_speed)
+		body.velocity.x = move_toward(body.velocity.x, 0.0, ground_friction * 0.7 * delta)
+		body.move_and_slide()
+		_desired_animation = &"hurt"
+		_animation_speed_scale = 1.0
+		_set_state_key("hurt")
+		return {"stamina_spent": stamina_spent, "drop_through": false}
+
+	# Grounded Shadow Guard (with early Perfect Guard parry window)
 	stamina_spent = _update_block_state(on_floor, block_held, jump_pressed, profile, delta) or stamina_spent
 
-	# Sword slash (grounded lunge or momentum-preserving aerial slash)
-	if not _block_active and attack_pressed and _attack_timer <= 0.0 and _attack_cooldown_timer <= 0.0:
-		_attack_timer = attack_duration
-		_attack_cooldown_timer = attack_cooldown
+	# 3-Hit Sword Combo (Shadow Cut -> Crescent Reverse -> Eclipse Finisher)
+	var combo_res: Dictionary = _try_process_combo_attack(
+		attack_pressed,
+		not _block_active,
+		profile,
+		attack_duration
+	)
+	if bool(combo_res.get("started", false)):
+		stamina_spent = bool(combo_res.get("stamina_spent", false)) or stamina_spent
 		if on_floor:
-			body.velocity.x = _facing_dir * attack_lunge_speed
-		action_triggered.emit("attack")
+			var lunge_mult: float = float(combo_res.get("lunge_multiplier", 1.0))
+			body.velocity.x = _facing_dir * attack_lunge_speed * lunge_mult
 
-	_attack_active = _attack_timer > 0.0
+	_attack_active = _active_attack_timer > 0.0
 
 	# Detect wall slide when descending against a vertical wall
 	var wall_normal_x: float = _resolve_wall_normal_x(body, sim_wall_normal_x)
@@ -285,8 +302,7 @@ func _tick_timers(delta: float) -> void:
 	_wall_jump_lock_timer = maxf(0.0, _wall_jump_lock_timer - delta)
 	_iframe_timer = maxf(0.0, _iframe_timer - delta)
 	_dodge_cooldown_timer = maxf(0.0, _dodge_cooldown_timer - delta)
-	_attack_timer = maxf(0.0, _attack_timer - delta)
-	_attack_cooldown_timer = maxf(0.0, _attack_cooldown_timer - delta)
+	_tick_combat_timers(delta)
 
 
 func _update_block_state(
@@ -296,9 +312,11 @@ func _update_block_state(
 	profile: PlayerProfile,
 	delta: float
 ) -> bool:
-	if not on_floor or not block_held or jump_pressed or _attack_timer > 0.0:
+	if not on_floor or not block_held or jump_pressed:
 		_clear_block()
 		return false
+	if _active_attack_timer > 0.0:
+		_cancel_combo_attack(true)
 
 	var min_req: float = 1.0 if _block_active else block_min_stamina
 	if profile != null and profile.current_stamina < min_req:
@@ -366,8 +384,8 @@ func _update_animation_and_state(
 ) -> void:
 	_animation_speed_scale = 1.0
 	if _attack_active:
-		_desired_animation = &"attack"
-		_set_state_key("attack")
+		_desired_animation = _get_combo_animation(false)
+		_set_state_key(_get_combo_state_key())
 	elif _block_active:
 		_desired_animation = &"block"
 		_set_state_key("parry" if _perfect_block_active else "block")

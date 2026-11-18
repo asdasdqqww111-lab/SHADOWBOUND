@@ -224,7 +224,7 @@ def draw_sidescroll_pose(
 
 def generate_sidescroll_sheet() -> None:
     cell = 128
-    cols, rows = 8, 8
+    cols, rows = 8, 11
     w, h = cell * cols, cell * rows
     img, draw, s = make_ss_canvas(w, h, scale=2)
 
@@ -467,6 +467,96 @@ def generate_sidescroll_sheet() -> None:
         draw.ellipse((spark_x - 3 * s, spark_y - 3 * s, spark_x + 3 * s, spark_y + 3 * s), fill=EYE_CYAN)
         draw.line([(spark_x, spark_y), (spark_x - 5 * s, spark_y - 8 * s)], fill=GOLD_BRIGHT, width=int(2 * s))
 
+    # Row 8: attack_2 — Crescent Reverse upward cyan slash (5 frames)
+    up_angles = [0.78, 0.25, -0.55, -1.45, -1.85]
+    for f in range(5):
+        ox, oy = f * cell, 8 * cell
+        lunge = 7.0 if f in (1, 2, 3) else 0.0
+        pose = {
+            "head": (65 + lunge, 41),
+            "neck": (62 + lunge, 55),
+            "hip": (58 + lunge * 0.7, 82),
+            "r_knee": (74 + lunge, 96),
+            "r_foot": (84 + lunge, 114),
+            "l_knee": (46, 98),
+            "l_foot": (36, 114),
+            "r_elbow": (73 + lunge, 62),
+            "r_hand": (84 + lunge, 58 - f * 2),
+            "l_elbow": (50 + lunge * 0.5, 67),
+            "l_hand": (44 + lunge * 0.5, 76),
+            "scarf_phase": f * 1.25 + 1.0,
+            "scarf_len": 36,
+            "scarf_lift": -3.0,
+            "sword_drawn": True,
+            "sword_angle": up_angles[f],
+            "sword_len": 40.0,
+            "lean": 1.15,
+            "grounded": True,
+        }
+        draw_sidescroll_pose(draw, ox, oy, s, pose)
+        if f in (1, 2, 3):
+            a_arc = 240 if f == 2 else 175
+            draw.arc(((ox + 44) * s, (oy + 12) * s, (ox + 125) * s, (oy + 108) * s), start=-82, end=52, fill=(76, 224, 255, a_arc), width=int(10 * s))
+            draw.arc(((ox + 48) * s, (oy + 16) * s, (ox + 121) * s, (oy + 104) * s), start=-72, end=42, fill=(235, 250, 255, a_arc), width=int(4.5 * s))
+
+    # Row 9: attack_3 — Eclipse Finisher blazing crimson-gold heavy cleave (6 frames)
+    fin_angles = [-2.4, -1.7, -0.35, 0.35, 0.72, 0.62]
+    for f in range(6):
+        ox, oy = f * cell, 9 * cell
+        lunge = 10.0 if f in (2, 3, 4) else (-3.0 if f == 0 else 2.0)
+        pose = {
+            "head": (64 + lunge, 40 if f < 2 else 44),
+            "neck": (61 + lunge, 54 if f < 2 else 58),
+            "hip": (56 + lunge * 0.8, 82),
+            "r_knee": (75 + lunge, 96),
+            "r_foot": (86 + lunge, 114),
+            "l_knee": (44, 98),
+            "l_foot": (34, 114),
+            "r_elbow": (74 + lunge, 62),
+            "r_hand": (86 + lunge, 64),
+            "l_elbow": (52 + lunge * 0.5, 66),
+            "l_hand": (48 + lunge * 0.5, 74),
+            "scarf_phase": f * 1.4,
+            "scarf_len": 40,
+            "scarf_lift": -5.0,
+            "sword_drawn": True,
+            "sword_angle": fin_angles[f],
+            "sword_len": 44.0,
+            "lean": 1.35,
+            "grounded": True,
+        }
+        draw_sidescroll_pose(draw, ox, oy, s, pose)
+        if f in (2, 3, 4):
+            a_arc = 248 if f == 3 else 185
+            draw.arc(((ox + 34) * s, (oy + 8) * s, (ox + 126) * s, (oy + 116) * s), start=-78, end=68, fill=(235, 58, 104, a_arc), width=int(13 * s))
+            draw.arc(((ox + 40) * s, (oy + 14) * s, (ox + 122) * s, (oy + 112) * s), start=-68, end=58, fill=(255, 224, 138, a_arc), width=int(6.5 * s))
+
+    # Row 10: hurt — stagger recoil with crimson impact spark (3 frames)
+    for f in range(3):
+        ox, oy = f * cell, 10 * cell
+        recoil = (2 - f) * 3.0
+        pose = {
+            "head": (58 - recoil, 45),
+            "neck": (60 - recoil, 59),
+            "hip": (62 - recoil * 0.5, 85),
+            "r_knee": (72, 98),
+            "r_foot": (78, 114),
+            "l_knee": (48, 98),
+            "l_foot": (42, 114),
+            "r_elbow": (72 - recoil, 68),
+            "r_hand": (78 - recoil, 58),
+            "l_elbow": (48 - recoil, 68),
+            "l_hand": (40 - recoil, 60),
+            "scarf_phase": f * 1.1,
+            "scarf_len": 32,
+            "scarf_lift": -6.0,
+            "lean": -0.6,
+            "grounded": True,
+        }
+        draw_sidescroll_pose(draw, ox, oy, s, pose)
+        if f in (0, 1):
+            draw.ellipse(((ox + 58) * s, (oy + 52) * s, (ox + 78) * s, (oy + 72) * s), outline=SCARF_HIGHLIGHT, width=int(3 * s))
+
     out = finalize_ss(img, w, h)
     out.save(SPRITES_DIR / "player" / "stickman_sidescroll_sheet.png")
 
@@ -600,7 +690,7 @@ def draw_topdown_stickman(
 
 def generate_topdown_sheet() -> None:
     cell = 128
-    cols, rows = 6, 9
+    cols, rows = 6, 12
     w, h = cell * cols, cell * rows
     img, draw, s = make_ss_canvas(w, h, scale=2)
 
@@ -641,6 +731,28 @@ def generate_topdown_sheet() -> None:
         rx2, ry2 = (ox + 102 + pulse) * s, (oy + 114 + pulse) * s
         draw.ellipse((rx1, ry1, rx2, ry2), outline=(146, 98, 255, 195), width=int(4.5 * s))
         draw.arc((rx1 + 4 * s, ry1 + 4 * s, rx2 - 4 * s, ry2 - 4 * s), start=int(25 + f * 18), end=int(155 + f * 18), fill=EYE_CYAN, width=int(3.5 * s))
+
+    # Row 9: td_attack_2 — Reverse cyan crescent slash (5 frames)
+    for f in range(5):
+        ox, oy = f * cell, 9 * cell
+        draw_topdown_stickman(draw, ox, oy, s, "down", step=-0.4, bob=-2.0, slashing=f)
+        if f in (1, 2, 3):
+            draw.arc(((ox + 16) * s, (oy + 38) * s, (ox + 112) * s, (oy + 122) * s), start=-20, end=195, fill=EYE_CYAN, width=int(7.0 * s))
+
+    # Row 10: td_attack_3 — Eclipse Spin Finisher crimson-gold 360 ring (5 frames)
+    for f in range(5):
+        ox, oy = f * cell, 10 * cell
+        draw_topdown_stickman(draw, ox, oy, s, "side", step=0.6, bob=-2.5, slashing=f)
+        if f in (1, 2, 3):
+            draw.ellipse(((ox + 12) * s, (oy + 34) * s, (ox + 116) * s, (oy + 120) * s), outline=SCARF_MAIN, width=int(8.5 * s))
+            draw.ellipse(((ox + 18) * s, (oy + 40) * s, (ox + 110) * s, (oy + 114) * s), outline=GOLD_BRIGHT, width=int(4.5 * s))
+
+    # Row 11: td_hurt — Recoil frame (3 frames)
+    for f in range(3):
+        ox, oy = f * cell, 11 * cell
+        draw_topdown_stickman(draw, ox, oy, s, "down", step=0.0, bob=2.0)
+        if f in (0, 1):
+            draw.ellipse(((ox + 38) * s, (oy + 48) * s, (ox + 90) * s, (oy + 98) * s), outline=SCARF_HIGHLIGHT, width=int(3.2 * s))
 
     out = finalize_ss(img, w, h)
     out.save(SPRITES_DIR / "player" / "stickman_topdown_sheet.png")
@@ -982,14 +1094,17 @@ def generate_environment() -> None:
 
 
 def main() -> None:
-    for sub in ("player", "environment", "ui"):
+    from generate_enemy_art import generate_all_enemy_art
+
+    for sub in ("player", "environment", "ui", "enemies"):
         (SPRITES_DIR / sub).mkdir(parents=True, exist_ok=True)
     generate_sidescroll_sheet()
     generate_topdown_sheet()
     generate_portrait_and_logo()
     generate_touch_ui()
     generate_environment()
-    print("Generated all SHADOWBOUND Phase 1 original art assets successfully.")
+    generate_all_enemy_art()
+    print("Generated all SHADOWBOUND original art assets (player, UI, environment, enemies, boss).")
 
 
 if __name__ == "__main__":
