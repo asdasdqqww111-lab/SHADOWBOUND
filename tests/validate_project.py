@@ -48,6 +48,8 @@ REQUIRED_INPUT_ACTIONS = [
     "jump",
     "dodge",
     "attack",
+    "block",
+    "sprint",
     "interact",
     "switch_mode",
     "pause",
@@ -60,6 +62,8 @@ REQUIRED_ANIMATIONS = [
     "fall",
     "dodge",
     "attack",
+    "block",
+    "wall_slide",
     "td_idle_down",
     "td_idle_up",
     "td_idle_side",
@@ -68,6 +72,7 @@ REQUIRED_ANIMATIONS = [
     "td_walk_side",
     "td_dodge",
     "td_attack",
+    "td_block",
 ]
 
 FORBIDDEN_SECRET_PATTERNS = (".keystore", ".jks", ".pem", ".key", ".p12", ".apk", ".aab")
@@ -185,6 +190,16 @@ def validate_gdscripts(autoload_names: set[str]) -> None:
         check(proc.returncode == 0, f"gdlint clean across all {len(gd_files)} scripts" + (f"\n{out_msg}" if proc.returncode != 0 else ""))
 
     # Verify zero autoload vs class_name collisions & zero unsafe JSON := inference
+    all_signals: set[str] = {"pressed", "area_entered", "body_entered", "body_exited"}
+    all_funcs: set[str] = set()
+    script_funcs: dict[Path, set[str]] = {}
+    for gd in gd_files:
+        src = gd.read_text(encoding="utf-8")
+        all_signals |= set(re.findall(r"^signal\s+(\w+)", src, re.MULTILINE))
+        fns = set(re.findall(r"^(?:static\s+)?func\s+(\w+)", src, re.MULTILINE))
+        script_funcs[gd] = fns
+        all_funcs |= fns
+
     for gd in gd_files:
         rel = gd.relative_to(ROOT)
         src = gd.read_text(encoding="utf-8")
@@ -193,6 +208,34 @@ def validate_gdscripts(autoload_names: set[str]) -> None:
             cname = m_cls.group(1)
             check(cname not in autoload_names, f"class_name '{cname}' in {rel} does not shadow any Autoload")
         check(":= JSON.parse_string" not in src, f"No unsafe Variant ':=' on JSON.parse_string in {rel}")
+
+    # Cross-script signal & dynamic method reference verification
+    sig_errors: list[str] = []
+    for gd in gd_files:
+        rel = gd.relative_to(ROOT)
+        src = gd.read_text(encoding="utf-8")
+        local_fns = script_funcs[gd]
+        for m in re.finditer(r"\.connect\(\s*([_a-zA-Z]\w*)\s*\)", src):
+            if m.group(1) not in local_fns:
+                sig_errors.append(f"{rel}:missing_cb:{m.group(1)}")
+        for m in re.finditer(r'\.connect\(\s*"(\w+)"\s*,\s*([_a-zA-Z]\w*)\s*\)', src):
+            if m.group(1) not in all_signals:
+                sig_errors.append(f"{rel}:unknown_sig:{m.group(1)}")
+            if m.group(2) not in local_fns:
+                sig_errors.append(f"{rel}:missing_cb:{m.group(2)}")
+        for m in re.finditer(r"\.(\w+)\.connect\(", src):
+            if m.group(1) not in all_signals:
+                sig_errors.append(f"{rel}:unknown_sig:{m.group(1)}")
+        for m in re.finditer(r'\.(?:call|has_method)\(\s*"(\w+)"', src):
+            if m.group(1) not in all_funcs:
+                sig_errors.append(f"{rel}:unknown_fn:{m.group(1)}")
+        for m in re.finditer(r'has_signal\(\s*"(\w+)"\)', src):
+            if m.group(1) not in all_signals:
+                sig_errors.append(f"{rel}:unknown_sig:{m.group(1)}")
+    check(
+        len(sig_errors) == 0,
+        f"Cross-script audit clean ({len(all_signals)} signals, {len(all_funcs)} functions; errors: {sig_errors})",
+    )
 
 
 def parse_godot_text_resource(path: Path) -> dict:
@@ -399,6 +442,30 @@ def validate_data_and_localization() -> None:
                 missing_used_keys.append(f"{gd.name}:{key}")
     check(len(missing_used_keys) == 0, f"Every translate_key() literal in scripts exists in localization JSONs (missing: {missing_used_keys})")
 
+    # Dynamic movement state.* keys & interactive lore_key bindings
+    dyn_states: set[str] = set()
+    for gd in (ROOT / "scripts/player").glob("*.gd"):
+        src = gd.read_text(encoding="utf-8")
+        dyn_states |= set(re.findall(r'_set_state_key\("(\w+)"\)', src))
+        for a, b in re.findall(r'_set_state_key\("(\w+)"\s+if\s+[^)]+else\s+"(\w+)"\)', src):
+            dyn_states.add(a)
+            dyn_states.add(b)
+        dyn_states |= set(re.findall(r'_last_air_jump_state(?:\s*:\s*String)?\s*=\s*"(\w+)"', src))
+    missing_states = [f"state.{s}" for s in sorted(dyn_states) if f"state.{s}" not in en_keys]
+    check(
+        len(missing_states) == 0 and len(dyn_states) >= 12,
+        f"All {len(dyn_states)} dynamic movement state.* keys exist in EN & AR (missing: {missing_states})",
+    )
+
+    lore_keys: set[str] = set()
+    for p in list(ROOT.rglob("*.tscn")) + list(ROOT.rglob("*.gd")):
+        lore_keys |= set(re.findall(r'lore_key(?:\s*:\s*String)?\s*=\s*"([^"]+)"', p.read_text(encoding="utf-8")))
+    missing_lore = [k for k in sorted(lore_keys) if k not in en_keys]
+    check(
+        len(missing_lore) == 0 and len(lore_keys) >= 2,
+        f"All {len(lore_keys)} interactive lore_key entries exist in EN & AR (missing: {missing_lore})",
+    )
+
     # Validate movement_config.json sanity
     ss = cfg.get("side_scroll", {})
     td = cfg.get("top_down", {})
@@ -436,7 +503,7 @@ def validate_assets_and_licenses() -> None:
 
 def main() -> int:
     print("=======================================================")
-    print("  SHADOWBOUND — Phase 1 Automated Validation Runner")
+    print("  SHADOWBOUND — Automated Project Validation Runner")
     print("=======================================================")
     validate_structure_and_security()
     autoloads = validate_project_godot()

@@ -224,7 +224,7 @@ def draw_sidescroll_pose(
 
 def generate_sidescroll_sheet() -> None:
     cell = 128
-    cols, rows = 8, 6
+    cols, rows = 8, 8
     w, h = cell * cols, cell * rows
     img, draw, s = make_ss_canvas(w, h, scale=2)
 
@@ -406,6 +406,67 @@ def generate_sidescroll_sheet() -> None:
             bbox_inner = ((ox + 46) * s, (oy + 22) * s, (ox + 121) * s, (oy + 108) * s)
             draw.arc(bbox_inner, start=-58, end=48, fill=(195, 245, 255, alpha_arc), width=int(4.5 * s))
 
+    # Row 6: guard / block (4 frames — defensive katana stance + glowing shadow ward)
+    for f in range(4):
+        ox, oy = f * cell, 6 * cell
+        phase = (f / 4.0) * math.tau
+        pulse = math.sin(phase) * 2.0
+        pose = {
+            "head": (62, 46),
+            "neck": (60, 60),
+            "hip": (56, 85),
+            "r_knee": (71, 98),
+            "r_foot": (77, 114),
+            "l_knee": (45, 99),
+            "l_foot": (37, 114),
+            "r_elbow": (74, 68),
+            "r_hand": (82, 58),
+            "l_elbow": (68, 72),
+            "l_hand": (80, 64),
+            "scarf_phase": phase,
+            "scarf_len": 28,
+            "scarf_lift": 2.0,
+            "sword_drawn": True,
+            "sword_angle": -1.38,
+            "sword_len": 34.0,
+            "lean": 0.4,
+            "grounded": True,
+        }
+        draw_sidescroll_pose(draw, ox, oy, s, pose)
+        # Shimmering forward shadow-cyan barrier arc
+        bx1, by1 = (ox + 68 - pulse) * s, (oy + 24 - pulse) * s
+        bx2, by2 = (ox + 108 + pulse) * s, (oy + 108 + pulse) * s
+        draw.arc((bx1, by1, bx2, by2), start=-65, end=65, fill=(142, 96, 255, 195), width=int(6.5 * s))
+        draw.arc((bx1 + 3 * s, by1 + 4 * s, bx2 - 2 * s, by2 - 4 * s), start=-55, end=55, fill=EYE_CYAN, width=int(3.0 * s))
+
+    # Row 7: wall_slide (4 frames — braced against right-side wall with cyan sparks)
+    for f in range(4):
+        ox, oy = f * cell, 7 * cell
+        phase = (f / 4.0) * math.tau
+        pose = {
+            "head": (66, 44),
+            "neck": (64, 58),
+            "hip": (60, 84),
+            "r_knee": (76, 90),
+            "r_foot": (82, 102),
+            "l_knee": (54, 96),
+            "l_foot": (58, 112),
+            "r_elbow": (76, 54),
+            "r_hand": (84, 42),
+            "l_elbow": (52, 68),
+            "l_hand": (46, 76),
+            "scarf_phase": phase * 1.5,
+            "scarf_len": 32,
+            "scarf_lift": -14.0,
+            "grounded": False,
+        }
+        draw_sidescroll_pose(draw, ox, oy, s, pose)
+        # Wall friction aura sparks
+        spark_y = (oy + 44 + (f * 14) % 48) * s
+        spark_x = (ox + 85) * s
+        draw.ellipse((spark_x - 3 * s, spark_y - 3 * s, spark_x + 3 * s, spark_y + 3 * s), fill=EYE_CYAN)
+        draw.line([(spark_x, spark_y), (spark_x - 5 * s, spark_y - 8 * s)], fill=GOLD_BRIGHT, width=int(2 * s))
+
     out = finalize_ss(img, w, h)
     out.save(SPRITES_DIR / "player" / "stickman_sidescroll_sheet.png")
 
@@ -539,7 +600,7 @@ def draw_topdown_stickman(
 
 def generate_topdown_sheet() -> None:
     cell = 128
-    cols, rows = 6, 8
+    cols, rows = 6, 9
     w, h = cell * cols, cell * rows
     img, draw, s = make_ss_canvas(w, h, scale=2)
 
@@ -570,6 +631,16 @@ def generate_topdown_sheet() -> None:
     # Row 7: td_attack (5 frames)
     for f in range(5):
         draw_topdown_stickman(draw, f * cell, 7 * cell, s, "down", step=0.3, bob=-1.5, slashing=f)
+
+    # Row 8: td_block (4 frames — omnidirectional rune ward ring + braced stance)
+    for f in range(4):
+        ox, oy = f * cell, 8 * cell
+        pulse = math.sin((f / 4.0) * math.tau) * 2.5
+        draw_topdown_stickman(draw, ox, oy, s, "down", step=0.0, bob=1.0)
+        rx1, ry1 = (ox + 26 - pulse) * s, (oy + 32 - pulse) * s
+        rx2, ry2 = (ox + 102 + pulse) * s, (oy + 114 + pulse) * s
+        draw.ellipse((rx1, ry1, rx2, ry2), outline=(146, 98, 255, 195), width=int(4.5 * s))
+        draw.arc((rx1 + 4 * s, ry1 + 4 * s, rx2 - 4 * s, ry2 - 4 * s), start=int(25 + f * 18), end=int(155 + f * 18), fill=EYE_CYAN, width=int(3.5 * s))
 
     out = finalize_ss(img, w, h)
     out.save(SPRITES_DIR / "player" / "stickman_topdown_sheet.png")
@@ -686,9 +757,24 @@ def generate_touch_ui() -> None:
         d.ellipse(((c - 28) * s, (c - 14) * s, (c + 28) * s, (c + 14) * s), outline=GOLD_BRIGHT, width=4 * s)
         d.polygon([(c * s, (c - 22) * s), ((c + 13) * s, c * s), (c * s, (c + 22) * s), ((c - 13) * s, c * s)], fill=EYE_CYAN, outline=BLADE_LIGHT)
 
+    # Block / Guard button (104x104) — crested anime rune shield
+    def icon_block(d: ImageDraw.ImageDraw, sz: int, s: int) -> None:
+        c = sz / 2.0
+        shield = [
+            (c * s, (c - 24) * s),
+            ((c + 20) * s, (c - 15) * s),
+            ((c + 16) * s, (c + 8) * s),
+            (c * s, (c + 24) * s),
+            ((c - 16) * s, (c + 8) * s),
+            ((c - 20) * s, (c - 15) * s),
+        ]
+        d.polygon(shield, fill=(58, 42, 128, 225), outline=BLADE_LIGHT)
+        d.polygon([(c * s, (c - 10) * s), ((c + 8) * s, c * s), (c * s, (c + 11) * s), ((c - 8) * s, c * s)], fill=EYE_CYAN)
+
     make_action_button("btn_attack.png", 128, (64, 18, 48, 205), SCARF_HIGHLIGHT, icon_attack)
     make_action_button("btn_jump.png", 112, (18, 42, 78, 200), EYE_CYAN, icon_jump)
     make_action_button("btn_dodge.png", 112, (42, 22, 82, 200), INK_RIM, icon_dodge)
+    make_action_button("btn_block.png", 104, (28, 30, 86, 205), BLADE_LIGHT, icon_block)
     make_action_button("btn_mode.png", 112, (56, 38, 18, 205), GOLD_BRIGHT, icon_mode)
 
 
@@ -864,6 +950,35 @@ def generate_environment() -> None:
     ttd.ellipse((35 * tts, 16 * tts, 61 * tts, 42 * tts), fill=(52, 40, 84, 255), outline=GOLD_MID, width=2 * tts)
     ttd.polygon([(48 * tts, 68 * tts), (56 * tts, 76 * tts), (48 * tts, 84 * tts), (40 * tts, 76 * tts)], fill=EYE_CYAN)
     finalize_ss(tt, 96, 128).save(SPRITES_DIR / "environment" / "training_totem.png")
+
+    # 11. One-Way Rune Skybridge tile (256x32, horizontally tileable)
+    ob = Image.new("RGBA", (256, 32), (0, 0, 0, 0))
+    obd = ImageDraw.Draw(ob, "RGBA")
+    obd.rectangle((0, 0, 256, 14), fill=(52, 36, 96, 245))
+    obd.line([(0, 1), (256, 1)], fill=EYE_CYAN, width=2)
+    obd.line([(0, 13), (256, 13)], fill=GOLD_BRIGHT, width=2)
+    for px in (16, 80, 144, 208):
+        obd.polygon([(px, 14), (px + 32, 14), (px + 24, 26), (px + 8, 26)], fill=(34, 24, 66, 225), outline=GOLD_MID)
+        obd.ellipse((px + 13, 5, px + 19, 11), fill=EYE_CYAN)
+    ob.save(SPRITES_DIR / "environment" / "oneway_bridge.png")
+
+    # 12. Ancient Lore Runestone tablet (80x120)
+    lr, lrd, lrs = make_ss_canvas(80, 120, scale=2)
+    lrd.ellipse((14 * lrs, 104 * lrs, 66 * lrs, 116 * lrs), fill=(8, 5, 18, 140))
+    stone_poly = [
+        (40 * lrs, 12 * lrs),
+        (62 * lrs, 32 * lrs),
+        (58 * lrs, 108 * lrs),
+        (22 * lrs, 108 * lrs),
+        (18 * lrs, 32 * lrs),
+    ]
+    lrd.polygon(stone_poly, fill=(36, 26, 68, 255), outline=GOLD_MID)
+    lrd.rectangle((14 * lrs, 102 * lrs, 66 * lrs, 112 * lrs), fill=(26, 18, 48, 255), outline=GOLD_BRIGHT, width=2 * lrs)
+    # Glowing carved cyan rune crest + inscription lines
+    lrd.polygon([(40 * lrs, 28 * lrs), (50 * lrs, 44 * lrs), (40 * lrs, 60 * lrs), (30 * lrs, 44 * lrs)], fill=AURA_VIOLET, outline=EYE_CYAN)
+    for ry in (70, 80, 90):
+        lrd.line([(28 * lrs, ry * lrs), (52 * lrs, ry * lrs)], fill=EYE_CYAN, width=2 * lrs)
+    finalize_ss(lr, 80, 120).save(SPRITES_DIR / "environment" / "lore_runestone.png")
 
 
 def main() -> None:

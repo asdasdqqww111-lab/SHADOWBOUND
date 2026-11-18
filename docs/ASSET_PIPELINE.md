@@ -19,8 +19,8 @@ Artists can replace the procedural Phase 1 sprite sheets with hand-animated PNGs
 ### 2.1 Side-Scrolling Stickman Sheet
 
 - **Path:** `assets/sprites/player/stickman_sidescroll_sheet.png`
-- **Image Size:** `1024 x 768` px (RGBA PNG, transparent background)
-- **Grid:** `8 columns x 6 rows`, cell size `128 x 128` px
+- **Image Size:** `1024 x 1024` px (RGBA PNG, transparent background)
+- **Grid:** `8 columns x 8 rows`, cell size `128 x 128` px
 - **Default Facing:** Right (`+X`); engine mirrors automatically via `flip_h` for Left (`-X`)
 - **Foot Ground Anchor:** `x = 64, y = 114` inside each `128 x 128` cell
 
@@ -32,12 +32,14 @@ Artists can replace the procedural Phase 1 sprite sheets with hand-animated PNGs
 | 3 | `fall` | 4 (cols 0–3) | `384` | 9.0 | Yes | Airborne descent, upward scarf trail |
 | 4 | `dodge` | 5 (cols 0–4) | `512` | 16.0 | No | Shadow-step dash with ghost afterimage |
 | 5 | `attack` | 6 (cols 0–5) | `640` | 16.0 | No | Katana slash; crescent arc active on frames 2–4 |
+| 6 | `block` | 4 (cols 0–3) | `768` | 9.0 | Yes | Shadow Guard diagonal katana ward + cyan/violet rune barrier |
+| 7 | `wall_slide` | 4 (cols 0–3) | `896` | 10.0 | Yes | Wall brace descend with cyan/gold friction sparks |
 
 ### 2.2 Top-Down (3/4 RPG) Stickman Sheet
 
 - **Path:** `assets/sprites/player/stickman_topdown_sheet.png`
-- **Image Size:** `768 x 1024` px (RGBA PNG, transparent background)
-- **Grid:** `6 columns x 8 rows`, cell size `128 x 128` px
+- **Image Size:** `768 x 1152` px (RGBA PNG, transparent background)
+- **Grid:** `6 columns x 9 rows`, cell size `128 x 128` px
 - **Foot Shadow Anchor:** `x = 64, y = 104` inside each `128 x 128` cell
 - **Side Facing:** Right (`+X`); engine mirrors via `flip_h` for Left (`-X`)
 
@@ -51,6 +53,7 @@ Artists can replace the procedural Phase 1 sprite sheets with hand-animated PNGs
 | 5 | `td_walk_side` | 6 (cols 0–5) | `640` | 11.0 | Yes |
 | 6 | `td_dodge` | 5 (cols 0–4) | `768` | 16.0 | No |
 | 7 | `td_attack` | 5 (cols 0–4) | `896` | 16.0 | No |
+| 8 | `td_block` | 4 (cols 0–3) | `1024` | 9.0 | Yes |
 
 ---
 
@@ -63,17 +66,20 @@ Artists can replace the procedural Phase 1 sprite sheets with hand-animated PNGs
 | `assets/sprites/environment/bg_distant_peaks.png` | `1280 x 512` | Horizontally tileable parallax layer |
 | `assets/sprites/environment/bg_ruined_arches.png` | `1280 x 512` | Horizontally tileable near parallax layer |
 | `assets/sprites/environment/platform_stone.png` | `256 x 64` | Horizontally tileable side-scroll platform |
+| `assets/sprites/environment/oneway_bridge.png` | `256 x 32` | Horizontally tileable one-way gilded rune skybridge |
 | `assets/sprites/environment/topdown_sanctum_floor.png` | `256 x 256` | Seamlessly tileable (X & Y) courtyard stone |
 | `assets/sprites/environment/topdown_wall_tile.png` | `128 x 128` | Tileable 3/4 sanctum wall/pillar block |
 | `assets/sprites/environment/topdown_rune_circle.png` | `384 x 384` | Centered RGBA courtyard floor decal |
 | `assets/sprites/environment/rift_gate_sheet.png` | `512 x 160` | 4 frames of `128 x 160` portal loop |
 | `assets/sprites/environment/mana_lantern.png` | `64 x 128` | RGBA fantasy prop |
 | `assets/sprites/environment/training_totem.png` | `96 x 128` | RGBA target dummy prop |
+| `assets/sprites/environment/lore_runestone.png` | `80 x 120` | RGBA interactive sanctum lore tablet |
 | `assets/sprites/ui/logo_emblem.png` | `256 x 256` | Main menu crest |
 | `assets/sprites/ui/joystick_base.png` | `220 x 220` | RGBA virtual joystick ring |
 | `assets/sprites/ui/joystick_knob.png` | `96 x 96` | RGBA virtual joystick thumb cap |
 | `assets/sprites/ui/btn_attack.png` | `128 x 128` | Primary touch attack button |
 | `assets/sprites/ui/btn_jump.png` | `112 x 112` | Touch jump / interact button |
+| `assets/sprites/ui/btn_block.png` | `104 x 104` | Hold-capable touch Shadow Guard / block button |
 | `assets/sprites/ui/btn_dodge.png` | `112 x 112` | Touch shadow-dodge button |
 | `assets/sprites/ui/btn_mode.png` | `112 x 112` | Touch camera/mode switch button |
 

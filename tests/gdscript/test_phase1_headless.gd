@@ -177,7 +177,8 @@ func _test_level_mode_and_camera_switching() -> void:
 	GameState.toggle_gameplay_mode()
 	_check(ss_zone.visible and not td_zone.visible, "Mode switch returns cleanly to SideScrollZone")
 	_check(
-		player.camera.get_camera_mode() == GameState.GameplayMode.SIDE_SCROLL and player.collision_mask == 1,
+		player.camera.get_camera_mode() == GameState.GameplayMode.SIDE_SCROLL
+		and (player.collision_mask & 1) == 1,
 		"Camera and collision restore to SIDE_SCROLL"
 	)
 

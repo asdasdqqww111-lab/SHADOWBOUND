@@ -236,6 +236,11 @@ custom_minimum_size = Vector2(0, 48)
 layout_mode = 2
 text = "Camera Smoothing: On"
 
+[node name="SettingsZoomBtn" type="Button" parent="SettingsModal/Center/Panel/VBox"]
+custom_minimum_size = Vector2(0, 48)
+layout_mode = 2
+text = "Camera View: Standard"
+
 [node name="SettingsCloseBtn" type="Button" parent="SettingsModal/Center/Panel/VBox"]
 custom_minimum_size = Vector2(0, 48)
 layout_mode = 2

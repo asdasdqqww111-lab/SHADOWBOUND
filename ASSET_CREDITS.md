@@ -30,22 +30,22 @@ This document records the asset source evaluation and the complete licensing/pro
 | **Modifications** | Filename normalized from `Cairo[slnt,wght].ttf` to `Cairo-VariableFont.ttf` for clean Godot/Android resource paths; binary font file unmodified (599,548 bytes). |
 | **Attribution Requirements** | Retain copyright notice and `licenses/OFL-1.1-Cairo.txt` in source repository and shipped distributions; do not sell the font file by itself or rename derivative fonts "Cairo". |
 
-### 2.2 Original Anime Fantasy Stickman Sprites (Phase 1 Prototype Art)
+### 2.2 Original Anime Fantasy Stickman Sprites (Phase 1–2 Prototype Art)
 
 | Field | Record |
 | --- | --- |
-| **Asset Names** | `assets/sprites/player/stickman_sidescroll_sheet.png` (1024x768, 6 animations / 33 frames), `assets/sprites/player/stickman_topdown_sheet.png` (768x1024, 8 animations / 40 frames), `assets/sprites/player/player_portrait.png` (160x160) |
+| **Asset Names** | `assets/sprites/player/stickman_sidescroll_sheet.png` (1024x1024, 8 animations / 41 frames: `idle`, `run`, `jump`, `fall`, `dodge`, `attack`, `block`, `wall_slide`), `assets/sprites/player/stickman_topdown_sheet.png` (768x1152, 9 animations / 44 frames: `td_idle_down`, `td_idle_up`, `td_idle_side`, `td_walk_down`, `td_walk_up`, `td_walk_side`, `td_dodge`, `td_attack`, `td_block`), `assets/sprites/player/player_portrait.png` (160x160) |
 | **Download URL** | Original in-repository creation (`assets/tools/generate_placeholder_art.py`) |
 | **Author** | SHADOWBOUND Development Team |
 | **License** | CC0 1.0 Universal (`licenses/CC0-1.0-Shadowbound-Art.txt`) |
-| **Modifications** | Original work — Twilight Obsidian stickman with violet aura rim-light, spiky shadow hair crest, cyan anime eyes, flowing crimson scarf, and shadow-violet katana. |
+| **Modifications** | Original work — Twilight Obsidian stickman with violet aura rim-light, spiky shadow hair crest, cyan anime eyes, flowing crimson scarf, shadow-violet katana, cyan/violet guard ward shield (Phase 2), and wall-slide sparks (Phase 2). |
 | **Attribution Requirements** | None required (CC0 1.0). Drop-in artist replacement specs documented in `docs/ASSET_PIPELINE.md`. |
 
 ### 2.3 Original Twilight Sanctum Environment & Prop Sprites
 
 | Field | Record |
 | --- | --- |
-| **Asset Names** | `bg_twilight_sky.png`, `bg_distant_peaks.png`, `bg_ruined_arches.png`, `platform_stone.png`, `topdown_sanctum_floor.png`, `topdown_wall_tile.png`, `topdown_rune_circle.png`, `rift_gate_sheet.png`, `mana_lantern.png`, `training_totem.png` (under `assets/sprites/environment/`) |
+| **Asset Names** | `bg_twilight_sky.png`, `bg_distant_peaks.png`, `bg_ruined_arches.png`, `platform_stone.png`, `oneway_bridge.png` *(Phase 2)*, `topdown_sanctum_floor.png`, `topdown_wall_tile.png`, `topdown_rune_circle.png`, `rift_gate_sheet.png`, `mana_lantern.png`, `training_totem.png`, `lore_runestone.png` *(Phase 2)* (under `assets/sprites/environment/`) |
 | **Download URL** | Original in-repository creation (`assets/tools/generate_placeholder_art.py`) |
 | **Author** | SHADOWBOUND Development Team |
 | **License** | CC0 1.0 Universal (`licenses/CC0-1.0-Shadowbound-Art.txt`) |
@@ -56,7 +56,7 @@ This document records the asset source evaluation and the complete licensing/pro
 
 | Field | Record |
 | --- | --- |
-| **Asset Names** | `icon.svg`, `logo_emblem.png`, `joystick_base.png`, `joystick_knob.png`, `btn_attack.png`, `btn_jump.png`, `btn_dodge.png`, `btn_mode.png` (under `assets/sprites/ui/`) |
+| **Asset Names** | `icon.svg`, `logo_emblem.png`, `joystick_base.png`, `joystick_knob.png`, `btn_attack.png`, `btn_jump.png`, `btn_block.png` *(Phase 2)*, `btn_dodge.png`, `btn_mode.png` (under `assets/sprites/ui/`) |
 | **Download URL** | Original in-repository creation (`assets/tools/generate_placeholder_art.py` and `icon.svg`) |
 | **Author** | SHADOWBOUND Development Team |
 | **License** | CC0 1.0 Universal (`licenses/CC0-1.0-Shadowbound-Art.txt`) |

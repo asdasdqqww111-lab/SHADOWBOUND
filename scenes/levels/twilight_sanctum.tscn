@@ -1,4 +1,4 @@
-[gd_scene load_steps=22 format=3]
+[gd_scene load_steps=27 format=3]
 
 [ext_resource type="Script" path="res://scripts/world/twilight_sanctum_level.gd" id="1_level"]
 [ext_resource type="PackedScene" path="res://scenes/player/player.tscn" id="2_player"]
@@ -14,6 +14,9 @@
 [ext_resource type="Texture2D" path="res://assets/sprites/environment/topdown_wall_tile.png" id="12_wall"]
 [ext_resource type="Texture2D" path="res://assets/sprites/environment/topdown_rune_circle.png" id="13_rune"]
 [ext_resource type="Texture2D" path="res://assets/sprites/environment/mana_lantern.png" id="14_lantern"]
+[ext_resource type="Texture2D" path="res://assets/sprites/environment/oneway_bridge.png" id="15_oneway"]
+[ext_resource type="PackedScene" path="res://scenes/props/lore_runestone.tscn" id="16_lore"]
+[ext_resource type="PackedScene" path="res://scenes/props/camera_zone_trigger.tscn" id="17_camzone"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_vbound"]
 size = Vector2(64, 1100)
@@ -35,6 +38,12 @@ size = Vector2(96, 1120)
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_td_pillar"]
 size = Vector2(112, 92)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_oneway"]
+size = Vector2(256, 16)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_wall_pillar"]
+size = Vector2(64, 220)
 
 [node name="TwilightSanctum" type="Node2D"]
 script = ExtResource("1_level")
@@ -211,6 +220,66 @@ target_mode = 1
 position = Vector2(2360, -40)
 target_mode = 1
 
+[node name="OneWaySkybridgeWest" type="StaticBody2D" parent="SideScrollZone"]
+position = Vector2(260, 44)
+collision_layer = 128
+collision_mask = 0
+
+[node name="Sprite2D" type="Sprite2D" parent="SideScrollZone/OneWaySkybridgeWest"]
+position = Vector2(0, 8)
+texture_repeat = 2
+texture = ExtResource("15_oneway")
+region_enabled = true
+region_rect = Rect2(0, 0, 256, 32)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="SideScrollZone/OneWaySkybridgeWest"]
+shape = SubResource("RectangleShape2D_oneway")
+one_way_collision = true
+
+[node name="OneWaySkybridgeEast" type="StaticBody2D" parent="SideScrollZone"]
+position = Vector2(1820, -6)
+collision_layer = 128
+collision_mask = 0
+
+[node name="Sprite2D" type="Sprite2D" parent="SideScrollZone/OneWaySkybridgeEast"]
+position = Vector2(0, 8)
+texture_repeat = 2
+texture = ExtResource("15_oneway")
+region_enabled = true
+region_rect = Rect2(0, 0, 256, 32)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="SideScrollZone/OneWaySkybridgeEast"]
+shape = SubResource("RectangleShape2D_oneway")
+one_way_collision = true
+
+[node name="WallJumpTower" type="StaticBody2D" parent="SideScrollZone"]
+position = Vector2(660, -210)
+collision_layer = 1
+collision_mask = 0
+
+[node name="Sprite2D" type="Sprite2D" parent="SideScrollZone/WallJumpTower"]
+texture_repeat = 2
+texture = ExtResource("12_wall")
+region_enabled = true
+region_rect = Rect2(0, 0, 64, 220)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="SideScrollZone/WallJumpTower"]
+shape = SubResource("RectangleShape2D_wall_pillar")
+
+[node name="OverlookVistaZone" parent="SideScrollZone" instance=ExtResource("17_camzone")]
+position = Vector2(920, -270)
+zone_id = "cliff_overlook"
+priority = 2
+zoom_scale_override = 0.85
+
+[node name="EastRiftVistaZone" parent="SideScrollZone" instance=ExtResource("17_camzone")]
+position = Vector2(2350, -110)
+zone_id = "east_rift"
+priority = 1
+zoom_scale_override = 0.92
+use_focal_pull = true
+focal_pull_weight = 0.28
+
 [node name="TopDownZone" type="Node2D" parent="."]
 visible = false
 
@@ -355,6 +424,23 @@ position = Vector2(1040, 2120)
 [node name="RiftGateSanctum" parent="TopDownZone" instance=ExtResource("5_rift")]
 position = Vector2(800, 1825)
 target_mode = 0
+
+[node name="LoreStoneWest" parent="TopDownZone" instance=ExtResource("16_lore")]
+position = Vector2(240, 2120)
+lore_key = "lore.west_tablet"
+
+[node name="LoreStoneEast" parent="TopDownZone" instance=ExtResource("16_lore")]
+position = Vector2(1360, 2120)
+lore_key = "lore.east_tablet"
+
+[node name="NorthAltarVistaZone" parent="TopDownZone" instance=ExtResource("17_camzone")]
+position = Vector2(800, 1835)
+zone_id = "sanctum_altar"
+priority = 2
+zoom_scale_override = 0.88
+use_focal_pull = true
+focal_pull_weight = 0.3
+focal_offset = Vector2(0, -35)
 
 [node name="Player" parent="." instance=ExtResource("2_player")]
 position = Vector2(120, 118)

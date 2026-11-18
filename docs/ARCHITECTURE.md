@@ -1,54 +1,75 @@
 # SHADOWBOUND — Unified Architecture Overview
 
-## 1. Core Architectural Principle: One Player, Two Gameplay Modes
+## 1. Core Architectural Principle: One Player, Two Dedicated Mode Systems
 
-**SHADOWBOUND** avoids duplicating the player system across Side-Scrolling and Top-Down gameplay. Instead, a single `Player` (`CharacterBody2D` in `scenes/player/player.tscn`) owns the shared character data, animation rig, hitbox, and camera, while delegating per-frame locomotion physics to pluggable controller nodes inheriting `MovementControllerBase`:
+**SHADOWBOUND** unifies Side-Scrolling action platforming and Top-Down 2D RPG exploration inside a single player entity (`PlayerCharacter` in `scenes/player/player.tscn`). All RPG data, stamina/health/mana pools, animation frames, combat hitbox, and visual feedback live on `Player`, while per-frame locomotion physics and camera behavior are cleanly separated into dedicated, data-driven controllers and `CameraModeProfile` resources:
 
 ```text
 Player (CharacterBody2D — scripts/player/player_controller.gd)
 ├── shared PlayerProfile (Resource — resources/player/player_profile.gd)
-├── AnimatedSprite2D (14 unified animations in stickman_sprite_frames.tres)
-├── CollisionShape2D (adapts upright capsule vs. 3/4 foot collider per mode)
-├── SideScrollController (MovementControllerBase — grounded, gravity, jump, double-jump, dodge, slash)
-├── TopDownController (MovementControllerBase — floating 8-direction normalized move, dodge, slash)
-├── DualModeCamera (Camera2D — mode-specific zoom, lookahead, drag margins, world bounds, trauma shake)
-└── SlashHitbox (Area2D — directional strike detection across both modes)
+├── AnimatedSprite2D (17 unified animations / 85 frames in stickman_sprite_frames.tres)
+├── CollisionShape2D (switches upright capsule [mask 129] vs. 3/4 foot collider [mask 2])
+├── SideScrollController (MovementControllerBase — platform physics, jump/double-jump,
+│                         apex hang, wall slide & wall jump, one-way drop-through,
+│                         ground/air dodge w/ i-frames, Shadow Guard w/ perfect-parry, slash)
+├── TopDownController    (MovementControllerBase — true 8-direction [E..NE] unit-normalized
+│                         analog walk / run / stamina sprint, 8-way dodge w/ i-frames,
+│                         pivotable directional Shadow Guard w/ perfect-parry, 8-way slash)
+├── DualModeCamera       (Camera2D — loads side_scroll_camera_profile.tres &
+│                         top_down_camera_profile.tres, fall-peek, 8-way lookahead,
+│                         dynamic sprint/guard zoom, Standard/Wide presets, trauma shake,
+│                         and priority-stacked CameraZoneTrigger vista / POI framing)
+└── SlashHitbox          (Area2D — directional strike detection shared across both modes)
 ```
 
-### Physics Layer Allocation (`project.godot`)
+---
+
+## 2. Phase 2 Dual-Mode Camera Architecture
+
+| Component | Path | Responsibility |
+| --- | --- | --- |
+| `CameraModeProfile` | `resources/camera/camera_mode_profile.gd` | Typed Godot `Resource` defining base zoom, framing offset, directional lookahead, follow smoothing, horizontal/vertical drag deadzones, fast-fall peek, and sprint/guard dynamic zoom. |
+| Side-Scroll Profile | `resources/camera/side_scroll_camera_profile.tres` | Elevated horizon (`offset.y = -44`), strong horizontal lookahead (`84 px`), locked X-follow with vertical platform drag deadzone, and downward fall-peek (`+62 px`) for safe landings. |
+| Top-Down Profile | `resources/camera/top_down_camera_profile.tres` | Balanced 3/4 overhead zoom (`1.12x`), symmetric 2D deadzone, omni-directional 8-way velocity/facing lookahead (`44, 34 px`), sprint zoom-out (`0.96x`), and guard focus zoom (`1.04x`). |
+| `CameraZoneTrigger` | `scripts/camera/camera_zone_trigger.gd` | Priority-stacked `Area2D` world trigger applying panoramic vista zoom, offset shifts, and smooth POI focal pull (e.g., Cliff Overlook, East Rift, North Sanctum Altar). Automatically cleared on mode switch. |
+
+---
+
+## 3. Physics Layer Allocation (`project.godot`)
 
 | Bit / Value | Layer Name | Purpose |
 | --- | --- | --- |
-| 1 (`1`) | `world_sidescroll` | Side-scrolling platforms, ledges, and level bounds |
+| 1 (`1`) | `world_sidescroll` | Solid side-scrolling platforms, wall-jump towers, and bounds |
 | 2 (`2`) | `world_topdown` | Top-down sanctum walls, pillars, and courtyard bounds |
 | 3 (`4`) | `player` | Unified Stickman `Player` body |
 | 4 (`8`) | `enemies` | Reserved for Phase 3 side-view and top-down enemy AI |
-| 5 (`16`) | `interactables` | Shadow Rift portals, training totems, future NPCs/chests |
+| 5 (`16`) | `interactables` | Shadow Rift gates, Lore Runestones, Training Totems, Camera Vista Zones |
 | 6 (`32`) | `player_hitbox` | Active sword-slash and skill hitboxes |
 | 7 (`64`) | `enemy_hitbox` | Reserved for Phase 3 enemy and boss attack hitboxes |
+| 8 (`128`) | `world_oneway` | Pass-through side-scroll skybridges (player temporarily drops bit 8 on `Down+Jump`) |
 
 ---
 
-## 2. Autoload Services
+## 4. Autoload Services
 
 1. **`LocalizationManager`** (`scripts/autoload/localization_manager.gd`)
-   - Loads offline JSON string tables (`data/localization/en.json`, `data/localization/ar.json`).
-   - Calls `TranslationServer.set_locale()` and applies `Control.LAYOUT_DIRECTION_RTL` / `LTR` cleanly while keeping mobile thumb controls ergonomically anchored (joystick left, action fan right).
+   - Loads offline JSON string tables (`data/localization/en.json`, `data/localization/ar.json` — 74 paired keys).
+   - Calls `TranslationServer.set_locale()` and applies `Control.LAYOUT_DIRECTION_RTL` / `LTR` cleanly while keeping mobile thumb controls ergonomically anchored (joystick left, 5-button action fan right).
 2. **`GameState`** (`scripts/autoload/game_state.gd`)
-   - Holds active `GameplayMode` (`SIDE_SCROLL` / `TOP_DOWN`), shared `PlayerProfile`, data-driven `movement_config.json`, pause/resume state, Android lifecycle handlers (`NOTIFICATION_APPLICATION_PAUSED`, `NOTIFICATION_WM_GO_BACK_REQUEST`), and offline settings persistence (`user://settings.cfg`).
+   - Holds active `GameplayMode` (`SIDE_SCROLL` / `TOP_DOWN`), shared `PlayerProfile`, data-driven `movement_config.json`, `CameraZoomPreset` (`STANDARD` / `WIDE`), touch visibility & camera smoothing settings, Android lifecycle handlers (`NOTIFICATION_APPLICATION_PAUSED`, `NOTIFICATION_WM_GO_BACK_REQUEST`), and offline settings persistence (`user://settings.cfg`).
 
 ---
 
-## 3. Phased Development Roadmap
+## 5. Phased Development Roadmap
 
 | Phase | Scope | Status |
 | --- | --- | --- |
-| **Phase 1** | Godot 4 project, main menu, playable anime Stickman, animations, side-scroll movement, top-down prototype, camera switching, playable Twilight Sanctum level, basic touch controls, bilingual EN/AR RTL base, README & credits | **Completed** |
-| **Phase 2** | Expanded dual-camera transitions, zone streaming, controller polish (blocking, wall/ledge feel, stamina tuning) | Planned |
-| **Phase 3** | Multi-hit sword combos, blocking/dodge i-frames, 3 enemy archetypes (side & top-down AI), 1 multi-phase boss, monster encyclopedia hook | Planned |
-| **Phase 4** | Character creation, 5 classes (Warrior, Mage, Assassin, Knight, Summoner), XP/levels, Ranks F–SSS, Gold/Diamonds/Magic Crystals, inventory | Planned |
-| **Phase 5** | Equipment slots, rarity tiers, skill trees, loot generation, blacksmith upgrades | Planned |
-| **Phase 6** | Towns, shops, NPC dialogue, dungeons, world/zone map, main & side quests | Planned |
-| **Phase 7** | Complete offline Guild simulation (HQ, NPC roster, ranks, missions, contribution, storage, shop, reputation) behind a clean service interface ready for optional future online adapters + full save/load persistence | Planned |
-| **Phase 8** | Visual VFX polish, audio/SFX/music, full Arabic RTL audit, Android touch customization | Planned |
+| **Phase 1** | Godot 4 project, main menu, playable anime Stickman, basic dual movement, camera switching, playable Twilight Sanctum, touch controls, bilingual EN/AR RTL, README & credits | **Completed** |
+| **Phase 2** | Dedicated data-driven Side-Scroll & Top-Down cameras (profiles, fall-peek, 8-way lookahead, vista/POI zones, Standard/Wide zoom) + separate full movement controllers (wall slide/jump, one-way drop-through, apex hang, 8-compass walk/run/sprint, dodge i-frames, Shadow Guard + perfect-parry window, Lore Runestones, 5-button touch fan) | **Completed** |
+| **Phase 3** | Multi-hit sword combos, damage/parry/i-frame combat resolution, 3 enemy archetypes, 1 multi-phase boss | **Next** |
+| **Phase 4** | XP, levels, Ranks (F–SSS), currencies (Gold, Diamonds, Magic Crystals), inventory | Planned |
+| **Phase 5** | Equipment/rarity/blacksmith upgrades, 5 classes (Warrior, Mage, Assassin, Knight, Summoner), skill trees, loot | Planned |
+| **Phase 6** | Towns, shops, NPC dialogue, dungeons, world/zone maps, main & side quests, monster encyclopedia | Planned |
+| **Phase 7** | Complete offline Guild simulation (HQ, NPC roster, ranks, missions, contribution, storage, shop, reputation, progression; extensible for future online) + full local save/load | Planned |
+| **Phase 8** | Visual VFX polish, audio/SFX/music, full Arabic RTL polish, Android touch customization | Planned |
 | **Phase 9** | End-to-end validation, mobile performance profiling, and verified Android 9+ APK export | Planned |

@@ -1,7 +1,7 @@
 extends Control
-## SHADOWBOUND Main Menu controller.
-## Provides entry into Side-Scrolling or Top-Down mode, Controls & Guide dialog,
-## Settings (English / Arabic RTL, Touch Controls mode, Camera Smoothing), and Quit.
+## SHADOWBOUND Main Menu controller (Phase 2).
+## Provides entry into Side-Scrolling or Top-Down camera mode, Controls & Guide dialog,
+## Settings (English / Arabic RTL, Touch Controls, Camera Smoothing, Camera Zoom Preset), and Quit.
 
 @onready var hero_preview: AnimatedSprite2D = $HeroPreview
 @onready var content_root: Control = $SafeMargin
@@ -21,6 +21,7 @@ extends Control
 @onready var settings_lang_btn: Button = $SettingsModal/Center/Panel/VBox/SettingsLangBtn
 @onready var settings_touch_btn: Button = $SettingsModal/Center/Panel/VBox/SettingsTouchBtn
 @onready var settings_cam_btn: Button = $SettingsModal/Center/Panel/VBox/SettingsCamBtn
+@onready var settings_zoom_btn: Button = $SettingsModal/Center/Panel/VBox/SettingsZoomBtn
 @onready var settings_close_btn: Button = $SettingsModal/Center/Panel/VBox/SettingsCloseBtn
 
 @onready var controls_modal: Control = $ControlsModal
@@ -48,6 +49,7 @@ func _ready() -> void:
 	settings_lang_btn.pressed.connect(_on_toggle_language)
 	settings_touch_btn.pressed.connect(_on_cycle_touch_mode)
 	settings_cam_btn.pressed.connect(_on_toggle_camera_smooth)
+	settings_zoom_btn.pressed.connect(_on_toggle_camera_zoom)
 	settings_close_btn.pressed.connect(_on_close_modals)
 	controls_close_btn.pressed.connect(_on_close_modals)
 
@@ -93,10 +95,21 @@ func _refresh_texts() -> void:
 		LocalizationManager.translate_key("settings.touch_mode"),
 		_get_touch_mode_label(),
 	]
-	var smooth_key: String = "settings.on" if GameState.camera_smoothing_enabled else "settings.off"
+	var smooth_key: String = (
+		"settings.on" if GameState.camera_smoothing_enabled else "settings.off"
+	)
 	settings_cam_btn.text = "%s: %s" % [
 		LocalizationManager.translate_key("settings.camera_smooth"),
 		LocalizationManager.translate_key(smooth_key),
+	]
+	var zoom_key: String = (
+		"settings.zoom_wide"
+		if GameState.camera_zoom_preset == GameState.CameraZoomPreset.WIDE
+		else "settings.zoom_standard"
+	)
+	settings_zoom_btn.text = "%s: %s" % [
+		LocalizationManager.translate_key("settings.camera_zoom"),
+		LocalizationManager.translate_key(zoom_key),
 	]
 	settings_close_btn.text = LocalizationManager.translate_key("settings.close")
 
@@ -105,7 +118,9 @@ func _refresh_texts() -> void:
 	controls_close_btn.text = LocalizationManager.translate_key("controls.close")
 
 	var rtl_align: HorizontalAlignment = (
-		HORIZONTAL_ALIGNMENT_RIGHT if LocalizationManager.is_rtl() else HORIZONTAL_ALIGNMENT_LEFT
+		HORIZONTAL_ALIGNMENT_RIGHT
+		if LocalizationManager.is_rtl()
+		else HORIZONTAL_ALIGNMENT_LEFT
 	)
 	controls_body.horizontal_alignment = rtl_align
 
@@ -159,6 +174,10 @@ func _on_cycle_touch_mode() -> void:
 
 func _on_toggle_camera_smooth() -> void:
 	GameState.set_camera_smoothing(not GameState.camera_smoothing_enabled)
+
+
+func _on_toggle_camera_zoom() -> void:
+	GameState.toggle_camera_zoom_preset()
 
 
 func _on_quit() -> void:

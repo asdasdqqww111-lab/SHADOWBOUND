@@ -187,7 +187,14 @@ horizontal_alignment = 1
 layout_mode = 2
 theme_override_colors/font_color = Color(0.54, 0.94, 1, 1)
 theme_override_font_sizes/font_size = 12
-text = "MODE: SIDE-SCROLL"
+text = "CAM: SIDE-SCROLL"
+horizontal_alignment = 1
+
+[node name="StateLabel" type="Label" parent="HudRoot/TopBar/RightCluster/ZonePanel/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.84, 0.78, 1, 0.95)
+theme_override_font_sizes/font_size = 11
+text = "State: Idle · E"
 horizontal_alignment = 1
 
 [node name="ButtonRow" type="HBoxContainer" parent="HudRoot/TopBar/RightCluster"]
@@ -279,6 +286,10 @@ text = "Resume"
 [node name="PauseModeBtn" type="Button" parent="PauseOverlay/CenterContainer/PausePanel/VBox"]
 layout_mode = 2
 text = "Switch Camera Mode"
+
+[node name="PauseZoomBtn" type="Button" parent="PauseOverlay/CenterContainer/PausePanel/VBox"]
+layout_mode = 2
+text = "Camera View: Standard"
 
 [node name="RespawnBtn" type="Button" parent="PauseOverlay/CenterContainer/PausePanel/VBox"]
 layout_mode = 2

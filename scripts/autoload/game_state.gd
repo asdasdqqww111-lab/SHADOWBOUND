@@ -18,6 +18,11 @@ enum TouchControlsMode {
 	HIDDEN = 2,
 }
 
+enum CameraZoomPreset {
+	STANDARD = 0,
+	WIDE = 1,
+}
+
 const MAIN_MENU_SCENE: String = "res://scenes/ui/main_menu.tscn"
 const PLAYABLE_LEVEL_SCENE: String = "res://scenes/levels/twilight_sanctum.tscn"
 const DEFAULT_PROFILE_PATH: String = "res://resources/player/default_player_profile.tres"
@@ -27,6 +32,7 @@ const SETTINGS_SAVE_PATH: String = "user://settings.cfg"
 var current_mode: int = GameplayMode.SIDE_SCROLL
 var touch_controls_mode: int = TouchControlsMode.ALWAYS_ON
 var camera_smoothing_enabled: bool = true
+var camera_zoom_preset: int = CameraZoomPreset.STANDARD
 var is_in_gameplay: bool = false
 var player_profile: PlayerProfile = null
 var movement_config: Dictionary = {}
@@ -97,6 +103,8 @@ func set_gameplay_mode(new_mode: int) -> void:
 	if current_mode == new_mode:
 		return
 	current_mode = new_mode
+	_ensure_player_profile()
+	player_profile.session_mode_switches += 1
 	gameplay_mode_changed.emit(current_mode)
 
 
@@ -151,7 +159,6 @@ func should_show_touch_controls() -> bool:
 		return true
 	if touch_controls_mode == TouchControlsMode.HIDDEN:
 		return false
-	# AUTO mode: show on Android/iOS or any device reporting touchscreen capability.
 	var os_name: String = OS.get_name()
 	if os_name == "Android" or os_name == "iOS":
 		return true
@@ -177,11 +184,35 @@ func set_camera_smoothing(enabled: bool) -> void:
 	settings_changed.emit()
 
 
+func set_camera_zoom_preset(preset: int) -> void:
+	camera_zoom_preset = clampi(preset, CameraZoomPreset.STANDARD, CameraZoomPreset.WIDE)
+	save_settings()
+	settings_changed.emit()
+
+
+func toggle_camera_zoom_preset() -> int:
+	var next_preset: int = (
+		CameraZoomPreset.WIDE
+		if camera_zoom_preset == CameraZoomPreset.STANDARD
+		else CameraZoomPreset.STANDARD
+	)
+	set_camera_zoom_preset(next_preset)
+	return camera_zoom_preset
+
+
+func get_camera_zoom_multiplier() -> float:
+	var cam_cfg: Dictionary = get_config_section("camera")
+	if camera_zoom_preset == CameraZoomPreset.WIDE:
+		return float(cam_cfg.get("zoom_preset_wide", 0.88))
+	return float(cam_cfg.get("zoom_preset_standard", 1.0))
+
+
 func save_settings() -> Error:
 	var cfg: ConfigFile = ConfigFile.new()
 	cfg.set_value("general", "locale", LocalizationManager.get_locale())
 	cfg.set_value("controls", "touch_mode", touch_controls_mode)
 	cfg.set_value("camera", "smoothing", camera_smoothing_enabled)
+	cfg.set_value("camera", "zoom_preset", camera_zoom_preset)
 	return cfg.save(SETTINGS_SAVE_PATH)
 
 
@@ -194,5 +225,7 @@ func load_settings() -> void:
 	touch_controls_mode = int(cfg.get_value("controls", "touch_mode", TouchControlsMode.ALWAYS_ON))
 	touch_controls_mode = clampi(touch_controls_mode, TouchControlsMode.AUTO, TouchControlsMode.HIDDEN)
 	camera_smoothing_enabled = bool(cfg.get_value("camera", "smoothing", true))
+	camera_zoom_preset = int(cfg.get_value("camera", "zoom_preset", CameraZoomPreset.STANDARD))
+	camera_zoom_preset = clampi(camera_zoom_preset, CameraZoomPreset.STANDARD, CameraZoomPreset.WIDE)
 	LocalizationManager.set_locale(saved_locale, true)
 	settings_changed.emit()

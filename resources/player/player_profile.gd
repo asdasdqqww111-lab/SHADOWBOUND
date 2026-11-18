@@ -17,6 +17,7 @@ extends Resource
 @export var current_stamina: float = 100.0
 
 var session_slash_hits: int = 0
+var session_mode_switches: int = 0
 
 
 func get_display_name(locale: String) -> String:
@@ -56,4 +57,5 @@ func to_dictionary() -> Dictionary:
 		"max_stamina": max_stamina,
 		"current_stamina": current_stamina,
 		"session_slash_hits": session_slash_hits,
+		"session_mode_switches": session_mode_switches,
 	}

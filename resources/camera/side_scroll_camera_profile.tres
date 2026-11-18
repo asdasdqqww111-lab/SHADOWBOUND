@@ -1,0 +1,27 @@
+[gd_resource type="Resource" script_class="CameraModeProfile" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://resources/camera/camera_mode_profile.gd" id="1_cam_profile"]
+
+[resource]
+script = ExtResource("1_cam_profile")
+mode_id = 0
+mode_key = "side_scroll"
+base_zoom = Vector2(1.14, 1.14)
+min_zoom_scale = 0.82
+max_zoom_scale = 1.15
+speed_zoom_out = 0.06
+block_zoom_in = 0.05
+base_offset = Vector2(0, -48)
+lookahead_distance = Vector2(92, 0)
+idle_lookahead_ratio = 0.52
+fall_peek_offset_y = 64.0
+fall_peek_speed_threshold = 340.0
+position_smoothing_speed = 8.0
+offset_smoothing_speed = 6.4
+zoom_smoothing_speed = 5.8
+drag_horizontal_enabled = false
+drag_vertical_enabled = true
+drag_left_margin = 0.08
+drag_right_margin = 0.08
+drag_top_margin = 0.24
+drag_bottom_margin = 0.15
