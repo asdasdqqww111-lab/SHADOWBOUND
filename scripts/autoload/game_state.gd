@@ -1,0 +1,198 @@
+extends Node
+## Global unified session, mode, shared player profile, settings, and Android lifecycle manager.
+## Persists lightweight user settings to Android-compatible `user://settings.cfg`.
+
+signal gameplay_mode_changed(new_mode: int)
+signal pause_state_changed(is_paused: bool)
+signal settings_changed
+signal profile_updated
+
+enum GameplayMode {
+	SIDE_SCROLL = 0,
+	TOP_DOWN = 1,
+}
+
+enum TouchControlsMode {
+	AUTO = 0,
+	ALWAYS_ON = 1,
+	HIDDEN = 2,
+}
+
+const MAIN_MENU_SCENE: String = "res://scenes/ui/main_menu.tscn"
+const PLAYABLE_LEVEL_SCENE: String = "res://scenes/levels/twilight_sanctum.tscn"
+const DEFAULT_PROFILE_PATH: String = "res://resources/player/default_player_profile.tres"
+const MOVEMENT_CONFIG_PATH: String = "res://data/config/movement_config.json"
+const SETTINGS_SAVE_PATH: String = "user://settings.cfg"
+
+var current_mode: int = GameplayMode.SIDE_SCROLL
+var touch_controls_mode: int = TouchControlsMode.ALWAYS_ON
+var camera_smoothing_enabled: bool = true
+var is_in_gameplay: bool = false
+var player_profile: PlayerProfile = null
+var movement_config: Dictionary = {}
+
+
+func _ready() -> void:
+	process_mode = Node.PROCESS_MODE_ALWAYS
+	get_tree().set_auto_accept_quit(true)
+	_load_movement_config()
+	_ensure_player_profile()
+	load_settings()
+
+
+func _notification(what: int) -> void:
+	if what == NOTIFICATION_APPLICATION_PAUSED:
+		if is_in_gameplay and not get_tree().paused:
+			set_paused(true)
+		save_settings()
+	elif what == NOTIFICATION_WM_GO_BACK_REQUEST:
+		if is_in_gameplay:
+			toggle_pause()
+
+
+func _load_movement_config() -> void:
+	if not FileAccess.file_exists(MOVEMENT_CONFIG_PATH):
+		push_warning("GameState: Missing movement config at %s" % MOVEMENT_CONFIG_PATH)
+		movement_config = {}
+		return
+	var raw: String = FileAccess.get_file_as_string(MOVEMENT_CONFIG_PATH)
+	var parsed: Variant = JSON.parse_string(raw)
+	if parsed is Dictionary:
+		movement_config = parsed
+	else:
+		movement_config = {}
+
+
+func get_config_section(section_name: String) -> Dictionary:
+	if movement_config.is_empty():
+		_load_movement_config()
+	if movement_config.has(section_name) and movement_config[section_name] is Dictionary:
+		var section: Dictionary = movement_config[section_name]
+		return section
+	return {}
+
+
+func _ensure_player_profile() -> void:
+	if player_profile != null:
+		return
+	var loaded: Resource = load(DEFAULT_PROFILE_PATH)
+	if loaded is PlayerProfile:
+		player_profile = loaded.duplicate(true) as PlayerProfile
+	else:
+		player_profile = PlayerProfile.new()
+
+
+func get_player_profile() -> PlayerProfile:
+	_ensure_player_profile()
+	return player_profile
+
+
+func notify_profile_updated() -> void:
+	profile_updated.emit()
+
+
+func set_gameplay_mode(new_mode: int) -> void:
+	if new_mode != GameplayMode.SIDE_SCROLL and new_mode != GameplayMode.TOP_DOWN:
+		return
+	if current_mode == new_mode:
+		return
+	current_mode = new_mode
+	gameplay_mode_changed.emit(current_mode)
+
+
+func toggle_gameplay_mode() -> int:
+	var next_mode: int = (
+		GameplayMode.TOP_DOWN
+		if current_mode == GameplayMode.SIDE_SCROLL
+		else GameplayMode.SIDE_SCROLL
+	)
+	set_gameplay_mode(next_mode)
+	return current_mode
+
+
+func get_mode_name(mode_value: int = -1) -> String:
+	var target: int = current_mode if mode_value < 0 else mode_value
+	if target == GameplayMode.TOP_DOWN:
+		return "TOP_DOWN"
+	return "SIDE_SCROLL"
+
+
+func start_game(initial_mode: int = GameplayMode.SIDE_SCROLL) -> Error:
+	_ensure_player_profile()
+	player_profile.restore_all()
+	current_mode = initial_mode
+	set_paused(false)
+	is_in_gameplay = true
+	return get_tree().change_scene_to_file(PLAYABLE_LEVEL_SCENE)
+
+
+func return_to_main_menu() -> Error:
+	set_paused(false)
+	is_in_gameplay = false
+	save_settings()
+	return get_tree().change_scene_to_file(MAIN_MENU_SCENE)
+
+
+func set_paused(paused: bool) -> void:
+	if get_tree().paused == paused:
+		return
+	get_tree().paused = paused
+	pause_state_changed.emit(paused)
+
+
+func toggle_pause() -> bool:
+	var next_paused: bool = not get_tree().paused
+	set_paused(next_paused)
+	return next_paused
+
+
+func should_show_touch_controls() -> bool:
+	if touch_controls_mode == TouchControlsMode.ALWAYS_ON:
+		return true
+	if touch_controls_mode == TouchControlsMode.HIDDEN:
+		return false
+	# AUTO mode: show on Android/iOS or any device reporting touchscreen capability.
+	var os_name: String = OS.get_name()
+	if os_name == "Android" or os_name == "iOS":
+		return true
+	return DisplayServer.is_touchscreen_available()
+
+
+func cycle_touch_controls_mode() -> int:
+	touch_controls_mode = (touch_controls_mode + 1) % 3
+	save_settings()
+	settings_changed.emit()
+	return touch_controls_mode
+
+
+func set_touch_controls_mode(mode_value: int) -> void:
+	touch_controls_mode = clampi(mode_value, TouchControlsMode.AUTO, TouchControlsMode.HIDDEN)
+	save_settings()
+	settings_changed.emit()
+
+
+func set_camera_smoothing(enabled: bool) -> void:
+	camera_smoothing_enabled = enabled
+	save_settings()
+	settings_changed.emit()
+
+
+func save_settings() -> Error:
+	var cfg: ConfigFile = ConfigFile.new()
+	cfg.set_value("general", "locale", LocalizationManager.get_locale())
+	cfg.set_value("controls", "touch_mode", touch_controls_mode)
+	cfg.set_value("camera", "smoothing", camera_smoothing_enabled)
+	return cfg.save(SETTINGS_SAVE_PATH)
+
+
+func load_settings() -> void:
+	var cfg: ConfigFile = ConfigFile.new()
+	var err: Error = cfg.load(SETTINGS_SAVE_PATH)
+	if err != OK:
+		return
+	var saved_locale: String = str(cfg.get_value("general", "locale", "en"))
+	touch_controls_mode = int(cfg.get_value("controls", "touch_mode", TouchControlsMode.ALWAYS_ON))
+	touch_controls_mode = clampi(touch_controls_mode, TouchControlsMode.AUTO, TouchControlsMode.HIDDEN)
+	camera_smoothing_enabled = bool(cfg.get_value("camera", "smoothing", true))
+	LocalizationManager.set_locale(saved_locale, true)
+	settings_changed.emit()

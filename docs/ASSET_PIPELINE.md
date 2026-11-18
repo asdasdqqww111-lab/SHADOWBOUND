@@ -1,0 +1,96 @@
+# SHADOWBOUND — Art Style & Asset Replacement Pipeline
+
+## 1. Visual Identity Specification
+
+**SHADOWBOUND** uses a 100% original dark-twilight anime fantasy stickman palette:
+
+- **Obsidian Core:** `#141024` / `#0E0B1A` (crisp stickman silhouette)
+- **Shadow Violet Rim & Magic:** `#9B7EFF` / `#8E60FF` (aura edges, blade energy, rifts)
+- **Soul Cyan Accent:** `#60EEFF` (expressive anime eyes, jump rings, slash core, target runes)
+- **Crimson Scarf:** `#E43662` / `#981A44` (kinetic secondary-motion cloth readable against dark skies)
+- **Royal Sanctum Gold:** `#FFE08A` / `#D69E3E` (katana tsuba, UI borders, ruin inlays, lanterns)
+
+---
+
+## 2. Drop-In Character Sprite Sheet Specifications
+
+Artists can replace the procedural Phase 1 sprite sheets with hand-animated PNGs (exported from Aseprite, Krita, Spine, or Blender Grease Pencil) **without modifying any GDScript or `.tscn` files**, provided the sheet grid and foot anchor match the tables below.
+
+### 2.1 Side-Scrolling Stickman Sheet
+
+- **Path:** `assets/sprites/player/stickman_sidescroll_sheet.png`
+- **Image Size:** `1024 x 768` px (RGBA PNG, transparent background)
+- **Grid:** `8 columns x 6 rows`, cell size `128 x 128` px
+- **Default Facing:** Right (`+X`); engine mirrors automatically via `flip_h` for Left (`-X`)
+- **Foot Ground Anchor:** `x = 64, y = 114` inside each `128 x 128` cell
+
+| Row | Animation Name | Frames | Cell Y | Speed (FPS) | Loop | Notes |
+| --- | --- | --- | --- | --- | --- | --- |
+| 0 | `idle` | 6 (cols 0–5) | `0` | 8.0 | Yes | Breathing stance, fluttering scarf, sheathed blade |
+| 1 | `run` | 8 (cols 0–7) | `128` | 13.0 | Yes | Forward-lean anime sprint cycle |
+| 2 | `jump` | 4 (cols 0–3) | `256` | 10.0 | No | Launch + rising arc |
+| 3 | `fall` | 4 (cols 0–3) | `384` | 9.0 | Yes | Airborne descent, upward scarf trail |
+| 4 | `dodge` | 5 (cols 0–4) | `512` | 16.0 | No | Shadow-step dash with ghost afterimage |
+| 5 | `attack` | 6 (cols 0–5) | `640` | 16.0 | No | Katana slash; crescent arc active on frames 2–4 |
+
+### 2.2 Top-Down (3/4 RPG) Stickman Sheet
+
+- **Path:** `assets/sprites/player/stickman_topdown_sheet.png`
+- **Image Size:** `768 x 1024` px (RGBA PNG, transparent background)
+- **Grid:** `6 columns x 8 rows`, cell size `128 x 128` px
+- **Foot Shadow Anchor:** `x = 64, y = 104` inside each `128 x 128` cell
+- **Side Facing:** Right (`+X`); engine mirrors via `flip_h` for Left (`-X`)
+
+| Row | Animation Name | Frames | Cell Y | Speed (FPS) | Loop |
+| --- | --- | --- | --- | --- | --- |
+| 0 | `td_idle_down` | 4 (cols 0–3) | `0` | 7.0 | Yes |
+| 1 | `td_idle_up` | 4 (cols 0–3) | `128` | 7.0 | Yes |
+| 2 | `td_idle_side` | 4 (cols 0–3) | `256` | 7.0 | Yes |
+| 3 | `td_walk_down` | 6 (cols 0–5) | `384` | 11.0 | Yes |
+| 4 | `td_walk_up` | 6 (cols 0–5) | `512` | 11.0 | Yes |
+| 5 | `td_walk_side` | 6 (cols 0–5) | `640` | 11.0 | Yes |
+| 6 | `td_dodge` | 5 (cols 0–4) | `768` | 16.0 | No |
+| 7 | `td_attack` | 5 (cols 0–4) | `896` | 16.0 | No |
+
+---
+
+## 3. Environment & UI Replacement Table
+
+| File Path | Dimensions | Format / Tiling Rule |
+| --- | --- | --- |
+| `assets/sprites/player/player_portrait.png` | `160 x 160` | RGBA character bust portrait |
+| `assets/sprites/environment/bg_twilight_sky.png` | `1280 x 720` | RGBA sky backdrop |
+| `assets/sprites/environment/bg_distant_peaks.png` | `1280 x 512` | Horizontally tileable parallax layer |
+| `assets/sprites/environment/bg_ruined_arches.png` | `1280 x 512` | Horizontally tileable near parallax layer |
+| `assets/sprites/environment/platform_stone.png` | `256 x 64` | Horizontally tileable side-scroll platform |
+| `assets/sprites/environment/topdown_sanctum_floor.png` | `256 x 256` | Seamlessly tileable (X & Y) courtyard stone |
+| `assets/sprites/environment/topdown_wall_tile.png` | `128 x 128` | Tileable 3/4 sanctum wall/pillar block |
+| `assets/sprites/environment/topdown_rune_circle.png` | `384 x 384` | Centered RGBA courtyard floor decal |
+| `assets/sprites/environment/rift_gate_sheet.png` | `512 x 160` | 4 frames of `128 x 160` portal loop |
+| `assets/sprites/environment/mana_lantern.png` | `64 x 128` | RGBA fantasy prop |
+| `assets/sprites/environment/training_totem.png` | `96 x 128` | RGBA target dummy prop |
+| `assets/sprites/ui/logo_emblem.png` | `256 x 256` | Main menu crest |
+| `assets/sprites/ui/joystick_base.png` | `220 x 220` | RGBA virtual joystick ring |
+| `assets/sprites/ui/joystick_knob.png` | `96 x 96` | RGBA virtual joystick thumb cap |
+| `assets/sprites/ui/btn_attack.png` | `128 x 128` | Primary touch attack button |
+| `assets/sprites/ui/btn_jump.png` | `112 x 112` | Touch jump / interact button |
+| `assets/sprites/ui/btn_dodge.png` | `112 x 112` | Touch shadow-dodge button |
+| `assets/sprites/ui/btn_mode.png` | `112 x 112` | Touch camera/mode switch button |
+
+---
+
+## 4. Regenerating Prototype Art & Licensing Checklist
+
+To deterministically regenerate all placeholder PNGs:
+
+```bash
+python3 assets/tools/generate_placeholder_art.py
+python3 tests/validate_project.py
+```
+
+Whenever replacing or adding any third-party asset:
+
+1. Verify the license permits free commercial redistribution in Android APKs (CC0, MIT, CC-BY 4.0, SIL OFL 1.1).
+2. Copy the full license text into `licenses/`.
+3. Record Asset Name, URL, Author, License, Modifications, and Attribution in `ASSET_CREDITS.md`.
+4. Re-run `python3 tests/validate_project.py` to confirm all `AtlasTexture` bounds fit the updated dimensions.

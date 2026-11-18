@@ -1,0 +1,294 @@
+[gd_scene load_steps=9 format=3]
+
+[ext_resource type="Script" path="res://scripts/ui/main_menu.gd" id="1_menu"]
+[ext_resource type="Theme" path="res://resources/themes/fantasy_ui_theme.tres" id="2_theme"]
+[ext_resource type="Texture2D" path="res://assets/sprites/environment/bg_twilight_sky.png" id="3_sky"]
+[ext_resource type="Texture2D" path="res://assets/sprites/environment/bg_distant_peaks.png" id="4_peaks"]
+[ext_resource type="Texture2D" path="res://assets/sprites/environment/bg_ruined_arches.png" id="5_arches"]
+[ext_resource type="Texture2D" path="res://assets/sprites/ui/logo_emblem.png" id="6_logo"]
+[ext_resource type="SpriteFrames" path="res://resources/sprites/stickman_sprite_frames.tres" id="7_hero"]
+[ext_resource type="Texture2D" path="res://assets/sprites/environment/platform_stone.png" id="8_stone"]
+
+[node name="MainMenu" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme = ExtResource("2_theme")
+script = ExtResource("1_menu")
+
+[node name="SkyBg" type="TextureRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+texture = ExtResource("3_sky")
+expand_mode = 1
+stretch_mode = 6
+
+[node name="PeaksBg" type="TextureRect" parent="."]
+layout_mode = 1
+anchors_preset = 12
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_top = -470.0
+grow_horizontal = 2
+grow_vertical = 0
+mouse_filter = 2
+texture = ExtResource("4_peaks")
+expand_mode = 1
+stretch_mode = 6
+
+[node name="ArchesBg" type="TextureRect" parent="."]
+modulate = Color(1, 1, 1, 0.85)
+layout_mode = 1
+anchors_preset = 12
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_top = -410.0
+grow_horizontal = 2
+grow_vertical = 0
+mouse_filter = 2
+texture = ExtResource("5_arches")
+expand_mode = 1
+stretch_mode = 6
+
+[node name="HeroPedestal" type="Sprite2D" parent="."]
+position = Vector2(360, 642)
+scale = Vector2(1.1, 1)
+texture = ExtResource("8_stone")
+
+[node name="HeroPreview" type="AnimatedSprite2D" parent="."]
+position = Vector2(360, 526)
+scale = Vector2(1.5, 1.5)
+sprite_frames = ExtResource("7_hero")
+animation = &"idle"
+
+[node name="SafeMargin" type="MarginContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 64.0
+offset_top = 42.0
+offset_right = -64.0
+offset_bottom = -52.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="MainLayout" type="HBoxContainer" parent="SafeMargin"]
+layout_mode = 2
+theme_override_constants/separation = 48
+alignment = 1
+
+[node name="BrandColumn" type="VBoxContainer" parent="SafeMargin/MainLayout"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 4
+theme_override_constants/separation = 8
+alignment = 1
+
+[node name="Emblem" type="TextureRect" parent="SafeMargin/MainLayout/BrandColumn"]
+custom_minimum_size = Vector2(148, 148)
+layout_mode = 2
+size_flags_horizontal = 4
+texture = ExtResource("6_logo")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="TitleLabel" type="Label" parent="SafeMargin/MainLayout/BrandColumn"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.92, 0.68, 1)
+theme_override_colors/font_outline_color = Color(0.06, 0.02, 0.16, 1)
+theme_override_constants/outline_size = 8
+theme_override_font_sizes/font_size = 44
+text = "SHADOWBOUND"
+horizontal_alignment = 1
+
+[node name="SubtitleLabel" type="Label" parent="SafeMargin/MainLayout/BrandColumn"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.68, 0.93, 1, 1)
+theme_override_font_sizes/font_size = 20
+text = "Chronicles of the Twilight Blade"
+horizontal_alignment = 1
+
+[node name="VersionLabel" type="Label" parent="SafeMargin/MainLayout/BrandColumn"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.78, 0.72, 0.95, 0.88)
+theme_override_font_sizes/font_size = 14
+text = "Phase 1 Playable Prototype · v0.1.0"
+horizontal_alignment = 1
+
+[node name="MenuPanel" type="PanelContainer" parent="SafeMargin/MainLayout"]
+custom_minimum_size = Vector2(410, 0)
+layout_mode = 2
+size_flags_vertical = 4
+
+[node name="MenuVBox" type="VBoxContainer" parent="SafeMargin/MainLayout/MenuPanel"]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="PlaySideScrollBtn" type="Button" parent="SafeMargin/MainLayout/MenuPanel/MenuVBox"]
+custom_minimum_size = Vector2(0, 50)
+layout_mode = 2
+text = "Start Adventure (Side-Scroll)"
+
+[node name="PlayTopDownBtn" type="Button" parent="SafeMargin/MainLayout/MenuPanel/MenuVBox"]
+custom_minimum_size = Vector2(0, 50)
+layout_mode = 2
+text = "Explore Sanctum (Top-Down)"
+
+[node name="ControlsBtn" type="Button" parent="SafeMargin/MainLayout/MenuPanel/MenuVBox"]
+custom_minimum_size = Vector2(0, 46)
+layout_mode = 2
+text = "Controls & Guide"
+
+[node name="SettingsBtn" type="Button" parent="SafeMargin/MainLayout/MenuPanel/MenuVBox"]
+custom_minimum_size = Vector2(0, 46)
+layout_mode = 2
+text = "Settings"
+
+[node name="LanguageBtn" type="Button" parent="SafeMargin/MainLayout/MenuPanel/MenuVBox"]
+custom_minimum_size = Vector2(0, 46)
+layout_mode = 2
+text = "العربية (RTL)"
+
+[node name="QuitBtn" type="Button" parent="SafeMargin/MainLayout/MenuPanel/MenuVBox"]
+custom_minimum_size = Vector2(0, 44)
+layout_mode = 2
+text = "Quit"
+
+[node name="FooterLabel" type="Label" parent="."]
+layout_mode = 1
+anchors_preset = 12
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_top = -34.0
+offset_bottom = -8.0
+grow_horizontal = 2
+grow_vertical = 0
+theme_override_colors/font_color = Color(0.82, 0.78, 0.96, 0.8)
+theme_override_font_sizes/font_size = 13
+text = "Offline Single-Player Anime Fantasy RPG · Godot 4.x"
+horizontal_alignment = 1
+
+[node name="SettingsModal" type="Control" parent="."]
+visible = false
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Dimmer" type="ColorRect" parent="SettingsModal"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.03, 0.015, 0.08, 0.78)
+
+[node name="Center" type="CenterContainer" parent="SettingsModal"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Panel" type="PanelContainer" parent="SettingsModal/Center"]
+custom_minimum_size = Vector2(430, 0)
+layout_mode = 2
+
+[node name="VBox" type="VBoxContainer" parent="SettingsModal/Center/Panel"]
+layout_mode = 2
+theme_override_constants/separation = 14
+
+[node name="SettingsTitle" type="Label" parent="SettingsModal/Center/Panel/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.91, 0.65, 1)
+theme_override_font_sizes/font_size = 26
+text = "Settings"
+horizontal_alignment = 1
+
+[node name="SettingsLangBtn" type="Button" parent="SettingsModal/Center/Panel/VBox"]
+custom_minimum_size = Vector2(0, 48)
+layout_mode = 2
+text = "Language: English"
+
+[node name="SettingsTouchBtn" type="Button" parent="SettingsModal/Center/Panel/VBox"]
+custom_minimum_size = Vector2(0, 48)
+layout_mode = 2
+text = "Touch Controls: Always On"
+
+[node name="SettingsCamBtn" type="Button" parent="SettingsModal/Center/Panel/VBox"]
+custom_minimum_size = Vector2(0, 48)
+layout_mode = 2
+text = "Camera Smoothing: On"
+
+[node name="SettingsCloseBtn" type="Button" parent="SettingsModal/Center/Panel/VBox"]
+custom_minimum_size = Vector2(0, 48)
+layout_mode = 2
+text = "Done"
+
+[node name="ControlsModal" type="Control" parent="."]
+visible = false
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Dimmer" type="ColorRect" parent="ControlsModal"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.03, 0.015, 0.08, 0.8)
+
+[node name="Center" type="CenterContainer" parent="ControlsModal"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Panel" type="PanelContainer" parent="ControlsModal/Center"]
+custom_minimum_size = Vector2(560, 0)
+layout_mode = 2
+
+[node name="VBox" type="VBoxContainer" parent="ControlsModal/Center/Panel"]
+layout_mode = 2
+theme_override_constants/separation = 14
+
+[node name="ControlsTitle" type="Label" parent="ControlsModal/Center/Panel/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.91, 0.65, 1)
+theme_override_font_sizes/font_size = 24
+text = "Controls & Dual-Mode Guide"
+horizontal_alignment = 1
+
+[node name="ControlsBody" type="Label" parent="ControlsModal/Center/Panel/VBox"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 16
+text = "Move: Virtual Joystick / WASD / Arrow Keys"
+autowrap_mode = 2
+
+[node name="ControlsCloseBtn" type="Button" parent="ControlsModal/Center/Panel/VBox"]
+custom_minimum_size = Vector2(0, 48)
+layout_mode = 2
+text = "Back"

@@ -1,0 +1,51 @@
+{
+  "side_scroll": {
+    "move_speed": 310.0,
+    "ground_acceleration": 2200.0,
+    "ground_friction": 2400.0,
+    "air_acceleration": 1550.0,
+    "air_friction": 650.0,
+    "gravity": 1320.0,
+    "fall_gravity_multiplier": 1.32,
+    "max_fall_speed": 880.0,
+    "jump_velocity": -520.0,
+    "double_jump_velocity": -465.0,
+    "jump_cut_multiplier": 0.52,
+    "max_jumps": 2,
+    "coyote_time": 0.12,
+    "jump_buffer_time": 0.13,
+    "dodge_speed": 640.0,
+    "dodge_duration": 0.2,
+    "dodge_cooldown": 0.55,
+    "dodge_stamina_cost": 22.0,
+    "attack_duration": 0.3,
+    "attack_cooldown": 0.1,
+    "attack_lunge_speed": 135.0
+  },
+  "top_down": {
+    "move_speed": 265.0,
+    "acceleration": 2100.0,
+    "friction": 2300.0,
+    "dodge_speed": 580.0,
+    "dodge_duration": 0.18,
+    "dodge_cooldown": 0.5,
+    "dodge_stamina_cost": 20.0,
+    "attack_duration": 0.28,
+    "attack_cooldown": 0.12,
+    "attack_step_speed": 95.0
+  },
+  "camera": {
+    "side_scroll_zoom": 1.15,
+    "top_down_zoom": 1.1,
+    "side_scroll_lookahead_x": 85.0,
+    "side_scroll_offset_y": -44.0,
+    "top_down_lookahead": 36.0,
+    "position_smoothing_speed": 7.5,
+    "zoom_transition_speed": 6.0
+  },
+  "shared": {
+    "stamina_regen_per_sec": 28.0,
+    "stamina_regen_delay": 0.35,
+    "abyss_respawn_y": 380.0
+  }
+}
