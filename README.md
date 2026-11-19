@@ -113,24 +113,22 @@ python3 tests/test_gameplay_logic.py
 
 The Python suites validate static contracts and geometry; they do **not** replace native Godot execution or device playtesting. `.github/workflows/validate.yml` imports assets and runs all five native suites on Godot 4.3. See [Phase 5 verification report](docs/PHASE_5_TEST_REPORT.md) for actual results and remaining checks.
 
-## Android Preview
+## Download Android Preview — Phase 5
 
-**Phase 5:** corrected source passes all five native suites; the refreshed APK is being built. Do not use the obsolete early v0.5.0 preview 5 for save testing. See the [Phase 5 report](docs/PHASE_5_TEST_REPORT.md).
+[**Download SHADOWBOUND v0.5.0 APK**](https://github.com/asdasdqqww111-lab/SHADOWBOUND/releases/download/v0.5.0-android-preview-9/SHADOWBOUND-v0.5.0-preview.apk) · [Release and checksum](https://github.com/asdasdqqww111-lab/SHADOWBOUND/releases/tag/v0.5.0-android-preview-9)
 
-### Previous verified download — Phase 4
+Experimental debug-signed build, approximately **160 MB**, for **Android 9+ ARM64/ARMv7** with OpenGL ES 3 support. Includes equipment, smith upgrades, five class skills/talent trees and loot. Allow installation from your browser/file manager if Android asks. No Android permissions are requested; the game runs offline.
 
-[**Download SHADOWBOUND v0.4.0 APK**](https://github.com/asdasdqqww111-lab/SHADOWBOUND/releases/download/v0.4.0-android-preview-4/SHADOWBOUND-v0.4.0-preview.apk) · [Release and checksum](https://github.com/asdasdqqww111-lab/SHADOWBOUND/releases/tag/v0.4.0-android-preview-4)
+**Verified build:** preview **9**, source `473b72f28950cb443401bd2c6423c46d0acc106b`; [APK build and validation](https://github.com/asdasdqqww111-lab/SHADOWBOUND/actions/runs/44440116517). **880 automated checks pass**, including **320 native Godot checks**. See [Phase 5 report](docs/PHASE_5_TEST_REPORT.md) for checksum, coverage and remaining device tests. Do not use obsolete early preview 5, which predates the save fix.
 
-Experimental debug-signed build, approximately **160 MB**, for **Android 9+ ARM64/ARMv7** with OpenGL ES 3 support. Allow installation from your browser/file manager if Android asks. No Android permissions are requested; the game runs offline. Later previews may need a reinstall because the test signing key is disposable. This is not a production/store release, and physical-device visual testing is still needed.
-
-The APK was built and signature/manifest/resource-verified by [GitHub Actions](https://github.com/asdasdqqww111-lab/SHADOWBOUND/actions/runs/44426513909). See [Phase 4 verification report](docs/PHASE_4_TEST_REPORT.md) for exact verification details.
+Phase 4 checkpoints migrate when app data is retained. Disposable test signing keys may require uninstall/reinstall, which **deletes app data**; back up important checkpoints first. This is not a production/store release, and no phone/emulator visual or performance pass is claimed.
 
 ## Android APK Export Setup (Android 9.0 / API 28+)
 
 1. Install matching Godot 4 **Export Templates** and configure **Android SDK (API 34)** + **OpenJDK 17** + local debug keystore (never commit `.keystore` files).
 2. Copy `export_presets.cfg.example` to `export_presets.cfg` (`min_sdk="28"`, `target_sdk="34"`, `include_filter="*.json"`, zero network permissions for 100% offline play).
 3. Choose `Project -> Install Android Build Template`. Keep **Use Gradle Build** enabled: Godot 4.3 requires Gradle to override minimum/target SDK versions.
-4. Set your local debug keystore in the preset, then export via `Project -> Export -> Android APK -> Export Project` using debug export. The Phase 4 preview APK is available above; production signing, optimization and device certification remain later work.
+4. Set your local debug keystore in the preset, then export via `Project -> Export -> Android APK -> Export Project` using debug export. The Phase 5 preview APK is available above; production signing, optimization and device certification remain later work.
 
 ---
 
@@ -146,7 +144,7 @@ SHADOWBOUND/
 ├── scripts/                      # Autoloads, separate movement controllers, dual camera/zones, world, UI
 ├── assets/                       # Cairo Arabic/Latin font, 42 CC0 PNGs, deterministic art generator
 ├── resources/                    # CameraModeProfiles, PlayerProfile, player/enemy SpriteFrames (23 player anims), Fantasy Theme
-├── data/                         # Movement/camera/combat/progression JSON config + item catalog + English & Arabic RTL localization (217 keys)
+├── data/                         # Movement/camera/combat/progression/build JSON config + item catalog + English & Arabic RTL localization (217 keys)
 ├── addons/                       # Reserved for Godot 4 editor plugins
 ├── tests/                        # Godot Phase 1–5 headless suites + Python AST/resource/physics validators
 ├── licenses/                     # Full license texts (SIL OFL 1.1, CC0 1.0)

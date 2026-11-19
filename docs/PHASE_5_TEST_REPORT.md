@@ -67,11 +67,27 @@ Native validation: [GitHub Actions run 44438704707](https://github.com/asdasdqqw
 4. Freshly changed classes synchronize the skill component before casting, so its next physics tick cannot remove a newly created summon as stale class state.
 5. APK publication now requires all five native suites to pass, then successful export/signature/manifest/resource validation. Failed exports never publish a partial artifact.
 
-## Android Build Status
+## Verified Android Preview
 
-The initial v0.5.0 preview 5 was produced before native save validation completed and is **not the recommended Phase 5 build**. It contains the old version-decoding defect. Do not use it to evaluate save compatibility.
+[**Download SHADOWBOUND v0.5.0 APK**](https://github.com/asdasdqqww111-lab/SHADOWBOUND/releases/download/v0.5.0-android-preview-9/SHADOWBOUND-v0.5.0-preview.apk) · [Release](https://github.com/asdasdqqww111-lab/SHADOWBOUND/releases/tag/v0.5.0-android-preview-9) · [Checksum file](https://github.com/asdasdqqww111-lab/SHADOWBOUND/releases/download/v0.5.0-android-preview-9/SHADOWBOUND-v0.5.0-preview.apk.sha256)
 
-The corrected source passed all native suites in both validation and the Android job. Its first export attempt was blocked by external Gradle/Maven dependency resolution, not a game test failure. A retry-enabled build is being verified; the final APK URL and checksum will be recorded after publication.
+| Field | Verified value |
+| --- | --- |
+| Build | [44440116517](https://github.com/asdasdqqww111-lab/SHADOWBOUND/actions/runs/44440116517), **success**, preview **9** |
+| Source | `473b72f28950cb443401bd2c6423c46d0acc106b` |
+| APK size | **159,769,210 bytes** (approximately 160 MB) |
+| SHA-256 | `c4a7163b2062ed0f167664440add8c71160ed1988040cd7c3e30203cd2ebf09e` |
+| Package/version | `com.shadowbound.rpg` / `0.5.0-preview` / version code **5** |
+| SDK | minimum **28** (Android 9), target/compile **34** |
+| Architectures | **arm64-v8a + armeabi-v7a** |
+| Signature | **APK Signature Scheme v2 verified**, disposable local-only debug key |
+| Permissions | **Zero requested Android permissions**, offline |
+| Packaged resources | Project binary, combat/progression/build JSON configs, item catalog, Arabic localization and both ARM engines verified |
+| Native gate | All five suites passed **46 / 45 / 56 / 77 / 96** before export/publication |
+
+The initial v0.5.0 preview 5 was produced before native save validation completed and is **obsolete**; its release is explicitly marked with a save issue. Use preview **9**, not preview 5, to test Phase 5 and schema-1 migration.
+
+The first corrected export was blocked by external Gradle/Maven dependency resolution. The workflow now tries Google's public Maven Central mirror before the canonical endpoint, bounds export attempts and retries failures without publishing partial files. The final build above successfully exported and passed signature/manifest/ZIP/resource checks. Standalone validation on the same source also passed: [44440116422](https://github.com/asdasdqqww111-lab/SHADOWBOUND/actions/runs/44440116422). No Android phone/emulator visual or performance pass is implied.
 
 ## Remaining Device / Visual Checks
 
