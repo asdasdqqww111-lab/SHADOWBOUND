@@ -11,10 +11,13 @@ extends CanvasLayer
 @onready var item_name: Label = $Root/Panel/VBox/Body/Details/Name
 @onready var description: Label = $Root/Panel/VBox/Body/Details/Description
 @onready var vitals: Label = $Root/Panel/VBox/Body/Details/Vitals
-@onready var use_button: Button = $Root/Panel/VBox/Body/Details/Use
+@onready var use_button: Button = $Root/Panel/VBox/Body/Details/Actions/Use
+@onready var discard_button: Button = $Root/Panel/VBox/Body/Details/Actions/Discard
+@onready var discard_dialog: ConfirmationDialog = $Root/DiscardDialog
 @onready var feedback: Label = $Root/Panel/VBox/Feedback
 @onready var capacity_label: Label = $Root/Panel/VBox/Capacity
 
+var _discard_id: String = ""
 var _ids: Array[String] = []
 var _selected_id: String = ""
 var _feedback_key: String = "inventory.save_hint"
@@ -25,6 +28,8 @@ func _ready() -> void:
 	root.visible = false
 	close_button.pressed.connect(_close)
 	use_button.pressed.connect(_use_selected)
+	discard_button.pressed.connect(_request_discard)
+	discard_dialog.confirmed.connect(_confirm_discard)
 	items.item_selected.connect(_select_item)
 	GameState.inventory_visibility_changed.connect(_on_visibility_changed)
 	GameState.profile_updated.connect(_refresh_if_open)
@@ -43,6 +48,8 @@ func _unhandled_input(event: InputEvent) -> void:
 
 func _on_visibility_changed(open: bool) -> void:
 	root.visible = open
+	if not open:
+		discard_dialog.hide()
 	if open:
 		_feedback_key = "inventory.save_hint"
 		_refresh()
@@ -50,6 +57,7 @@ func _on_visibility_changed(open: bool) -> void:
 
 
 func _close() -> void:
+	discard_dialog.hide()
 	GameState.set_inventory_open(false)
 
 
@@ -118,6 +126,8 @@ func _refresh_details() -> void:
 		"mp": int(ceilf(profile.current_mp)), "max_mp": int(profile.max_mp),
 		"sp": int(ceilf(profile.current_stamina)), "max_sp": int(profile.max_stamina),
 	})
+	discard_button.text = LocalizationManager.translate_key("inventory.discard")
+	discard_button.disabled = _selected_id.is_empty()
 	use_button.text = LocalizationManager.translate_key("inventory.use")
 	use_button.disabled = spec.get("kind", "") != "consumable" or profile.is_defeated()
 
@@ -132,3 +142,25 @@ func _use_selected() -> void:
 func _on_save_failed() -> void:
 	_feedback_key = "inventory.save_failed"
 	_refresh_if_open()
+
+
+func _request_discard() -> void:
+	if _selected_id.is_empty():
+		return
+	_discard_id = _selected_id
+	discard_dialog.title = LocalizationManager.translate_key("inventory.discard")
+	discard_dialog.dialog_text = LocalizationManager.translate_key("inventory.discard_confirm")
+	discard_dialog.ok_button_text = LocalizationManager.translate_key("inventory.discard")
+	discard_dialog.cancel_button_text = LocalizationManager.translate_key("inventory.cancel")
+	LocalizationManager.apply_layout_direction(discard_dialog.get_label())
+	LocalizationManager.apply_layout_direction(discard_dialog.get_ok_button().get_parent() as Control)
+	discard_dialog.popup_centered()
+
+
+func _confirm_discard() -> void:
+	if GameState.progression.discard_item(GameState.get_player_profile(), _discard_id):
+		_feedback_key = "inventory.discarded"
+	if GameState.progression.last_save_error != OK:
+		_feedback_key = "inventory.save_failed"
+	_discard_id = ""
+	_refresh()

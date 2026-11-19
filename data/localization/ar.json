@@ -134,5 +134,9 @@
   "item.shadow_fragment": "شظية الظل",
   "item.shadow_fragment_desc": "مادة تُجمع من الأعداء المهزومين. مخصصة للصناعة لاحقًا؛ لا تُستخدم حاليًا.",
   "item.eclipse_sigil": "ختم الكسوف",
-  "item.eclipse_sigil_desc": "غنيمة من فايلور. احتفظ بها للصناعة مستقبلًا. ليست قطعة معدات."
+  "item.eclipse_sigil_desc": "غنيمة من فايلور. احتفظ بها للصناعة مستقبلًا. ليست قطعة معدات.",
+  "inventory.discard": "تخلص من واحد",
+  "inventory.discard_confirm": "هل تريد التخلص نهائيًا من وحدة واحدة من العنصر المحدد؟",
+  "inventory.discarded": "تم التخلص من عنصر واحد وحفظ التقدم محليًا.",
+  "inventory.cancel": "إلغاء"
 }

@@ -133,6 +133,10 @@ func _test_consumables_and_rewards() -> void:
 		_check(_manager.use_item(profile, item_id) == "inventory.used", "Consumable works: %s" % item_id)
 	profile.inventory.add("shadow_fragment")
 	_check(_manager.use_item(profile, "shadow_fragment") == "inventory.cannot_use", "Materials are not consumables")
+	_check(_manager.discard_item(profile, "shadow_fragment") and profile.inventory.count("shadow_fragment") == 0,
+		"Discard removes exactly one item")
+	_check(not _manager.discard_item(profile, "unknown"), "Discard rejects missing items")
+	profile.inventory.add("shadow_fragment")
 	var stats: EnemyStats = load("res://resources/combat/umbral_hound_stats.tres") as EnemyStats
 	var reward: Dictionary = _manager.award_enemy(profile, stats)
 	_check(int(reward.xp_awarded) == 24 and profile.wallet.balance("gold") == 12, "Enemy awards configured XP/gold")

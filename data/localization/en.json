@@ -134,5 +134,9 @@
   "item.shadow_fragment": "Shadow Fragment",
   "item.shadow_fragment_desc": "A material earned from defeated foes. Reserved for future crafting; not usable yet.",
   "item.eclipse_sigil": "Eclipse Sigil",
-  "item.eclipse_sigil_desc": "A trophy from Vaelor. Keep it for future crafting. Not an equippable item."
+  "item.eclipse_sigil_desc": "A trophy from Vaelor. Keep it for future crafting. Not an equippable item.",
+  "inventory.discard": "Discard 1",
+  "inventory.discard_confirm": "Discard one of the selected item permanently?",
+  "inventory.discarded": "One item discarded. Progress saved locally.",
+  "inventory.cancel": "Cancel"
 }

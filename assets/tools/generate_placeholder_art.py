@@ -1095,8 +1095,9 @@ def generate_environment() -> None:
 
 def main() -> None:
     from generate_enemy_art import generate_all_enemy_art
+    from generate_inventory_icons import main as generate_inventory_icons
 
-    for sub in ("player", "environment", "ui", "enemies"):
+    for sub in ("player", "environment", "ui", "enemies", "items"):
         (SPRITES_DIR / sub).mkdir(parents=True, exist_ok=True)
     generate_sidescroll_sheet()
     generate_topdown_sheet()
@@ -1104,6 +1105,7 @@ def main() -> None:
     generate_touch_ui()
     generate_environment()
     generate_all_enemy_art()
+    generate_inventory_icons()
     print("Generated all SHADOWBOUND original art assets (player, UI, environment, enemies, boss).")
 
 

@@ -108,6 +108,13 @@ func use_item(profile: PlayerProfile, item_id: String) -> String:
 	return "inventory.used"
 
 
+func discard_item(profile: PlayerProfile, item_id: String) -> bool:
+	if not profile.inventory.remove(item_id):
+		return false
+	_commit(profile)
+	return true
+
+
 func _commit(profile: PlayerProfile) -> void:
 	last_save_error = save_progress(profile) if autosave_enabled else OK
 	if last_save_error != OK:

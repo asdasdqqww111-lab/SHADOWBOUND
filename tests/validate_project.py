@@ -197,7 +197,7 @@ def validate_gdscripts(autoload_names: set[str]) -> None:
         check(proc.returncode == 0, f"gdlint clean across all {len(gd_files)} scripts" + (f"\n{out_msg}" if proc.returncode != 0 else ""))
 
     # Verify zero autoload vs class_name collisions & zero unsafe JSON := inference
-    all_signals: set[str] = {"pressed", "area_entered", "body_entered", "body_exited", "item_selected"}
+    all_signals: set[str] = {"pressed", "area_entered", "body_entered", "body_exited", "item_selected", "confirmed"}
     all_funcs: set[str] = set()
     script_funcs: dict[Path, set[str]] = {}
     for gd in gd_files:

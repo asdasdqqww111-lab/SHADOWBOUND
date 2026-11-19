@@ -18,10 +18,18 @@ jobs:
     timeout-minutes: 25
     env:
       GODOT_VERSION: 4.3.stable
-      APK_NAME: SHADOWBOUND-v0.3.0-preview.apk
       GH_TOKEN: ${{ github.token }}
     steps:
       - uses: actions/checkout@v7.0.1
+      - name: Read project version
+        run: |
+          python3 - <<'PY'
+          import os, re
+          from pathlib import Path
+          version = re.search(r'config/version="([0-9]+\.[0-9]+\.[0-9]+)"', Path('project.godot').read_text())[1]
+          with open(os.environ['GITHUB_ENV'], 'a') as stream:
+              stream.write(f'APP_VERSION={version}\nAPK_NAME=SHADOWBOUND-v{version}-preview.apk\n')
+          PY
       - uses: actions/setup-java@v5
         with:
           distribution: temurin
@@ -54,15 +62,16 @@ jobs:
             -keyalg RSA -keysize 2048 -validity 3650
           mkdir -p "$HOME/.config/godot" builds/android
           python3 - <<'PY'
-          import os
+          import os, re
           from pathlib import Path
           settings = '[gd_resource type="EditorSettings" format=3]\n\n[resource]\n'
           settings += 'export/android/android_sdk_path = "' + os.environ['ANDROID_HOME'] + '"\n'
           settings += 'export/android/java_sdk_path = "' + os.environ['JAVA_HOME'] + '"\n'
           Path.home().joinpath('.config/godot/editor_settings-4.3.tres').write_text(settings)
           preset = Path('export_presets.cfg.example').read_text()
-          preset = preset.replace('v0.1.0.apk', 'v0.3.0-preview.apk').replace('version/code=1', 'version/code=3')
-          preset = preset.replace('version/name="0.1.0"', 'version/name="0.3.0-preview"')
+          version = os.environ['APP_VERSION']
+          preset = re.sub(r'export_path="[^"]+"', 'export_path="builds/android/' + os.environ['APK_NAME'] + '"', preset)
+          preset = re.sub(r'version/name="[^"]+"', 'version/name="' + version + '-preview"', preset)
           preset += '\nkeystore/debug="' + os.environ['RUNNER_TEMP'] + '/preview.keystore"\n'
           preset += 'keystore/debug_user="androiddebugkey"\nkeystore/debug_password="android"\n'
           Path('export_presets.cfg').write_text(preset)
@@ -90,11 +99,11 @@ jobs:
           GH_REPO: ${{ github.repository }}
         run: |
           cat > "$RUNNER_TEMP/release-notes.md" <<EOF
-          ## SHADOWBOUND v0.3.0 — Phase 3 Android test build
+          ## SHADOWBOUND v$APP_VERSION — Android test build
 
           Download **$APK_NAME** below. Android **9.0+**, ARM64 or ARMv7. Offline single-player.
           Experimental debug-signed build for visual testing, not a production/store release.
-          Includes both gameplay modes, three enemy archetypes and the three-phase Eclipse Warden boss.
+          Includes both gameplay modes, three enemy archetypes, the Eclipse Warden boss, XP/levels/ranks, three currencies and inventory.
 
           Allow installation from your browser/file manager when Android asks. No network permissions are requested.
           This preview uses a disposable test signing key; a later preview may require uninstalling this one first.
@@ -107,8 +116,8 @@ jobs:
           Build: https://github.com/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID
           SHA-256 checksum is supplied next to the APK.
           EOF
-          gh release create "v0.3.0-android-preview-$GITHUB_RUN_NUMBER" \
-            --target "$GITHUB_SHA" --prerelease --title 'SHADOWBOUND v0.3.0 — Android Preview' \
+          gh release create "v$APP_VERSION-android-preview-$GITHUB_RUN_NUMBER" \
+            --target "$GITHUB_SHA" --prerelease --title "SHADOWBOUND v$APP_VERSION — Android Preview" \
             --notes-file "$RUNNER_TEMP/release-notes.md" \
             "builds/android/$APK_NAME" "builds/android/$APK_NAME.sha256"
       - name: Publish build diagnostics

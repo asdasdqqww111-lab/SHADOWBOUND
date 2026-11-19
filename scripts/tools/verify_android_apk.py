@@ -13,7 +13,9 @@ def main() -> None:
     signature = (logs / "signature.log").read_text()
     assert "Verifies" in signature, "APK signature verification did not succeed"
     assert "name='com.shadowbound.rpg'" in badging, "Unexpected package ID"
-    assert "versionName='0.3.0-preview'" in badging, "Unexpected version"
+    project = Path(__file__).resolve().parents[2] / "project.godot"
+    version = re.search(r'config/version="([0-9]+\.[0-9]+\.[0-9]+)"', project.read_text())[1]
+    assert f"versionName='{version}-preview'" in badging, "Unexpected version"
     assert "sdkVersion:'28'" in badging, "Minimum Android version must be API 28"
     assert "targetSdkVersion:'34'" in badging, "Target SDK must be API 34"
     native = re.search(r"^native-code: (.+)$", badging, re.M)
@@ -26,7 +28,8 @@ def main() -> None:
         assert "AndroidManifest.xml" in names, "Missing manifest"
         assert any(n.startswith("lib/arm64-v8a/") and n.endswith(".so") for n in names), "Missing ARM64 engine"
         assert any(n.startswith("lib/armeabi-v7a/") and n.endswith(".so") for n in names), "Missing ARMv7 engine"
-        for suffix in ["project.binary", "data/config/combat_config.json", "data/localization/ar.json"]:
+        for suffix in ["project.binary", "data/config/combat_config.json", "data/localization/ar.json",
+                       "data/config/progression_config.json", "data/items/item_catalog.json"]:
             assert any(n.endswith(suffix) for n in names), f"Missing game resource: {suffix}"
         assert not any(n.endswith((".keystore", ".jks", ".py")) for n in names), "Build tool or signing key leaked"
     print(f"PASS: {apk.name}: signature, manifest, SDK, ARM libraries, offline permissions and resources")
