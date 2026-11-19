@@ -206,8 +206,11 @@ func _gear_stats_text(spec: Dictionary) -> String:
 	var parts: Array[String] = []
 	var stats: Dictionary = spec.get("stats", {})
 	var profile: PlayerProfile = GameState.get_player_profile()
-	var multiplier: float = 1 + int(profile.build.upgrades.get(_selected_id, 0)) * 0.2
+	var multiplier: float = 1 + int(profile.build.upgrades.get(_selected_id, 0)) * float(
+		GameState.progression.armory.definitions.get("upgrade_scale", 0.2)
+	)
 	for key: String in stats:
-		parts.append("%s +%s" % [LocalizationManager.translate_key("stat." + key),
-			str(snappedf(float(stats[key]) * multiplier, 0.01))])
+		var value: float = float(stats[key]) * multiplier
+		var text: String = "%s%%" % snappedf(value * 100, 0.1) if key == "crit" else str(snappedf(value, 0.1))
+		parts.append("%s +%s" % [LocalizationManager.translate_key("stat." + key), text])
 	return ", ".join(parts)

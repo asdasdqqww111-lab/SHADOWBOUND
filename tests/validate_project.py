@@ -598,6 +598,56 @@ def validate_phase4_progression() -> None:
     check((ROOT / "tests/gdscript/test_phase4_runner.tscn").is_file(), "Phase 4 native runner exists")
 
 
+def validate_phase5_builds() -> None:
+    print("\n--- 9. Phase 5 Equipment, Classes & Skills ---")
+    cfg = json.loads((ROOT / "data/config/build_config.json").read_text())
+    catalog = json.loads((ROOT / "data/items/item_catalog.json").read_text())
+    en = json.loads((ROOT / "data/localization/en.json").read_text())
+    classes = cfg["classes"]
+    check(set(classes) == {"warrior", "mage", "assassin", "knight", "summoner"}, "Five playable class definitions")
+    check(len(cfg["rarities"]) == 5, "Five equipment rarity tiers")
+    check(cfg["upgrade_cap"] == 5 and cfg["upgrade_scale"] == 0.2, "Smith enhancement cap and scaling")
+    check(cfg["upgrade_gold_base"] > 0 and cfg["upgrade_material_base"] > 0, "Smith costs are positive")
+    node_ids = set()
+    for class_id, spec in classes.items():
+        check(all(spec[k] in en for k in ["name_key", "description_key", "skill_key"]),
+              f"{class_id}: class and skill descriptions localized")
+        check(spec["mp_cost"] > 0 and spec["cooldown"] > 0 and spec["damage_multiplier"] > 0,
+              f"{class_id}: skill has positive MP/cooldown/power")
+        check(len(spec["nodes"]) == 3, f"{class_id}: three-node skill tree")
+        previous = ""
+        for node in spec["nodes"]:
+            check(node["id"].startswith(class_id + ".") and node["id"] not in node_ids
+                  and node["requires"] == previous and node["name_key"] in en
+                  and 1 <= node["level"] <= 60 and 0 < node["cost"] <= node["level"],
+                  f"{node['id']}: unique localized talent with valid prerequisite/level/cost")
+            node_ids.add(node["id"])
+            previous = node["id"]
+    gear = {k: v for k, v in catalog.items() if v["kind"] == "equipment"}
+    check(len(gear) == 9, "Nine equipment pieces")
+    check({v["rarity"] for v in gear.values()} == set(cfg["rarities"]), "Catalog covers all five rarities")
+    for item_id, spec in gear.items():
+        check(spec["unique"] and spec["stack_limit"] == 1
+              and spec["slot"] in {"weapon", "armor", "charm"}
+              and spec["rarity"] in cfg["rarities"] and spec["color"] == cfg["rarities"][spec["rarity"]]
+              and set(spec["stats"]) <= {"attack", "defense", "hp", "mp", "stamina", "crit"}
+              and all(value > 0 for value in spec["stats"].values()),
+              f"{item_id}: unique, slotted, rarity-colored positive-stat equipment")
+    loot = cfg["loot"]
+    check(0 < loot["chance"] <= 1 and loot["duplicate_gold"] > 0, "Regular loot chance and duplicate compensation")
+    for pool in ["regular", "boss"]:
+        entries = loot[pool]
+        check(len(entries) > 0 and all(e["id"] in gear and e["weight"] > 0 for e in entries)
+              and len({e["id"] for e in entries}) == len(entries), f"{pool}: weighted owned-gear loot references")
+    check({e["id"] for pool in ["regular", "boss"] for e in loot[pool]} == set(gear),
+          "All nine equipment pieces are obtainable")
+    player = (ROOT / "scenes/player/player.tscn").read_text()
+    check('res://scripts/combat/class_skill_controller.gd' in player, "Player mounts shared class skill component")
+    check((ROOT / "tests/gdscript/test_phase5_runner.tscn").is_file(), "Phase 5 native runner exists")
+    check('for phase in 1 2 3 4 5;' in (ROOT / '.github/workflows/validate.yml').read_text(),
+          "CI executes all five native regression suites")
+
+
 def main() -> int:
     print("=======================================================")
     print("  SHADOWBOUND — Automated Project Validation Runner")
@@ -610,6 +660,7 @@ def main() -> int:
     validate_assets_and_licenses()
     validate_phase3_combat()
     validate_phase4_progression()
+    validate_phase5_builds()
 
     print("\n=======================================================")
     print(f"  SUMMARY: {passed} passed, {failed} failed")

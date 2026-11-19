@@ -194,6 +194,11 @@ func _test_saves() -> void:
 	_check(_manager.load_progress(restored) and restored.build.to_dictionary() == profile.build.to_dictionary()
 		and restored.class_id == "assassin" and restored.base_attack == profile.base_attack,
 		"Schema 2 round-trip rebuilds derived stats exactly")
+	_manager.autosave_enabled = true
+	armory.equip(profile, "night_dagger")
+	_check(_manager.load_progress(restored) and restored.build.equipped.weapon == "",
+		"Armory mutation automatically checkpoints through shared progression service")
+	_manager.autosave_enabled = false
 	_write({"version": 1, "total_xp": 100, "wallet": {"gold": 42}, "inventory": {"mana_potion": 2}})
 	_check(_manager.load_progress(restored) and restored.level == 2 and restored.class_id == "warrior"
 		and restored.build.talents.is_empty() and restored.build.equipped.weapon == ""
@@ -263,6 +268,9 @@ func _test_live_skills_and_ui() -> void:
 	var bolts: Array[Node] = get_tree().get_nodes_in_group("projectiles")
 	_check(bolts.size() == 3, "Mage spawns three friendly bolts")
 	before_hp = enemy.current_hp
+	(bolts[1] as ClassSkillBolt).gameplay_mode = GameState.GameplayMode.SIDE_SCROLL
+	(bolts[1] as ClassSkillBolt)._on_area_entered(enemy.hurtbox)
+	_check(enemy.current_hp == before_hp, "Friendly bolts cannot damage inactive-mode enemies")
 	(bolts[0] as ClassSkillBolt)._on_area_entered(enemy.hurtbox)
 	_check(enemy.current_hp < before_hp, "Friendly bolt hits actual enemy hurtbox")
 	var after_hp: float = enemy.current_hp
@@ -304,7 +312,7 @@ func _test_live_skills_and_ui() -> void:
 	_check((build_panel.get("class_selector") as OptionButton).item_count == 5,
 		"Character tab exposes all five classes")
 	LocalizationManager.set_locale("ar", true)
-	_check(tabs.layout_direction == Control.LAYOUT_DIRECTION_RTL, "Character tabs inherit Arabic RTL")
+	_check(tabs.is_layout_rtl(), "Character tabs inherit Arabic RTL")
 	_check(tabs.get_tab_title(1) == LocalizationManager.translate_key("build.tab"), "Character tab title localizes")
 	player.profile.inventory.add("rust_blade")
 	panel.set("_selected_id", "rust_blade")
@@ -317,6 +325,15 @@ func _test_live_skills_and_ui() -> void:
 	panel.call("_upgrade_selected")
 	_check(int(player.profile.build.upgrades.get("rust_blade", 0)) == 1, "Real forge button applies enhancement")
 	GameState.set_inventory_open(false)
+	skill.cooldown_remaining = 0
+	player.active_controller.trigger_hurt_stun(0.5)
+	_check(skill.try_cast() == "skill.busy", "Hurt stun blocks class casting")
+	player.active_controller.activate(player)
+	player.profile.current_hp = 0
+	_check(skill.try_cast() == "skill.busy", "Defeated players cannot cast")
+	player.profile.restore_all()
+	spirit._physics_process(spirit.duration + 0.1)
+	_check(spirit.is_queued_for_deletion(), "Companion expires after its configured lifetime")
 	armory.select_class(player.profile, "mage")
 	skill._physics_process(0)
 	_check(spirit.is_queued_for_deletion(), "Changing class removes summoned companion")
