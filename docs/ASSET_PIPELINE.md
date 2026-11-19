@@ -115,3 +115,10 @@ The three enemy sheets are **512×512**, four rows of four **128×128** cells: `
 Resources live in `resources/sprites/{umbral_hound,rift_wisp,obsidian_sentinel,eclipse_warden}_frames.tres`. Preserve their animation names and atlas rectangles when replacing PNGs. `shadow_orb.png` is **64×64** with a central pivot. Boss phase tints are applied by code, so preserve neutral original hues.
 
 Run `python3 assets/tools/generate_placeholder_art.py` to regenerate all 28 PNGs, or `python3 assets/tools/generate_enemy_art.py` for only the five new combat PNGs. Regeneration overwrites artist replacements: run it only on a clean worktree or back up custom art. Run both Python suites afterward and reimport in Godot; dimensions and atlas bounds must pass before export.
+
+
+## Phase 4 — Inventory Asset Contract
+
+The five IDs in `data/items/item_catalog.json` each map to `assets/sprites/items/<item_id>.png`, **64×64 RGBA**, transparent outer corners, violet/obsidian card, gold outline. Potions use red/blue/jade liquids; materials use a violet crystal and gold eclipse medallion. Inventory renders icons at 56px and uses the catalog's color/name/description/stack/effect metadata, not text painted into the images.
+
+Regenerate only icons with `python3 assets/tools/generate_inventory_icons.py`, or all **33 PNGs** with `python3 assets/tools/generate_placeholder_art.py`. Replacing art must preserve IDs/filenames and icon dimensions. Both routes are deterministic and CC0. Text remains localized by Godot/Cairo; do not bake translated labels into icons.

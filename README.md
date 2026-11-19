@@ -2,11 +2,11 @@
 
 **SHADOWBOUND** (*عهد الظلال*) is an offline single-player 2D Anime Fantasy Stickman RPG built with **Godot 4.x stable** and **GDScript**, designed for **Android (9.0 / API 28+)** and desktop testing with full **English (LTR)** and **Arabic (RTL)** support.
 
-> **Current Milestone:** **Phase 3 — Full Combat, Three Enemy Archetypes & Multi-Phase Boss (`v0.3.0`)**
+> **Current Milestone:** **Phase 4 — XP, Levels, Ranks, Currencies & Inventory (`v0.4.0`)**
 
 ---
 
-## Delivered Features (Phases 1–3)
+## Delivered Features (Phases 1–4)
 
 1. **Dedicated Dual-Mode Camera System (`resources/camera/`, `scripts/camera/`)**
    - Data-driven **`CameraModeProfile`** resources for both modes (`side_scroll_camera_profile.tres` and `top_down_camera_profile.tres`).
@@ -27,7 +27,7 @@
    - 112 frames across `idle`, `run`, `jump`, `fall`, `dodge`, `attack`, `block`, `wall_slide`, `td_idle_down/up/side`, `td_walk_down/up/side`, `td_dodge`, `td_attack`, `td_block`, `attack_2/3`, `hurt`, `td_attack_2/3`, and `td_hurt`.
    - Upgraded `scenes/levels/twilight_sanctum.tscn` with two pass-through **One-Way Skybridges**, a **Wall-Jump Ruin Tower** leading to the upper overlook, two bilingual **Lore Runestones** in the courtyard wings, and three **Camera Vista Zones**.
 5. **Android 9+ Multi-Touch & Bilingual English / Arabic (RTL) UI**
-   - Non-overlapping 5-button right-thumb fan (`ATK`, `JUMP/ACT`, hold-capable `GUARD`, `DODGE`, `MODE`) + left-thumb analog `VirtualJoystick`, live HUD movement-state/compass/`[VISTA]` readout, Camera View settings in Main & Pause menus, and 103 paired EN/AR RTL localization keys bundled with the SIL OFL **Cairo** font.
+   - Non-overlapping 5-button right-thumb fan (`ATK`, `JUMP/ACT`, hold-capable `GUARD`, `DODGE`, `MODE`) + left-thumb analog `VirtualJoystick`, live HUD movement-state/compass/`[VISTA]` readout, Camera View settings in Main & Pause menus, and 140 paired EN/AR RTL localization keys bundled with the SIL OFL **Cairo** font.
 
 6. **Shared Full Combat System**
    - Buffered **3-hit sword combo**: Shadow Cut → Crescent Reverse → Eclipse Finisher (shield-breaking); 5/9 stamina follow-ups, critical hits, knockback, hurt stun and one hit per target per swing.
@@ -39,7 +39,15 @@
    - **Obsidian Sentinel**: slow armored guardian; directional shield is vulnerable to flanking, parry and finisher.
    - **Vaelor, Warden of the Eclipse**: North Seal boss, **320 HP**, three phases (100% / 65% / 30%), greatsword cleave, dash-strike, three-orb fan and eight-orb nova. Phase changes briefly grant invulnerability.
    - Seven regular foes across cliffs and courtyard, safe courtyard spawn south of boss aggro, auto-revive after defeat, and **Pause → Revive & Reset Enemies**. Reset restores all enemies and boss; mode changes clear projectiles but preserve combat progress.
-   - Combat tuning lives in `data/config/combat_config.json`; per-enemy tuning in `resources/combat/*_stats.tres`. XP/gold are future progression metadata, not awarded in this milestone.
+   - Combat tuning lives in `data/config/combat_config.json`; per-enemy tuning in `resources/combat/*_stats.tres`. Phase 4 now awards these XP/gold values and deterministic materials exactly once per enemy life.
+
+8. **RPG Progression & Inventory (Phase 4)**
+   - **Levels 1–60**, overflow/multi-level XP awards, deterministic HP/MP/Stamina/Attack/Defense growth and ranks **F → E → D → C → B → A → S → SS → SSS**. Level-up restores vitals for living players.
+   - **Gold, Diamonds and Magic Crystals**, bounded balances and atomic spending API. Regular foes award XP/gold/materials; Vaelor also awards **3 Diamonds, 5 Magic Crystals and an Eclipse Sigil**.
+   - **24-slot stackable inventory**, three usable restorative consumables, two materials, five new original icons, selected-item details, and confirmed single-item discard. Full vitals never waste a potion; full bags reject materials without losing XP/currency rewards.
+   - Open **Satchel** from HUD/Pause or press **I**. Combat pauses; closing restores the previous pause state. Arabic RTL, item labels/descriptions, wallet and XP displays update live.
+   - Versioned **local progression checkpoints** (`user://progression.json`) preserve XP, currencies and item counts across restarts. Atomic temporary-file replacement, one previous backup, file-size/type/range validation and future-schema overwrite protection. This is **not** a full world/quest save; full save remains Phase 7.
+   - Starter supplies: 3 Health Potions, 2 Mana Potions, 2 Stamina Draughts. Used items stay used after retries/relaunch; retrying a trial permits earning rewards from revived foes again. No paid currency purchases, shops, equipment, skill trees or randomized loot yet.
 
 ---
 
@@ -56,6 +64,7 @@
 | **Shadow Dodge (w/ i-frames)** | `DODGE` | `Shift` or `K` | B / Circle |
 | **Interact (Rift Gate / Lore Runestone)** | `ACT` *(when in range)* | `E` or `F` | Y / Triangle |
 | **Switch Camera & Gameplay Mode** | `MODE` or HUD Button | `Tab` or `M` | R1 / RB |
+| **Satchel / Inventory** | HUD `Satchel` / Pause menu | `I` (Esc closes) | HUD / Pause menu |
 | **Pause / Resume** | HUD `Pause` / Android Back | `Esc` or `P` | Start |
 
 ---
@@ -73,12 +82,13 @@
 
 ## Running Tests & Validation
 
-### 1. Godot Headless Runtime Test Suites (Phases 1–3)
+### 1. Godot Headless Runtime Test Suites (Phases 1–4)
 ```bash
 godot --headless --editor --path . --import --quit
 godot --headless --path . res://tests/gdscript/test_phase1_runner.tscn
 godot --headless --path . res://tests/gdscript/test_phase2_runner.tscn
 godot --headless --path . res://tests/gdscript/test_phase3_runner.tscn
+godot --headless --path . res://tests/gdscript/test_phase4_runner.tscn
 ```
 
 ### 2. Static AST, Linter, Scene/Resource, Signal & Geometry Suites
@@ -90,22 +100,22 @@ python3 tests/test_gameplay_logic.py
 
 ---
 
-The Python suites validate static contracts and geometry; they do **not** replace native Godot execution or device playtesting. `.github/workflows/validate.yml` imports assets and runs all three native suites on Godot 4.3. See [Phase 3 verification report](docs/PHASE_3_TEST_REPORT.md) for actual results and remaining checks.
+The Python suites validate static contracts and geometry; they do **not** replace native Godot execution or device playtesting. `.github/workflows/validate.yml` imports assets and runs all four native suites on Godot 4.3. See [Phase 4 verification report](docs/PHASE_4_TEST_REPORT.md) for actual results and remaining checks.
 
-## Download Android Preview — Phase 3
+## Download Android Preview — Phase 4
 
-[**Download SHADOWBOUND v0.3.0 APK**](https://github.com/asdasdqqww111-lab/SHADOWBOUND/releases/download/v0.3.0-android-preview-2/SHADOWBOUND-v0.3.0-preview.apk) · [Release and checksum](https://github.com/asdasdqqww111-lab/SHADOWBOUND/releases/tag/v0.3.0-android-preview-2)
+[**Download SHADOWBOUND v0.4.0 APK**](https://github.com/asdasdqqww111-lab/SHADOWBOUND/releases/download/v0.4.0-android-preview-3/SHADOWBOUND-v0.4.0-preview.apk) · [Release and checksum](https://github.com/asdasdqqww111-lab/SHADOWBOUND/releases/tag/v0.4.0-android-preview-3)
 
 Experimental debug-signed build, approximately **160 MB**, for **Android 9+ ARM64/ARMv7** with OpenGL ES 3 support. Allow installation from your browser/file manager if Android asks. No Android permissions are requested; the game runs offline. Later previews may need a reinstall because the test signing key is disposable. This is not a production/store release, and physical-device visual testing is still needed.
 
-The APK was built and signature/manifest/resource-verified by [GitHub Actions](https://github.com/asdasdqqww111-lab/SHADOWBOUND/actions/runs/44422671140). See [Android preview report](docs/ANDROID_PREVIEW_TEST_REPORT.md) for exact verification details.
+The APK was built and signature/manifest/resource-verified by [GitHub Actions](https://github.com/asdasdqqww111-lab/SHADOWBOUND/actions/runs/44425818776). See [Phase 4 verification report](docs/PHASE_4_TEST_REPORT.md) for exact verification details.
 
 ## Android APK Export Setup (Android 9.0 / API 28+)
 
 1. Install matching Godot 4 **Export Templates** and configure **Android SDK (API 34)** + **OpenJDK 17** + local debug keystore (never commit `.keystore` files).
 2. Copy `export_presets.cfg.example` to `export_presets.cfg` (`min_sdk="28"`, `target_sdk="34"`, `include_filter="*.json"`, zero network permissions for 100% offline play).
 3. Choose `Project -> Install Android Build Template`. Keep **Use Gradle Build** enabled: Godot 4.3 requires Gradle to override minimum/target SDK versions.
-4. Set your local debug keystore in the preset, then export via `Project -> Export -> Android APK -> Export Project` using debug export. The Phase 3 preview APK is available above; production signing, optimization and device certification remain later work.
+4. Set your local debug keystore in the preset, then export via `Project -> Export -> Android APK -> Export Project` using debug export. The Phase 4 preview APK is available above; production signing, optimization and device certification remain later work.
 
 ---
 
@@ -113,17 +123,17 @@ The APK was built and signature/manifest/resource-verified by [GitHub Actions](h
 
 ```text
 SHADOWBOUND/
-├── project.godot                 # Godot 4.x project config (v0.3.0, 12 actions, 8 physics layers)
+├── project.godot                 # Godot 4.x project config (v0.4.0, 13 actions, 8 physics layers)
 ├── export_presets.cfg.example    # Android 9+ (API 28) offline APK preset template
 ├── icon.svg                      # Original SHADOWBOUND application icon
 ├── ASSET_CREDITS.md              # Asset evaluation & complete licensing provenance ledger
 ├── scenes/                       # Main menu, player, HUD, touch UI, props, Twilight Sanctum level
 ├── scripts/                      # Autoloads, separate movement controllers, dual camera/zones, world, UI
-├── assets/                       # Cairo Arabic/Latin font, 28 CC0 PNGs, deterministic art generator
+├── assets/                       # Cairo Arabic/Latin font, 33 CC0 PNGs, deterministic art generator
 ├── resources/                    # CameraModeProfiles, PlayerProfile, player/enemy SpriteFrames (23 player anims), Fantasy Theme
-├── data/                         # Movement/camera/combat JSON config + English & Arabic RTL localization (103 keys)
+├── data/                         # Movement/camera/combat/progression JSON config + item catalog + English & Arabic RTL localization (140 keys)
 ├── addons/                       # Reserved for Godot 4 editor plugins
-├── tests/                        # Godot Phase 1–3 headless suites + Python AST/resource/physics validators
+├── tests/                        # Godot Phase 1–4 headless suites + Python AST/resource/physics validators
 ├── licenses/                     # Full license texts (SIL OFL 1.1, CC0 1.0)
-└── docs/                         # Architecture, asset replacement pipeline, Phase 1–3 test reports
+└── docs/                         # Architecture, asset replacement pipeline, Phase 1–4 test reports
 ```
