@@ -58,6 +58,21 @@ jobs:
           unzip -q "$RUNNER_TEMP/android_source.zip" -d android/build
           touch android/build/.gdignore
           printf '%s\n' "$GODOT_VERSION" > android/.build_version
+          # Use Google's public Maven Central mirror before the canonical endpoint.
+          # This avoids a single repository outage blocking Android transitive dependencies.
+          python3 - <<'PY'
+          from pathlib import Path
+          count = 0
+          for path in Path('android/build').rglob('*.gradle'):
+              text = path.read_text()
+              if 'mavenCentral()' in text:
+                  text = text.replace('mavenCentral()',
+                      "maven { url 'https://maven-central.storage-download.googleapis.com/maven2/' }; mavenCentral()")
+                  path.write_text(text)
+                  count += 1
+          assert count, 'Expected Maven Central repository declarations in Godot Android template'
+          print(f'Configured Central mirror in {count} Gradle scripts')
+          PY
           chmod +x android/build/gradlew
       - name: Configure Android SDK and local-only debug signing
         run: |
@@ -96,9 +111,9 @@ jobs:
           # Maven/Gradle repository availability is external to the project.
           # Retry a failed export, but never publish an unsuccessful/partial APK.
           exported=false
-          for attempt in 1 2 3; do
+          for attempt in 1 2; do
             rm -f "builds/android/$APK_NAME"
-            if godot --headless --path . --export-debug 'Android APK' "builds/android/$APK_NAME" \
+            if timeout --kill-after=15s 300 godot --headless --path . --export-debug 'Android APK' "builds/android/$APK_NAME" \
               2>&1 | tee "$RUNNER_TEMP/export.log"; then
               exported=true
               break
