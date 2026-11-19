@@ -228,9 +228,12 @@ func _test_live_level() -> void:
 	player.profile.inventory.add("health_potion", 2)
 	player.profile.current_hp = 60
 	GameState.set_paused(false)
+	GameState.progression.last_save_error = ERR_CANT_CREATE
 	GameState.set_inventory_open(true)
 	var panel: Node = level.get_node("InventoryPanel")
 	_check(get_tree().paused and panel.get("root").visible, "Satchel pauses combat and opens modal")
+	_check(panel.get("_feedback_key") == "inventory.save_failed", "Prior autosave failure remains visible on opening")
+	GameState.progression.last_save_error = OK
 	panel.set("_selected_id", "health_potion")
 	panel.call("_use_selected")
 	_check(player.profile.current_hp == 110 and player.profile.inventory.count("health_potion") == 1,

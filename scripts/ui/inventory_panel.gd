@@ -51,7 +51,9 @@ func _on_visibility_changed(open: bool) -> void:
 	if not open:
 		discard_dialog.hide()
 	if open:
-		_feedback_key = "inventory.save_hint"
+		_feedback_key = (
+			"inventory.save_failed" if GameState.progression.last_save_error != OK else "inventory.save_hint"
+		)
 		_refresh()
 		close_button.grab_focus()
 
