@@ -111,7 +111,8 @@ func _test_upgrades() -> void:
 	_check(armory.upgrade(profile, "rust_blade") == "build.upgraded", "+4 consumes crystal")
 	_check(armory.upgrade(profile, "rust_blade") == "build.upgraded", "+5 consumes crystal")
 	_check(profile.wallet.balance("gold") == 625 and profile.inventory.count("shadow_fragment") == 69
-		and profile.wallet.balance("magic_crystals") == 0, "Full smith chain charges exactly 375 gold/30 fragments/2 crystals")
+		and profile.wallet.balance("magic_crystals") == 0,
+		"Full smith chain charges exactly 375 gold/30 fragments/2 crystals")
 	before = profile.wallet.to_dictionary()
 	_check(armory.upgrade(profile, "rust_blade") == "build.max_upgrade"
 		and before == profile.wallet.to_dictionary(), "Enhancement cap rejects without charging")
@@ -210,7 +211,8 @@ func _test_saves() -> void:
 		and restored.build.equipped.armor == "", "Save recovery rejects unknown class, unowned gear and wrong slots")
 	_check(restored.inventory.count("rust_blade") == 1 and int(restored.build.upgrades.get("rust_blade")) == 5
 		and not restored.build.upgrades.has("eclipse_blade"), "Recovery clamps owned enhancements and removes unowned ones")
-	_check(restored.build.talents == ["warrior.focus"], "Recovery enforces talent level, prerequisites and global point budget")
+	_check(restored.build.talents == ["warrior.focus"],
+		"Recovery enforces talent level, prerequisites and global point budget")
 	_write({"version": 2, "total_xp": 0, "wallet": {}, "inventory": {}, "class_id": [], "build": []})
 	_check(_manager.load_progress(restored) and restored.class_id == "warrior"
 		and restored.build.talents.is_empty(), "Malformed optional build data recovers safely")
