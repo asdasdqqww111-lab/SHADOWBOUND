@@ -4,7 +4,7 @@
 
 اكتملت أنظمة الخبرة والمستويات حتى 60، والرتب التسع من F إلى SSS، والذهب والألماس والبلورات السحرية، وحقيبة من 24 خانة. تمنح هزيمة الأعداء مكافآت فعلية، ويمكن استخدام الجرعات والتخلص من عنصر بعد التأكيد. الحقيبة تدعم العربية وتوقف القتال مؤقتًا. يُحفظ تقدم الخبرة والعملات والعناصر محليًا مع نسخة احتياطية؛ لا يشمل ذلك حفظ العالم الكامل المخطط للمرحلة السابعة.
 
-نجح **677 فحصًا**: 454 فحصًا ساكنًا/بايثون و223 اختبارًا فعليًا على Godot 4.3، منها 76 اختبارًا جديدًا للمرحلة الرابعة. بُنيت نسخة APK موقعة ومتحقق منها للمرحلة الرابعة، ولم يُدّعَ اختبارها بصريًا على هاتف فعلي.
+نجح **678 فحصًا**: 454 فحصًا ساكنًا/بايثون و224 اختبارًا فعليًا على Godot 4.3، منها 77 اختبارًا جديدًا للمرحلة الرابعة. بُنيت نسخة APK موقعة ومتحقق منها للمرحلة الرابعة، ولم يُدّعَ اختبارها بصريًا على هاتف فعلي.
 
 ## Delivered Scope
 
@@ -27,29 +27,29 @@
 | Native Phase 1 regression | **46 passed, 0 failed** |
 | Native Phase 2 regression | **45 passed, 0 failed** |
 | Native Phase 3 regression | **56 passed, 0 failed** |
-| Native Phase 4 progression integration | **76 passed, 0 failed** |
+| Native Phase 4 progression integration | **77 passed, 0 failed** |
 | Art regeneration / SHA-256 comparison | All **33 PNGs** byte-identical |
 | `git diff --check` | Clean |
 
-**454 static checks + 223 native assertions = 677 passing checks.** Static checks are not substituted for native execution. Godot ran on GitHub Actions (not locally; sandbox release-binary downloads are host-restricted).
+**454 static checks + 224 native assertions = 678 passing checks.** Static checks are not substituted for native execution. Godot ran on GitHub Actions (not locally; sandbox release-binary downloads are host-restricted).
 
-Native/static verified commit: `77972ea0aec3b655e46df716b2584f2d533a52c9`.
-Successful CI: https://github.com/asdasdqqww111-lab/SHADOWBOUND/actions/runs/44425957440
+Native/static verified commit: `20535001eaa9c78e06eb78b5ec20104ee1a8c062`.
+Successful CI: https://github.com/asdasdqqww111-lab/SHADOWBOUND/actions/runs/44426513999
 
 ### Native Phase 4 Coverage
 
-XP exact/off-by-one thresholds; every rank boundary; multi-level awards; stat growth/refill/cap/idempotence; wallet invalid amounts, unknown IDs, atomic failure/success and overflow; stack boundaries, capacity and atomic rejection; invalid saved counts; potion clamping/no-waste/fallen/material rejection; ordinary/boss rewards; full-bag behavior; XP cap; atomic checkpoint round-trip, backup recovery, bad JSON/schema/containers/XP, oversize input, future-save non-overwrite, failed writes and starter-item non-duplication; actual enemy-death reward idempotence; retry/mode persistence; modal pause restoration; Arabic selected-item localization; registered input action; discard confirmation/cancellation/commit.
+XP exact/off-by-one thresholds; every rank boundary; multi-level awards; stat growth/refill/cap/idempotence; wallet invalid amounts, unknown IDs, atomic failure/success and overflow; stack boundaries, capacity and atomic rejection; invalid saved counts; potion clamping/no-waste/fallen/material rejection; ordinary/boss rewards; full-bag behavior; XP cap; atomic checkpoint round-trip, backup recovery, bad JSON/schema/containers/XP, oversize input, future-save non-overwrite, failed writes, retained autosave-failure feedback on opening the UI, and starter-item non-duplication; actual enemy-death reward idempotence; retry/mode persistence; modal pause restoration; Arabic selected-item localization; registered input action; discard confirmation/cancellation/commit.
 
 ## Android APK — Actual Build PASS
 
-[**Download SHADOWBOUND v0.4.0 APK**](https://github.com/asdasdqqww111-lab/SHADOWBOUND/releases/download/v0.4.0-android-preview-3/SHADOWBOUND-v0.4.0-preview.apk)
+[**Download SHADOWBOUND v0.4.0 APK**](https://github.com/asdasdqqww111-lab/SHADOWBOUND/releases/download/v0.4.0-android-preview-4/SHADOWBOUND-v0.4.0-preview.apk)
 
-[Release / checksum](https://github.com/asdasdqqww111-lab/SHADOWBOUND/releases/tag/v0.4.0-android-preview-3)
+[Release / checksum](https://github.com/asdasdqqww111-lab/SHADOWBOUND/releases/tag/v0.4.0-android-preview-4)
 
-- File size: **159,690,385 bytes** (~160 MB / 152 MiB).
-- SHA-256: `ce381bcc8f75b7d9b3e56b7d59a38172b4d3654e408dce3b604859920fc28327`.
-- APK source: `73d2d604e50ac1401043c1b45e8316efbda4ff34`. The later `77972ea` commit only adds tests, not game changes.
-- Successful build/signature/manifest/package verification: https://github.com/asdasdqqww111-lab/SHADOWBOUND/actions/runs/44425818776
+- File size: **159,690,401 bytes** (~160 MB / 152 MiB).
+- SHA-256: `601e84c5895b9e342a65a5d9bf29896b3b84c0eb0d88ec840a230d54d4524630`.
+- APK source: `20535001eaa9c78e06eb78b5ec20104ee1a8c062`, the same source verified by the final native regression suite.
+- Successful build/signature/manifest/package verification: https://github.com/asdasdqqww111-lab/SHADOWBOUND/actions/runs/44426513909
 - Package `com.shadowbound.rpg`, version **0.4.0-preview**, code **4**.
 - Android minimum SDK **28** / target **34**, launchable landscape Godot activity, OpenGL ES 3.
 - Native **ARM64 + ARMv7** libraries, valid **APK v2 signature**, **zero requested Android permissions**, ZIP integrity and packaged progression/catalog/localization resources verified.

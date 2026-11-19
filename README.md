@@ -104,11 +104,11 @@ The Python suites validate static contracts and geometry; they do **not** replac
 
 ## Download Android Preview — Phase 4
 
-[**Download SHADOWBOUND v0.4.0 APK**](https://github.com/asdasdqqww111-lab/SHADOWBOUND/releases/download/v0.4.0-android-preview-3/SHADOWBOUND-v0.4.0-preview.apk) · [Release and checksum](https://github.com/asdasdqqww111-lab/SHADOWBOUND/releases/tag/v0.4.0-android-preview-3)
+[**Download SHADOWBOUND v0.4.0 APK**](https://github.com/asdasdqqww111-lab/SHADOWBOUND/releases/download/v0.4.0-android-preview-4/SHADOWBOUND-v0.4.0-preview.apk) · [Release and checksum](https://github.com/asdasdqqww111-lab/SHADOWBOUND/releases/tag/v0.4.0-android-preview-4)
 
 Experimental debug-signed build, approximately **160 MB**, for **Android 9+ ARM64/ARMv7** with OpenGL ES 3 support. Allow installation from your browser/file manager if Android asks. No Android permissions are requested; the game runs offline. Later previews may need a reinstall because the test signing key is disposable. This is not a production/store release, and physical-device visual testing is still needed.
 
-The APK was built and signature/manifest/resource-verified by [GitHub Actions](https://github.com/asdasdqqww111-lab/SHADOWBOUND/actions/runs/44425818776). See [Phase 4 verification report](docs/PHASE_4_TEST_REPORT.md) for exact verification details.
+The APK was built and signature/manifest/resource-verified by [GitHub Actions](https://github.com/asdasdqqww111-lab/SHADOWBOUND/actions/runs/44426513909). See [Phase 4 verification report](docs/PHASE_4_TEST_REPORT.md) for exact verification details.
 
 ## Android APK Export Setup (Android 9.0 / API 28+)
 
