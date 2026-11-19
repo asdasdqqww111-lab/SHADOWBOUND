@@ -7,6 +7,8 @@ on:
     paths:
       - '.github/workflows/android-preview.yml'
       - 'scripts/tools/verify_android_apk.py'
+      - 'project.godot'
+      - 'export_presets.cfg.example'
 
 permissions:
   contents: write
