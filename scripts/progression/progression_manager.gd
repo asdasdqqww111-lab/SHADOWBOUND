@@ -8,9 +8,11 @@ signal save_failed
 
 const CONFIG_PATH: String = "res://data/config/progression_config.json"
 const CATALOG_PATH: String = "res://data/items/item_catalog.json"
-const SAVE_VERSION: int = 1
+const SAVE_VERSION: int = 2
 const MAX_SAVE_BYTES: int = 65536
 
+var armory: ArmoryService = ArmoryService.new()
+var _rng: RandomNumberGenerator = RandomNumberGenerator.new()
 var config: Dictionary = {}
 var catalog: Dictionary = {}
 var save_path: String = "user://progression.json"
@@ -21,6 +23,11 @@ var last_save_error: Error = OK
 func _init() -> void:
 	config = _read_dictionary(CONFIG_PATH)
 	catalog = _read_dictionary(CATALOG_PATH)
+	armory.definitions = _read_dictionary("res://data/config/build_config.json")
+	config["builds"] = armory.definitions
+	armory.progression_config = config
+	armory.modified.connect(_commit)
+	_rng.randomize()
 
 
 func _read_dictionary(path: String) -> Dictionary:
@@ -40,6 +47,9 @@ func prepare_profile(profile: PlayerProfile) -> void:
 	profile.inventory.catalog = catalog
 	profile.inventory.capacity = int(config.get("inventory_capacity", 24))
 	profile.wallet.limit = int(config.get("max_currency", 999999999))
+	var classes: Dictionary = armory.definitions.get("classes", {})
+	if not classes.has(profile.class_id):
+		profile.class_id = "warrior"
 	profile.apply_progression(config)
 
 
@@ -52,7 +62,9 @@ func initialize(profile: PlayerProfile) -> void:
 	profile.restore_all()
 
 
-func award_enemy(profile: PlayerProfile, stats: EnemyStats) -> Dictionary:
+func award_enemy(
+	profile: PlayerProfile, stats: EnemyStats, loot_roll: float = -1.0, choice_roll: float = -1.0
+) -> Dictionary:
 	var was_alive: bool = not profile.is_defeated()
 	var max_xp: int = ProgressionRules.max_total_xp(config)
 	var awarded_xp: int = mini(maxi(0, stats.xp_reward), max_xp - profile.total_xp)
@@ -70,6 +82,10 @@ func award_enemy(profile: PlayerProfile, stats: EnemyStats) -> Dictionary:
 		item_id = str(bonus.get("item", "eclipse_sigil"))
 	summary["item_id"] = item_id
 	summary["item_added"] = profile.inventory.add(item_id)
+	summary["loot"] = armory.roll_loot(
+		profile, stats.is_boss, _rng.randf() if loot_roll < 0 else loot_roll,
+		_rng.randf() if choice_roll < 0 else choice_roll
+	)
 	_commit(profile)
 	rewards_granted.emit(summary)
 	return summary
@@ -109,8 +125,11 @@ func use_item(profile: PlayerProfile, item_id: String) -> String:
 
 
 func discard_item(profile: PlayerProfile, item_id: String) -> bool:
+	if profile.build.is_equipped(item_id):
+		return false
 	if not profile.inventory.remove(item_id):
 		return false
+	profile.build.upgrades.erase(item_id)
 	_commit(profile)
 	return true
 
@@ -129,6 +148,7 @@ func save_progress(profile: PlayerProfile) -> Error:
 		return ERR_FILE_UNRECOGNIZED
 	var data: Dictionary = {
 		"version": SAVE_VERSION, "total_xp": profile.total_xp,
+		"class_id": profile.class_id, "build": profile.build.to_dictionary(),
 		"wallet": profile.wallet.to_dictionary(), "inventory": profile.inventory.to_dictionary(),
 	}
 	var file: FileAccess = FileAccess.open(save_path + ".tmp", FileAccess.WRITE)
@@ -158,7 +178,7 @@ func _validated_save(path: String) -> Dictionary:
 	if file == null or file.get_length() > MAX_SAVE_BYTES:
 		return {}
 	var data: Dictionary = _read_dictionary(path)
-	if data.get("version") != SAVE_VERSION or not data.get("wallet") is Dictionary:
+	if data.get("version") not in [1, SAVE_VERSION] or not data.get("wallet") is Dictionary:
 		return {}
 	if not data.get("inventory") is Dictionary:
 		return {}
@@ -176,5 +196,13 @@ func load_progress(profile: PlayerProfile) -> bool:
 	profile.total_xp = int(data.total_xp)
 	profile.wallet.load_dictionary(data.wallet)
 	profile.inventory.load_dictionary(data.inventory)
+	var classes: Dictionary = armory.definitions.get("classes", {})
+	var saved_class: Variant = data.get("class_id", "warrior")
+	profile.class_id = saved_class if saved_class is String and classes.has(saved_class) else "warrior"
+	var saved_build: Variant = data.get("build", {})
+	profile.build.load_dictionary(
+		saved_build if saved_build is Dictionary else {}, profile.inventory,
+		armory.definitions, int(ProgressionRules.describe(profile.total_xp, config).level)
+	)
 	profile.apply_progression(config)
 	return true

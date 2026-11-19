@@ -43,7 +43,7 @@ func _run() -> void:
 
 func _test_xp_and_rank() -> void:
 	var cfg: Dictionary = _manager.config
-	_check(not cfg.is_empty() and _manager.catalog.size() == 5, "Progression config and five items load")
+	_check(not cfg.is_empty() and _manager.catalog.size() == 14, "Progression config and fourteen items load")
 	_check(ProgressionRules.xp_for_level(1, cfg) == 100, "Level 1 needs 100 XP")
 	_check(ProgressionRules.xp_for_level(2, cfg) == 140, "Level 2 needs 140 XP")
 	var below: Dictionary = ProgressionRules.describe(99, cfg)
@@ -184,7 +184,7 @@ func _test_persistence() -> void:
 	_check(not _manager.load_progress(loaded), "Wrong save containers are rejected")
 	_write_save(" ".repeat(65537))
 	_check(not _manager.load_progress(loaded), "Oversize save is rejected before JSON parsing")
-	_write_save('{"version":2,"total_xp":10,"wallet":{},"inventory":{}}')
+	_write_save('{"version":3,"total_xp":10,"wallet":{},"inventory":{}}')
 	_check(not _manager.load_progress(loaded) and _manager.save_progress(profile) == ERR_FILE_UNRECOGNIZED,
 		"Newer save schema is neither loaded nor overwritten")
 	_cleanup()

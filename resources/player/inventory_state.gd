@@ -26,6 +26,8 @@ func stack_limit(item_id: String) -> int:
 func add(item_id: String, amount: int = 1) -> bool:
 	if not catalog.has(item_id) or amount <= 0 or amount > capacity * stack_limit(item_id):
 		return false
+	if bool(catalog[item_id].get("unique", false)) and count(item_id) + amount > 1:
+		return false
 	var old_slots: int = ceili(float(count(item_id)) / stack_limit(item_id))
 	var new_slots: int = ceili(float(count(item_id) + amount) / stack_limit(item_id))
 	if used_slots() - old_slots + new_slots > capacity:
@@ -54,5 +56,7 @@ func load_dictionary(data: Dictionary) -> void:
 	# Catalog order makes recovery deterministic and ignores unknown IDs, regardless of file size/order.
 	for item_id: String in catalog:
 		var amount: int = ProgressionRules.safe_int(data.get(item_id, 0), 0, 0, capacity * stack_limit(item_id))
+		if bool(catalog[item_id].get("unique", false)):
+			amount = mini(1, amount)
 		if amount > 0:
 			add(item_id, amount)

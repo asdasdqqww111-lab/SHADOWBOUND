@@ -1,4 +1,4 @@
-[gd_scene load_steps=10 format=3]
+[gd_scene load_steps=11 format=3]
 
 [ext_resource type="Script" path="res://scripts/player/player_controller.gd" id="1_player"]
 [ext_resource type="SpriteFrames" path="res://resources/sprites/stickman_sprite_frames.tres" id="2_frames"]
@@ -7,6 +7,8 @@
 [ext_resource type="Script" path="res://scripts/camera/dual_mode_camera.gd" id="5_cam"]
 [ext_resource type="Resource" path="res://resources/camera/side_scroll_camera_profile.tres" id="6_ss_cam"]
 [ext_resource type="Resource" path="res://resources/camera/top_down_camera_profile.tres" id="7_td_cam"]
+
+[ext_resource type="Script" path="res://scripts/combat/class_skill_controller.gd" id="8_skill"]
 
 [sub_resource type="CapsuleShape2D" id="CapsuleShape2D_body"]
 radius = 13.0
@@ -55,3 +57,6 @@ monitorable = false
 [node name="CollisionShape2D" type="CollisionShape2D" parent="SlashHitbox"]
 shape = SubResource("CircleShape2D_slash")
 disabled = true
+
+[node name="ClassSkillController" type="Node" parent="."]
+script = ExtResource("8_skill")

@@ -7,6 +7,7 @@ signal mode_switch_requested
 signal respawn_requested
 
 @onready var reward_label: Label = $HudRoot/RewardLabel
+@onready var skill_btn: Button = $HudRoot/TopBar/RightCluster/SkillBtn
 @onready var hud_root: Control = $HudRoot
 @onready var name_label: Label = $HudRoot/TopBar/StatusPanel/HBox/StatsVBox/HeaderRow/NameLabel
 @onready var rank_label: Label = $HudRoot/TopBar/StatusPanel/HBox/StatsVBox/HeaderRow/RankLabel
@@ -79,6 +80,7 @@ func _ready() -> void:
 	pause_lang_btn.pressed.connect(_on_pause_lang_pressed)
 	main_menu_btn.pressed.connect(_on_main_menu_pressed)
 
+	skill_btn.pressed.connect(_on_skill_pressed)
 	inventory_btn.pressed.connect(_on_inventory_pressed)
 	pause_inventory_btn.pressed.connect(_on_inventory_pressed)
 	GameState.progression.rewards_granted.connect(_on_rewards_granted)
@@ -92,6 +94,7 @@ func _ready() -> void:
 
 
 func _process(delta: float) -> void:
+	_refresh_skill_button()
 	if get_tree().paused:
 		return
 	if _reward_timer > 0.0:
@@ -422,4 +425,36 @@ func _refresh_reward_feedback() -> void:
 		text += " · " + LocalizationManager.translate_key("progress.boss_bonus", {
 			"diamonds": summary.diamonds_awarded, "crystals": summary.crystals_awarded,
 		})
+	var loot: Dictionary = summary.get("loot", {})
+	if loot.get("outcome") == "added":
+		text += " · " + LocalizationManager.translate_key("build.loot", {
+			"item": LocalizationManager.translate_key("item." + str(loot.item_id)),
+		})
+	elif loot.get("outcome") == "duplicate":
+		text += " · " + LocalizationManager.translate_key("build.duplicate", {"gold": loot.get("gold", 0)})
+	elif loot.get("outcome") == "full":
+		text += " · " + LocalizationManager.translate_key("inventory.full")
 	reward_label.text = text
+
+
+func _on_skill_pressed() -> void:
+	var node: Node = get_tree().get_first_node_in_group("player")
+	if node != null:
+		var skill: ClassSkillController = node.get_node_or_null("ClassSkillController") as ClassSkillController
+		if skill != null:
+			var result: String = skill.try_cast()
+			if result != "skill.cast":
+				show_combat_banner(result)
+
+
+func _refresh_skill_button() -> void:
+	var node: Node = get_tree().get_first_node_in_group("player")
+	if node == null:
+		return
+	var skill: ClassSkillController = node.get_node_or_null("ClassSkillController") as ClassSkillController
+	if skill == null:
+		return
+	var class_id: String = GameState.get_player_profile().class_id
+	skill_btn.text = "%s · Q%s" % [LocalizationManager.translate_key("skill." + class_id),
+		" (%ds)" % int(ceilf(skill.cooldown_remaining)) if skill.cooldown_remaining > 0 else ""]
+	skill_btn.disabled = get_tree().paused or (node as PlayerCharacter).is_defeated() or skill.cooldown_remaining > 0

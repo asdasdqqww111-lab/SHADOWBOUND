@@ -3,17 +3,63 @@
   "level_cap": 60,
   "xp_base": 100,
   "xp_step": 40,
-  "growth": {"hp": 12, "mp": 6, "stamina": 2, "attack": 2, "defense": 0.5},
+  "growth": {
+    "hp": 12,
+    "mp": 6,
+    "stamina": 2,
+    "attack": 2,
+    "defense": 0.5
+  },
   "ranks": [
-    {"code": "F", "level": 1}, {"code": "E", "level": 5},
-    {"code": "D", "level": 10}, {"code": "C", "level": 15},
-    {"code": "B", "level": 20}, {"code": "A", "level": 30},
-    {"code": "S", "level": 40}, {"code": "SS", "level": 50},
-    {"code": "SSS", "level": 60}
+    {
+      "code": "F",
+      "level": 1
+    },
+    {
+      "code": "E",
+      "level": 5
+    },
+    {
+      "code": "D",
+      "level": 10
+    },
+    {
+      "code": "C",
+      "level": 15
+    },
+    {
+      "code": "B",
+      "level": 20
+    },
+    {
+      "code": "A",
+      "level": 30
+    },
+    {
+      "code": "S",
+      "level": 40
+    },
+    {
+      "code": "SS",
+      "level": 50
+    },
+    {
+      "code": "SSS",
+      "level": 60
+    }
   ],
   "inventory_capacity": 24,
   "max_currency": 999999999,
-  "starter_items": {"health_potion": 3, "mana_potion": 2, "stamina_draught": 2},
+  "starter_items": {
+    "health_potion": 3,
+    "mana_potion": 2,
+    "stamina_draught": 2,
+    "rust_blade": 1
+  },
   "enemy_material": "shadow_fragment",
-  "boss_rewards": {"diamonds": 3, "magic_crystals": 5, "item": "eclipse_sigil"}
+  "boss_rewards": {
+    "diamonds": 3,
+    "magic_crystals": 5,
+    "item": "eclipse_sigil"
+  }
 }

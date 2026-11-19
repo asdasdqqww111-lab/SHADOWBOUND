@@ -1,18 +1,20 @@
 extends CanvasLayer
 ## Responsive bilingual inventory. This modal owns no gameplay state; GameState owns pause restoration.
 
+@onready var tabs: TabContainer = $Root/Panel/VBox/Tabs
+@onready var upgrade_button: Button = $Root/Panel/VBox/Tabs/Satchel/Body/Details/Actions/Upgrade
 @onready var root: Control = $Root
 @onready var title: Label = $Root/Panel/VBox/Header/Title
 @onready var close_button: Button = $Root/Panel/VBox/Header/Close
 @onready var profile_label: Label = $Root/Panel/VBox/Profile
 @onready var xp_bar: ProgressBar = $Root/Panel/VBox/XP
 @onready var wallet_label: Label = $Root/Panel/VBox/Wallet
-@onready var items: ItemList = $Root/Panel/VBox/Body/Items
-@onready var item_name: Label = $Root/Panel/VBox/Body/Details/Name
-@onready var description: Label = $Root/Panel/VBox/Body/Details/Description
-@onready var vitals: Label = $Root/Panel/VBox/Body/Details/Vitals
-@onready var use_button: Button = $Root/Panel/VBox/Body/Details/Actions/Use
-@onready var discard_button: Button = $Root/Panel/VBox/Body/Details/Actions/Discard
+@onready var items: ItemList = $Root/Panel/VBox/Tabs/Satchel/Body/Items
+@onready var item_name: Label = $Root/Panel/VBox/Tabs/Satchel/Body/Details/Name
+@onready var description: Label = $Root/Panel/VBox/Tabs/Satchel/Body/Details/Description
+@onready var vitals: Label = $Root/Panel/VBox/Tabs/Satchel/Body/Details/Vitals
+@onready var use_button: Button = $Root/Panel/VBox/Tabs/Satchel/Body/Details/Actions/Use
+@onready var discard_button: Button = $Root/Panel/VBox/Tabs/Satchel/Body/Details/Actions/Discard
 @onready var discard_dialog: ConfirmationDialog = $Root/DiscardDialog
 @onready var feedback: Label = $Root/Panel/VBox/Feedback
 @onready var capacity_label: Label = $Root/Panel/VBox/Capacity
@@ -27,6 +29,7 @@ func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
 	root.visible = false
 	close_button.pressed.connect(_close)
+	upgrade_button.pressed.connect(_upgrade_selected)
 	use_button.pressed.connect(_use_selected)
 	discard_button.pressed.connect(_request_discard)
 	discard_dialog.confirmed.connect(_confirm_discard)
@@ -76,6 +79,8 @@ func _refresh() -> void:
 	var profile: PlayerProfile = GameState.get_player_profile()
 	var state: Dictionary = ProgressionRules.describe(profile.total_xp, GameState.progression.config)
 	LocalizationManager.apply_layout_direction(root)
+	tabs.set_tab_title(0, LocalizationManager.translate_key("inventory.button"))
+	tabs.set_tab_title(1, LocalizationManager.translate_key("build.tab"))
 	title.text = LocalizationManager.translate_key("inventory.title")
 	close_button.text = LocalizationManager.translate_key("inventory.close")
 	profile_label.text = LocalizationManager.translate_key("progress.profile", {
@@ -131,11 +136,32 @@ func _refresh_details() -> void:
 	discard_button.text = LocalizationManager.translate_key("inventory.discard")
 	discard_button.disabled = _selected_id.is_empty()
 	use_button.text = LocalizationManager.translate_key("inventory.use")
-	use_button.disabled = spec.get("kind", "") != "consumable" or profile.is_defeated()
+	use_button.disabled = spec.get("kind", "") not in ["consumable", "equipment"] or profile.is_defeated()
+	upgrade_button.visible = spec.get("kind") == "equipment"
+	upgrade_button.text = LocalizationManager.translate_key("build.forge")
+	if spec.get("kind") == "equipment":
+		use_button.text = LocalizationManager.translate_key(
+			"build.unequip" if profile.build.is_equipped(_selected_id) else "build.equip"
+		)
+		discard_button.disabled = profile.build.is_equipped(_selected_id)
+		var cost: Dictionary = GameState.progression.armory.upgrade_cost(profile, _selected_id)
+		description.text = LocalizationManager.translate_key("build.gear_details", {
+			"rarity": LocalizationManager.translate_key("rarity." + str(spec.rarity)),
+			"slot": LocalizationManager.translate_key("slot." + str(spec.slot)),
+			"upgrade": int(profile.build.upgrades.get(_selected_id, 0)),
+			"stats": _gear_stats_text(spec), "gold": cost.gold, "fragments": cost.fragments,
+			"crystals": cost.crystals,
+		})
+		upgrade_button.disabled = int(profile.build.upgrades.get(_selected_id, 0)) >= 5
 
 
 func _use_selected() -> void:
-	_feedback_key = GameState.progression.use_item(GameState.get_player_profile(), _selected_id)
+	var profile: PlayerProfile = GameState.get_player_profile()
+	var spec: Dictionary = GameState.progression.catalog.get(_selected_id, {})
+	if spec.get("kind") == "equipment":
+		_feedback_key = GameState.progression.armory.equip(profile, _selected_id)
+	else:
+		_feedback_key = GameState.progression.use_item(profile, _selected_id)
 	if GameState.progression.last_save_error != OK:
 		_feedback_key = "inventory.save_failed"
 	_refresh()
@@ -160,9 +186,28 @@ func _request_discard() -> void:
 
 
 func _confirm_discard() -> void:
+	_feedback_key = "build.unequip_first"
 	if GameState.progression.discard_item(GameState.get_player_profile(), _discard_id):
 		_feedback_key = "inventory.discarded"
 	if GameState.progression.last_save_error != OK:
 		_feedback_key = "inventory.save_failed"
 	_discard_id = ""
 	_refresh()
+
+
+func _upgrade_selected() -> void:
+	_feedback_key = GameState.progression.armory.upgrade(GameState.get_player_profile(), _selected_id)
+	if GameState.progression.last_save_error != OK:
+		_feedback_key = "inventory.save_failed"
+	_refresh()
+
+
+func _gear_stats_text(spec: Dictionary) -> String:
+	var parts: Array[String] = []
+	var stats: Dictionary = spec.get("stats", {})
+	var profile: PlayerProfile = GameState.get_player_profile()
+	var multiplier: float = 1 + int(profile.build.upgrades.get(_selected_id, 0)) * 0.2
+	for key: String in stats:
+		parts.append("%s +%s" % [LocalizationManager.translate_key("stat." + key),
+			str(snappedf(float(stats[key]) * multiplier, 0.01))])
+	return ", ".join(parts)

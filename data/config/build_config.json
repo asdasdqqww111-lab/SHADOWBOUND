@@ -1,0 +1,285 @@
+{
+  "classes": {
+    "warrior": {
+      "name_key": "class.warrior",
+      "description_key": "class.warrior_desc",
+      "stats": {},
+      "skill_key": "skill.warrior",
+      "mp_cost": 15,
+      "cooldown": 6,
+      "damage_multiplier": 2.2,
+      "nodes": [
+        {
+          "id": "warrior.focus",
+          "level": 1,
+          "cost": 1,
+          "requires": "",
+          "name_key": "talent.focus",
+          "stats": {
+            "attack": 2
+          }
+        },
+        {
+          "id": "warrior.mastery",
+          "level": 3,
+          "cost": 1,
+          "requires": "warrior.focus",
+          "name_key": "talent.mastery",
+          "stats": {
+            "mp": 10
+          }
+        },
+        {
+          "id": "warrior.awakening",
+          "level": 8,
+          "cost": 2,
+          "requires": "warrior.mastery",
+          "name_key": "talent.awakening",
+          "stats": {
+            "hp": 15
+          }
+        }
+      ]
+    },
+    "mage": {
+      "name_key": "class.mage",
+      "description_key": "class.mage_desc",
+      "stats": {
+        "mp": 30,
+        "attack": -2
+      },
+      "skill_key": "skill.mage",
+      "mp_cost": 22,
+      "cooldown": 7,
+      "damage_multiplier": 1.1,
+      "nodes": [
+        {
+          "id": "mage.focus",
+          "level": 1,
+          "cost": 1,
+          "requires": "",
+          "name_key": "talent.focus",
+          "stats": {
+            "attack": 2
+          }
+        },
+        {
+          "id": "mage.mastery",
+          "level": 3,
+          "cost": 1,
+          "requires": "mage.focus",
+          "name_key": "talent.mastery",
+          "stats": {
+            "mp": 10
+          }
+        },
+        {
+          "id": "mage.awakening",
+          "level": 8,
+          "cost": 2,
+          "requires": "mage.mastery",
+          "name_key": "talent.awakening",
+          "stats": {
+            "hp": 15
+          }
+        }
+      ]
+    },
+    "assassin": {
+      "name_key": "class.assassin",
+      "description_key": "class.assassin_desc",
+      "stats": {
+        "crit": 0.08,
+        "hp": -10
+      },
+      "skill_key": "skill.assassin",
+      "mp_cost": 18,
+      "cooldown": 6,
+      "damage_multiplier": 2.8,
+      "nodes": [
+        {
+          "id": "assassin.focus",
+          "level": 1,
+          "cost": 1,
+          "requires": "",
+          "name_key": "talent.focus",
+          "stats": {
+            "attack": 2
+          }
+        },
+        {
+          "id": "assassin.mastery",
+          "level": 3,
+          "cost": 1,
+          "requires": "assassin.focus",
+          "name_key": "talent.mastery",
+          "stats": {
+            "mp": 10
+          }
+        },
+        {
+          "id": "assassin.awakening",
+          "level": 8,
+          "cost": 2,
+          "requires": "assassin.mastery",
+          "name_key": "talent.awakening",
+          "stats": {
+            "hp": 15
+          }
+        }
+      ]
+    },
+    "knight": {
+      "name_key": "class.knight",
+      "description_key": "class.knight_desc",
+      "stats": {
+        "defense": 3,
+        "hp": 20,
+        "attack": -2
+      },
+      "skill_key": "skill.knight",
+      "mp_cost": 20,
+      "cooldown": 9,
+      "damage_multiplier": 1.4,
+      "nodes": [
+        {
+          "id": "knight.focus",
+          "level": 1,
+          "cost": 1,
+          "requires": "",
+          "name_key": "talent.focus",
+          "stats": {
+            "attack": 2
+          }
+        },
+        {
+          "id": "knight.mastery",
+          "level": 3,
+          "cost": 1,
+          "requires": "knight.focus",
+          "name_key": "talent.mastery",
+          "stats": {
+            "mp": 10
+          }
+        },
+        {
+          "id": "knight.awakening",
+          "level": 8,
+          "cost": 2,
+          "requires": "knight.mastery",
+          "name_key": "talent.awakening",
+          "stats": {
+            "hp": 15
+          }
+        }
+      ]
+    },
+    "summoner": {
+      "name_key": "class.summoner",
+      "description_key": "class.summoner_desc",
+      "stats": {
+        "mp": 20,
+        "attack": -1
+      },
+      "skill_key": "skill.summoner",
+      "mp_cost": 25,
+      "cooldown": 10,
+      "damage_multiplier": 0.65,
+      "nodes": [
+        {
+          "id": "summoner.focus",
+          "level": 1,
+          "cost": 1,
+          "requires": "",
+          "name_key": "talent.focus",
+          "stats": {
+            "attack": 2
+          }
+        },
+        {
+          "id": "summoner.mastery",
+          "level": 3,
+          "cost": 1,
+          "requires": "summoner.focus",
+          "name_key": "talent.mastery",
+          "stats": {
+            "mp": 10
+          }
+        },
+        {
+          "id": "summoner.awakening",
+          "level": 8,
+          "cost": 2,
+          "requires": "summoner.mastery",
+          "name_key": "talent.awakening",
+          "stats": {
+            "hp": 15
+          }
+        }
+      ]
+    }
+  },
+  "rarities": {
+    "common": "#C1C6D6",
+    "uncommon": "#60D99A",
+    "rare": "#609EFF",
+    "epic": "#BE83FF",
+    "legendary": "#FFE08A"
+  },
+  "upgrade_cap": 5,
+  "upgrade_scale": 0.2,
+  "upgrade_gold_base": 25,
+  "upgrade_material_base": 2,
+  "loot": {
+    "chance": 0.35,
+    "regular": [
+      {
+        "id": "rust_blade",
+        "weight": 30
+      },
+      {
+        "id": "dusk_mail",
+        "weight": 25
+      },
+      {
+        "id": "violet_sabre",
+        "weight": 20
+      },
+      {
+        "id": "cyan_charm",
+        "weight": 15
+      },
+      {
+        "id": "rift_staff",
+        "weight": 8
+      },
+      {
+        "id": "night_dagger",
+        "weight": 2
+      }
+    ],
+    "boss": [
+      {
+        "id": "rift_staff",
+        "weight": 25
+      },
+      {
+        "id": "night_dagger",
+        "weight": 25
+      },
+      {
+        "id": "warden_plate",
+        "weight": 25
+      },
+      {
+        "id": "eclipse_blade",
+        "weight": 15
+      },
+      {
+        "id": "royal_sigil",
+        "weight": 10
+      }
+    ],
+    "duplicate_gold": 15
+  }
+}

@@ -217,6 +217,8 @@ func reset_sanctum_trial() -> void:
 
 
 func _clear_active_projectiles() -> void:
+	for companion: Node in get_tree().get_nodes_in_group("companions"):
+		companion.queue_free()
 	for pnode: Node in get_tree().get_nodes_in_group("projectiles"):
 		if is_instance_valid(pnode):
 			pnode.queue_free()

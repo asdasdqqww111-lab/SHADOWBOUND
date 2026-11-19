@@ -296,7 +296,7 @@ def test_progression_math() -> None:
               f"Rank {rank['code']} at level {rank['level']} has an increasing cumulative threshold")
     catalog = json.loads((ROOT / "data/items/item_catalog.json").read_text())
     slots = sum(math.ceil(count / catalog[item]["stack_limit"]) for item, count in cfg["starter_items"].items())
-    check(slots == 3 and slots < cfg["inventory_capacity"], "Starter inventory occupies 3 of 24 slots")
+    check(slots == 4 and slots < cfg["inventory_capacity"], "Starter inventory occupies 4 of 24 slots")
     g = cfg["growth"]
     check(120 + 59 * g["hp"] == 828 and 18 + 59 * g["attack"] == 136,
           "Max-level base HP and attack derive deterministically without compounding")

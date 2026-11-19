@@ -1096,6 +1096,7 @@ def generate_environment() -> None:
 def main() -> None:
     from generate_enemy_art import generate_all_enemy_art
     from generate_inventory_icons import main as generate_inventory_icons
+    from generate_gear_icons import main as generate_gear_icons
 
     for sub in ("player", "environment", "ui", "enemies", "items"):
         (SPRITES_DIR / sub).mkdir(parents=True, exist_ok=True)
@@ -1106,6 +1107,7 @@ def main() -> None:
     generate_environment()
     generate_all_enemy_art()
     generate_inventory_icons()
+    generate_gear_icons()
     print("Generated all SHADOWBOUND original art assets (player, UI, environment, enemies, boss).")
 
 

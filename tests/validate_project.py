@@ -445,7 +445,7 @@ def validate_data_and_localization() -> None:
         src = gd.read_text(encoding="utf-8")
         for m in re.finditer(r'translate_key\(\s*"([a-z0-9_.]+)"', src):
             key = m.group(1)
-            if key not in en_keys:
+            if key not in en_keys and not (key.endswith(".") and any(k.startswith(key) for k in en_keys)):
                 missing_used_keys.append(f"{gd.name}:{key}")
     check(len(missing_used_keys) == 0, f"Every translate_key() literal in scripts exists in localization JSONs (missing: {missing_used_keys})")
 
@@ -574,7 +574,7 @@ def validate_phase4_progression() -> None:
           "Inventory and wallet have finite configured bounds")
     for item_id, spec in catalog.items():
         check(spec["name_key"] in en and spec["description_key"] in en, f"{item_id}: catalog keys localized")
-        check(spec["kind"] in {"consumable", "material"} and 0 < spec["stack_limit"] <= 99,
+        check(spec["kind"] in {"consumable", "material", "equipment"} and 0 < spec["stack_limit"] <= 99,
               f"{item_id}: valid kind and stack limit")
         icon = ROOT / f"assets/sprites/items/{item_id}.png"
         with Image.open(icon) as image:
@@ -589,7 +589,7 @@ def validate_phase4_progression() -> None:
     check(cfg["boss_rewards"]["diamonds"] > 0 and cfg["boss_rewards"]["magic_crystals"] > 0,
           "Boss grants both special currencies")
     manager = (ROOT / "scripts/progression/progression_manager.gd").read_text()
-    check('SAVE_VERSION: int = 1' in manager and 'MAX_SAVE_BYTES: int = 65536' in manager,
+    check('SAVE_VERSION: int = 2' in manager and 'MAX_SAVE_BYTES: int = 65536' in manager,
           "Progression checkpoint schema and file-size cap declared")
     check('DirAccess.rename_absolute(save_path + ".tmp", save_path)' in manager,
           "Progression replaces saves through same-directory temporary file")

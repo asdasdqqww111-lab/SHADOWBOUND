@@ -21,6 +21,7 @@ extends Resource
 @export var crit_chance: float = 0.12
 @export var crit_multiplier: float = 1.5
 
+var build: BuildState = BuildState.new()
 var total_xp: int = 0
 var wallet: CurrencyWallet = CurrencyWallet.new()
 var inventory: InventoryState = InventoryState.new()
@@ -99,6 +100,13 @@ func apply_progression(cfg: Dictionary, refill_on_level_up: bool = false) -> Dic
 	max_stamina = 100.0 + steps * float(growth.get("stamina", 2.0))
 	base_attack = 18.0 + steps * float(growth.get("attack", 2.0))
 	defense = 4.0 + steps * float(growth.get("defense", 0.5))
+	var modifiers: Dictionary = BuildRules.bonuses(self, cfg.get("builds", {}), inventory.catalog)
+	max_hp = maxf(1.0, max_hp + float(modifiers.hp))
+	max_mp = maxf(1.0, max_mp + float(modifiers.mp))
+	max_stamina = maxf(1.0, max_stamina + float(modifiers.stamina))
+	base_attack = maxf(1.0, base_attack + float(modifiers.attack))
+	defense = maxf(0.0, defense + float(modifiers.defense))
+	crit_chance = clampf(0.12 + float(modifiers.crit), 0.0, 0.75)
 	if refill_on_level_up and level > old_level:
 		restore_all()
 	else:
@@ -127,6 +135,7 @@ func to_dictionary() -> Dictionary:
 		"defense": defense,
 		"crit_chance": crit_chance,
 		"crit_multiplier": crit_multiplier,
+		"build": build.to_dictionary(),
 		"total_xp": total_xp,
 		"wallet": wallet.to_dictionary(),
 		"inventory": inventory.to_dictionary(),
