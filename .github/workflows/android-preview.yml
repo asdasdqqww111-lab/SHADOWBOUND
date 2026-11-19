@@ -83,6 +83,12 @@ jobs:
           set -euo pipefail
           godot --headless --editor --path . --import --quit 2>&1 | tee "$RUNNER_TEMP/import.log"
           if grep -En 'SCRIPT ERROR:|ERROR:|WARNING:' "$RUNNER_TEMP/import.log"; then exit 1; fi
+          # Never publish a preview whose native regression suites fail.
+          for phase in 1 2 3 4 5; do
+            timeout 30 godot --headless --path . "res://tests/gdscript/test_phase${phase}_runner.tscn" 2>&1 \
+              | tee "$RUNNER_TEMP/phase${phase}.log"
+          done
+          if grep -En 'SCRIPT ERROR:|ERROR:|WARNING:' "$RUNNER_TEMP/"phase*.log; then exit 1; fi
           godot --headless --path . --export-debug 'Android APK' "builds/android/$APK_NAME" \
             2>&1 | tee "$RUNNER_TEMP/export.log"
           test -s "builds/android/$APK_NAME"
@@ -105,13 +111,14 @@ jobs:
 
           Download **$APK_NAME** below. Android **9.0+**, ARM64 or ARMv7. Offline single-player.
           Experimental debug-signed build for visual testing, not a production/store release.
-          Includes both gameplay modes, three enemy archetypes, the Eclipse Warden boss, XP/levels/ranks, three currencies and inventory.
+          Includes both gameplay modes, three enemy archetypes, the Eclipse Warden boss, XP/levels/ranks, three currencies, inventory, equipment/rarities, smith upgrades, five classes, talent trees and class skills.
 
           Allow installation from your browser/file manager when Android asks. No network permissions are requested.
           This preview uses a disposable test signing key; a later preview may require uninstalling this one first.
-          No gameplay saves are promised compatible between preview builds.
+          Phase 4 progression checkpoints migrate to schema 2 in this build, if Android retains app data.
+          Uninstalling removes app data, so back up any important checkpoints before reinstalling.
 
-          Verified: successful Godot 4.3 export, Android signature, package/version/minimum SDK, ARM architectures,
+          Verified: all five native Godot regression suites, successful Godot 4.3 export, Android signature, package/version/minimum SDK, ARM architectures,
           no requested Android permissions, and packaged game resources. Physical-device gameplay remains to be tested.
 
           Source commit: $GITHUB_SHA
@@ -131,7 +138,7 @@ jobs:
           import json, os
           from pathlib import Path
           logs = []
-          for name in ['import', 'export', 'signature', 'badging', 'permissions']:
+          for name in ['import', 'phase1', 'phase2', 'phase3', 'phase4', 'phase5', 'export', 'signature', 'badging', 'permissions']:
               path = Path(os.environ['RUNNER_TEMP']) / (name + '.log')
               if path.exists():
                   logs.append(name + '\n```text\n' + path.read_text()[-12000:] + '\n```')

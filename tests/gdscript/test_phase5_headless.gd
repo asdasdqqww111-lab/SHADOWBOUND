@@ -223,6 +223,8 @@ func _test_saves() -> void:
 		and restored.build.talents.is_empty(), "Malformed optional build data recovers safely")
 	_write({"version": 3, "total_xp": 0, "wallet": {}, "inventory": {}})
 	_check(_manager.save_progress(restored) == ERR_FILE_UNRECOGNIZED, "Future schema checkpoint cannot be overwritten")
+	_write({"version": 999999999999, "total_xp": 0, "wallet": {}, "inventory": {}})
+	_check(_manager.save_progress(restored) == ERR_FILE_UNRECOGNIZED, "Very large future schema is also protected")
 	_cleanup()
 
 

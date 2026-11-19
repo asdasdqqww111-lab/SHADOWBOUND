@@ -143,8 +143,8 @@ func _commit(profile: PlayerProfile) -> void:
 
 func save_progress(profile: PlayerProfile) -> Error:
 	var on_disk: Dictionary = _read_dictionary(save_path)
-	var disk_version: int = ProgressionRules.safe_int(on_disk.get("version", 0), 0, 0, 999999)
-	if disk_version > SAVE_VERSION:
+	var disk_version: Variant = on_disk.get("version", 0)
+	if (disk_version is int or disk_version is float) and float(disk_version) > SAVE_VERSION:
 		return ERR_FILE_UNRECOGNIZED
 	var data: Dictionary = {
 		"version": SAVE_VERSION, "total_xp": profile.total_xp,

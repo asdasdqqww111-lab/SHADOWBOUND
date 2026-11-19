@@ -89,6 +89,11 @@ func _ready() -> void:
 	GameState.settings_changed.connect(_refresh_button_texts)
 	LocalizationManager.locale_changed.connect(_on_locale_changed)
 
+	var actor: Node = get_tree().get_first_node_in_group("player")
+	if actor != null:
+		var skill: ClassSkillController = actor.get_node_or_null("ClassSkillController") as ClassSkillController
+		if skill != null:
+			skill.cast_finished.connect(_on_skill_result)
 	_displayed_mode = GameState.current_mode
 	_refresh_all()
 
@@ -442,9 +447,7 @@ func _on_skill_pressed() -> void:
 	if node != null:
 		var skill: ClassSkillController = node.get_node_or_null("ClassSkillController") as ClassSkillController
 		if skill != null:
-			var result: String = skill.try_cast()
-			if result != "skill.cast":
-				show_combat_banner(result)
+			skill.try_cast()
 
 
 func _refresh_skill_button() -> void:
@@ -458,3 +461,8 @@ func _refresh_skill_button() -> void:
 	skill_btn.text = "%s · Q%s" % [LocalizationManager.translate_key("skill." + class_id),
 		" (%ds)" % int(ceilf(skill.cooldown_remaining)) if skill.cooldown_remaining > 0 else ""]
 	skill_btn.disabled = get_tree().paused or (node as PlayerCharacter).is_defeated() or skill.cooldown_remaining > 0
+
+
+func _on_skill_result(result: String) -> void:
+	if result != "skill.cast":
+		show_combat_banner(result)
