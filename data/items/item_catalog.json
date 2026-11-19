@@ -1,0 +1,165 @@
+{
+  "health_potion": {
+    "name_key": "item.health_potion",
+    "description_key": "item.health_potion_desc",
+    "kind": "consumable",
+    "stat": "hp",
+    "amount": 50,
+    "stack_limit": 20,
+    "color": "#E43662"
+  },
+  "mana_potion": {
+    "name_key": "item.mana_potion",
+    "description_key": "item.mana_potion_desc",
+    "kind": "consumable",
+    "stat": "mp",
+    "amount": 35,
+    "stack_limit": 20,
+    "color": "#609EFF"
+  },
+  "stamina_draught": {
+    "name_key": "item.stamina_draught",
+    "description_key": "item.stamina_draught_desc",
+    "kind": "consumable",
+    "stat": "stamina",
+    "amount": 40,
+    "stack_limit": 20,
+    "color": "#47DBB8"
+  },
+  "shadow_fragment": {
+    "name_key": "item.shadow_fragment",
+    "description_key": "item.shadow_fragment_desc",
+    "kind": "material",
+    "stack_limit": 99,
+    "color": "#9B7EFF"
+  },
+  "eclipse_sigil": {
+    "name_key": "item.eclipse_sigil",
+    "description_key": "item.eclipse_sigil_desc",
+    "kind": "material",
+    "stack_limit": 10,
+    "color": "#FFE08A"
+  },
+  "rust_blade": {
+    "name_key": "item.rust_blade",
+    "description_key": "item.rust_blade_desc",
+    "kind": "equipment",
+    "slot": "weapon",
+    "rarity": "common",
+    "stats": {
+      "attack": 3
+    },
+    "stack_limit": 1,
+    "unique": true,
+    "color": "#C1C6D6"
+  },
+  "violet_sabre": {
+    "name_key": "item.violet_sabre",
+    "description_key": "item.violet_sabre_desc",
+    "kind": "equipment",
+    "slot": "weapon",
+    "rarity": "uncommon",
+    "stats": {
+      "attack": 6
+    },
+    "stack_limit": 1,
+    "unique": true,
+    "color": "#60D99A"
+  },
+  "rift_staff": {
+    "name_key": "item.rift_staff",
+    "description_key": "item.rift_staff_desc",
+    "kind": "equipment",
+    "slot": "weapon",
+    "rarity": "rare",
+    "stats": {
+      "attack": 9,
+      "mp": 10
+    },
+    "stack_limit": 1,
+    "unique": true,
+    "color": "#609EFF"
+  },
+  "night_dagger": {
+    "name_key": "item.night_dagger",
+    "description_key": "item.night_dagger_desc",
+    "kind": "equipment",
+    "slot": "weapon",
+    "rarity": "epic",
+    "stats": {
+      "attack": 12,
+      "crit": 0.03
+    },
+    "stack_limit": 1,
+    "unique": true,
+    "color": "#BE83FF"
+  },
+  "eclipse_blade": {
+    "name_key": "item.eclipse_blade",
+    "description_key": "item.eclipse_blade_desc",
+    "kind": "equipment",
+    "slot": "weapon",
+    "rarity": "legendary",
+    "stats": {
+      "attack": 16
+    },
+    "stack_limit": 1,
+    "unique": true,
+    "color": "#FFE08A"
+  },
+  "dusk_mail": {
+    "name_key": "item.dusk_mail",
+    "description_key": "item.dusk_mail_desc",
+    "kind": "equipment",
+    "slot": "armor",
+    "rarity": "common",
+    "stats": {
+      "defense": 2,
+      "hp": 10
+    },
+    "stack_limit": 1,
+    "unique": true,
+    "color": "#C1C6D6"
+  },
+  "warden_plate": {
+    "name_key": "item.warden_plate",
+    "description_key": "item.warden_plate_desc",
+    "kind": "equipment",
+    "slot": "armor",
+    "rarity": "epic",
+    "stats": {
+      "defense": 5,
+      "hp": 25
+    },
+    "stack_limit": 1,
+    "unique": true,
+    "color": "#BE83FF"
+  },
+  "cyan_charm": {
+    "name_key": "item.cyan_charm",
+    "description_key": "item.cyan_charm_desc",
+    "kind": "equipment",
+    "slot": "charm",
+    "rarity": "uncommon",
+    "stats": {
+      "mp": 15
+    },
+    "stack_limit": 1,
+    "unique": true,
+    "color": "#60D99A"
+  },
+  "royal_sigil": {
+    "name_key": "item.royal_sigil",
+    "description_key": "item.royal_sigil_desc",
+    "kind": "equipment",
+    "slot": "charm",
+    "rarity": "legendary",
+    "stats": {
+      "stamina": 15,
+      "crit": 0.04
+    },
+    "stack_limit": 1,
+    "unique": true,
+    "color": "#FFE08A"
+  }
+}

@@ -1,0 +1,24 @@
+SHADOWBOUND — Original Prototype & Game Art License Declaration
+================================================================
+
+Creative Commons Zero v1.0 Universal (CC0 1.0) / Project Original Work
+
+All original artwork, icons, UI graphics, environment textures, and anime
+fantasy stickman sprite sheets generated specifically for the SHADOWBOUND
+repository (via `assets/tools/generate_placeholder_art.py` and `icon.svg`)
+are 100% original works created for this project without using any copyrighted
+anime characters, trademarks, or third-party proprietary materials.
+
+Summary of Rights (CC0 1.0 Universal):
+The authors dedicate these original SHADOWBOUND placeholder and prototype art
+assets to the public domain under the Creative Commons Zero v1.0 Universal
+(CC0 1.0) Public Domain Dedication, permitting unrestricted use, modification,
+replacement, redistribution, and commercial packaging (including Android APK
+distribution) with no attribution required.
+
+Full legal code reference:
+https://creativecommons.org/publicdomain/zero/1.0/legalcode
+
+Note: Third-party open-source assets bundled in this repository (such as the
+Cairo font family) are governed by their respective license files in this
+`licenses/` directory and documented in `ASSET_CREDITS.md`.

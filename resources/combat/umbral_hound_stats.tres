@@ -1,0 +1,28 @@
+[gd_resource type="Resource" script_class="EnemyStats" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://resources/combat/enemy_stats.gd" id="1_estats"]
+
+[resource]
+script = ExtResource("1_estats")
+enemy_id = "umbral_hound"
+archetype = "melee_rusher"
+name_key = "enemy.umbral_hound"
+is_boss = false
+max_hp = 68.0
+defense = 2.0
+knockback_resistance = 0.1
+has_front_shield = false
+front_shield_reduction = 0.0
+attack_damage = 14.0
+attack_knockback = 235.0
+move_speed = 178.0
+aggro_range = 340.0
+leash_range = 520.0
+attack_range = 78.0
+preferred_min_range = 0.0
+telegraph_duration = 0.36
+attack_active_duration = 0.24
+attack_cooldown = 1.05
+hurt_stun_duration = 0.22
+xp_reward = 24
+gold_reward = 12

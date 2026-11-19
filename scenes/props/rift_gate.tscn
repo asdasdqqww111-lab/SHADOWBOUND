@@ -1,0 +1,74 @@
+[gd_scene load_steps=10 format=3]
+
+[ext_resource type="Script" path="res://scripts/world/rift_gate.gd" id="1_script"]
+[ext_resource type="Texture2D" path="res://assets/sprites/environment/rift_gate_sheet.png" id="2_tex"]
+[ext_resource type="FontFile" path="res://assets/fonts/Cairo-VariableFont.ttf" id="3_font"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_rg_0"]
+atlas = ExtResource("2_tex")
+region = Rect2(0, 0, 128, 160)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_rg_1"]
+atlas = ExtResource("2_tex")
+region = Rect2(128, 0, 128, 160)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_rg_2"]
+atlas = ExtResource("2_tex")
+region = Rect2(256, 0, 128, 160)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_rg_3"]
+atlas = ExtResource("2_tex")
+region = Rect2(384, 0, 128, 160)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_rift"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_rg_0")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_rg_1")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_rg_2")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_rg_3")
+}],
+"loop": true,
+"name": &"swirl",
+"speed": 6.0
+}]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_trigger"]
+size = Vector2(82, 128)
+
+[node name="RiftGate" type="Area2D" groups=["rift_gates"]]
+collision_layer = 16
+collision_mask = 4
+monitorable = false
+script = ExtResource("1_script")
+
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="."]
+position = Vector2(0, -78)
+sprite_frames = SubResource("SpriteFrames_rift")
+animation = &"swirl"
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+position = Vector2(0, -64)
+shape = SubResource("RectangleShape2D_trigger")
+
+[node name="PromptLabel" type="Label" parent="."]
+visible = false
+offset_left = -110.0
+offset_top = -182.0
+offset_right = 110.0
+offset_bottom = -148.0
+theme_override_colors/font_color = Color(1, 0.917647, 0.62, 1)
+theme_override_colors/font_outline_color = Color(0.05, 0.02, 0.12, 1)
+theme_override_constants/outline_size = 5
+theme_override_fonts/font = ExtResource("3_font")
+theme_override_font_sizes/font_size = 16
+text = "[E] Switch Mode"
+horizontal_alignment = 1
+vertical_alignment = 1

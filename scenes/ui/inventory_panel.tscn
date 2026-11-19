@@ -1,0 +1,172 @@
+[gd_scene load_steps=4 format=3]
+
+[ext_resource type="Script" path="res://scripts/ui/inventory_panel.gd" id="1_script"]
+[ext_resource type="Theme" path="res://resources/themes/fantasy_ui_theme.tres" id="2_theme"]
+
+[ext_resource type="Script" path="res://scripts/ui/character_build_panel.gd" id="3_builds"]
+
+[node name="InventoryPanel" type="CanvasLayer"]
+layer = 45
+process_mode = 3
+script = ExtResource("1_script")
+
+[node name="Root" type="Control" parent="."]
+visible = false
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+theme = ExtResource("2_theme")
+
+[node name="Dimmer" type="ColorRect" parent="Root"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+color = Color(0.025, 0.015, 0.06, 0.94)
+
+[node name="Panel" type="PanelContainer" parent="Root"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 72.0
+offset_top = 32.0
+offset_right = -72.0
+offset_bottom = -32.0
+
+[node name="VBox" type="VBoxContainer" parent="Root/Panel"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="Header" type="HBoxContainer" parent="Root/Panel/VBox"]
+layout_mode = 2
+
+[node name="Title" type="Label" parent="Root/Panel/VBox/Header"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 26
+theme_override_colors/font_color = Color(1, 0.88, 0.54, 1)
+text = "Adventurer's Satchel"
+
+[node name="Close" type="Button" parent="Root/Panel/VBox/Header"]
+custom_minimum_size = Vector2(120, 58)
+layout_mode = 2
+text = "Close"
+
+[node name="Profile" type="Label" parent="Root/Panel/VBox"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 18
+text = "Kael · Lv.1 · Rank F"
+
+[node name="XP" type="ProgressBar" parent="Root/Panel/VBox"]
+custom_minimum_size = Vector2(0, 14)
+layout_mode = 2
+mouse_filter = 2
+show_percentage = false
+
+[node name="Wallet" type="Label" parent="Root/Panel/VBox"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 17
+theme_override_colors/font_color = Color(1, 0.88, 0.54, 1)
+text = "Gold 0 · Diamonds 0 · Magic Crystals 0"
+autowrap_mode = 2
+
+[node name="Tabs" type="TabContainer" parent="Root/Panel/VBox"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="Satchel" type="VBoxContainer" parent="Root/Panel/VBox/Tabs"]
+layout_mode = 2
+
+[node name="Body" type="HBoxContainer" parent="Root/Panel/VBox/Tabs/Satchel"]
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_constants/separation = 24
+
+[node name="Items" type="ItemList" parent="Root/Panel/VBox/Tabs/Satchel/Body"]
+custom_minimum_size = Vector2(360, 200)
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+size_flags_stretch_ratio = 1.0
+theme_override_font_sizes/font_size = 18
+fixed_icon_size = Vector2i(56, 56)
+icon_mode = 1
+allow_reselect = true
+
+[node name="Details" type="VBoxContainer" parent="Root/Panel/VBox/Tabs/Satchel/Body"]
+custom_minimum_size = Vector2(400, 0)
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 10
+
+[node name="Name" type="Label" parent="Root/Panel/VBox/Tabs/Satchel/Body/Details"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 23
+theme_override_colors/font_color = Color(0.7, 0.9, 1, 1)
+autowrap_mode = 2
+
+[node name="Description" type="Label" parent="Root/Panel/VBox/Tabs/Satchel/Body/Details"]
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_font_sizes/font_size = 15
+autowrap_mode = 2
+
+[node name="Vitals" type="Label" parent="Root/Panel/VBox/Tabs/Satchel/Body/Details"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 16
+autowrap_mode = 2
+
+[node name="Actions" type="HBoxContainer" parent="Root/Panel/VBox/Tabs/Satchel/Body/Details"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="Use" type="Button" parent="Root/Panel/VBox/Tabs/Satchel/Body/Details/Actions"]
+custom_minimum_size = Vector2(0, 64)
+layout_mode = 2
+text = "Use item"
+theme_override_font_sizes/font_size = 14
+size_flags_horizontal = 3
+
+[node name="Discard" type="Button" parent="Root/Panel/VBox/Tabs/Satchel/Body/Details/Actions"]
+custom_minimum_size = Vector2(0, 64)
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Discard 1"
+theme_override_font_sizes/font_size = 14
+
+[node name="Upgrade" type="Button" parent="Root/Panel/VBox/Tabs/Satchel/Body/Details/Actions"]
+custom_minimum_size = Vector2(0, 64)
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 14
+text = "Forge"
+
+[node name="Builds" type="ScrollContainer" parent="Root/Panel/VBox/Tabs"]
+layout_mode = 2
+horizontal_scroll_mode = 0
+
+[node name="Character" type="HBoxContainer" parent="Root/Panel/VBox/Tabs/Builds"]
+layout_mode = 2
+size_flags_horizontal = 3
+script = ExtResource("3_builds")
+
+[node name="Feedback" type="Label" parent="Root/Panel/VBox"]
+custom_minimum_size = Vector2(0, 28)
+layout_mode = 2
+theme_override_colors/font_color = Color(0.6, 1, 0.85, 1)
+theme_override_font_sizes/font_size = 16
+autowrap_mode = 2
+
+[node name="Capacity" type="Label" parent="Root/Panel/VBox"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 14
+text = "Slots 0 / 24"
+autowrap_mode = 2
+
+[node name="DiscardDialog" type="ConfirmationDialog" parent="Root"]
+initial_position = 2
+size = Vector2i(460, 180)
+exclusive = true
+theme = ExtResource("2_theme")

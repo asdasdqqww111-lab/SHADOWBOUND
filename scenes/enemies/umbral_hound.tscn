@@ -1,0 +1,37 @@
+[gd_scene load_steps=6 format=3]
+
+[ext_resource type="Script" path="res://scripts/enemies/umbral_hound.gd" id="1_script"]
+[ext_resource type="Resource" path="res://resources/combat/umbral_hound_stats.tres" id="2_stats"]
+[ext_resource type="SpriteFrames" path="res://resources/sprites/umbral_hound_frames.tres" id="3_frames"]
+
+[sub_resource type="CapsuleShape2D" id="CapsuleShape2D_body"]
+radius = 15.0
+height = 46.0
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_hurt"]
+radius = 30.0
+
+[node name="UmbralHound" type="CharacterBody2D"]
+z_index = 8
+collision_layer = 8
+collision_mask = 129
+script = ExtResource("1_script")
+stats = ExtResource("2_stats")
+
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="."]
+position = Vector2(0, -48)
+sprite_frames = ExtResource("3_frames")
+animation = &"idle"
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+position = Vector2(0, -23)
+shape = SubResource("CapsuleShape2D_body")
+
+[node name="Hurtbox" type="Area2D" parent="." groups=["enemy_hurtbox"]]
+position = Vector2(0, -28)
+collision_layer = 16
+collision_mask = 0
+monitoring = false
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Hurtbox"]
+shape = SubResource("CircleShape2D_hurt")

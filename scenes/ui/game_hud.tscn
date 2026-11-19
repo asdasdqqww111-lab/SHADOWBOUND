@@ -1,0 +1,404 @@
+[gd_scene load_steps=8 format=3]
+
+[ext_resource type="Script" path="res://scripts/ui/game_hud.gd" id="1_hud"]
+[ext_resource type="Theme" path="res://resources/themes/fantasy_ui_theme.tres" id="2_theme"]
+[ext_resource type="Texture2D" path="res://assets/sprites/player/player_portrait.png" id="3_portrait"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_hp_fill"]
+bg_color = Color(0.878431, 0.219608, 0.392157, 1)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_mp_fill"]
+bg_color = Color(0.305882, 0.568627, 1, 1)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_sp_fill"]
+bg_color = Color(0.28, 0.86, 0.72, 1)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_boss_fill"]
+bg_color = Color(0.84, 0.18, 0.42, 1)
+border_width_right = 2
+border_color = Color(1, 0.88, 0.54, 1)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
+
+[node name="GameHUD" type="CanvasLayer"]
+layer = 20
+script = ExtResource("1_hud")
+
+[node name="HudRoot" type="Control" parent="."]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+theme = ExtResource("2_theme")
+
+[node name="TopBar" type="HBoxContainer" parent="HudRoot"]
+layout_mode = 1
+anchors_preset = 10
+anchor_right = 1.0
+offset_left = 18.0
+offset_top = 14.0
+offset_right = -18.0
+offset_bottom = 170.0
+grow_horizontal = 2
+mouse_filter = 2
+
+[node name="StatusPanel" type="PanelContainer" parent="HudRoot/TopBar"]
+custom_minimum_size = Vector2(328, 108)
+layout_mode = 2
+mouse_filter = 2
+
+[node name="HBox" type="HBoxContainer" parent="HudRoot/TopBar/StatusPanel"]
+layout_mode = 2
+mouse_filter = 2
+theme_override_constants/separation = 12
+
+[node name="Portrait" type="TextureRect" parent="HudRoot/TopBar/StatusPanel/HBox"]
+custom_minimum_size = Vector2(76, 76)
+layout_mode = 2
+size_flags_vertical = 4
+mouse_filter = 2
+texture = ExtResource("3_portrait")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="StatsVBox" type="VBoxContainer" parent="HudRoot/TopBar/StatusPanel/HBox"]
+layout_mode = 2
+size_flags_horizontal = 3
+mouse_filter = 2
+theme_override_constants/separation = 4
+
+[node name="HeaderRow" type="HBoxContainer" parent="HudRoot/TopBar/StatusPanel/HBox/StatsVBox"]
+layout_mode = 2
+mouse_filter = 2
+
+[node name="NameLabel" type="Label" parent="HudRoot/TopBar/StatusPanel/HBox/StatsVBox/HeaderRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_colors/font_color = Color(1, 0.94, 0.78, 1)
+theme_override_font_sizes/font_size = 16
+text = "Kael"
+
+[node name="RankLabel" type="Label" parent="HudRoot/TopBar/StatusPanel/HBox/StatsVBox/HeaderRow"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.55, 0.93, 1, 1)
+theme_override_font_sizes/font_size = 14
+text = "Rank F · Lv.1"
+
+[node name="HpRow" type="HBoxContainer" parent="HudRoot/TopBar/StatusPanel/HBox/StatsVBox"]
+layout_mode = 2
+mouse_filter = 2
+theme_override_constants/separation = 8
+
+[node name="HpLabel" type="Label" parent="HudRoot/TopBar/StatusPanel/HBox/StatsVBox/HpRow"]
+custom_minimum_size = Vector2(38, 0)
+layout_mode = 2
+theme_override_font_sizes/font_size = 12
+text = "HP"
+
+[node name="HpBar" type="ProgressBar" parent="HudRoot/TopBar/StatusPanel/HBox/StatsVBox/HpRow"]
+custom_minimum_size = Vector2(0, 12)
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 4
+mouse_filter = 2
+theme_override_styles/fill = SubResource("StyleBoxFlat_hp_fill")
+max_value = 120.0
+value = 120.0
+show_percentage = false
+
+[node name="MpRow" type="HBoxContainer" parent="HudRoot/TopBar/StatusPanel/HBox/StatsVBox"]
+layout_mode = 2
+mouse_filter = 2
+theme_override_constants/separation = 8
+
+[node name="MpLabel" type="Label" parent="HudRoot/TopBar/StatusPanel/HBox/StatsVBox/MpRow"]
+custom_minimum_size = Vector2(38, 0)
+layout_mode = 2
+theme_override_font_sizes/font_size = 12
+text = "MP"
+
+[node name="MpBar" type="ProgressBar" parent="HudRoot/TopBar/StatusPanel/HBox/StatsVBox/MpRow"]
+custom_minimum_size = Vector2(0, 10)
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 4
+mouse_filter = 2
+theme_override_styles/fill = SubResource("StyleBoxFlat_mp_fill")
+max_value = 80.0
+value = 80.0
+show_percentage = false
+
+[node name="SpRow" type="HBoxContainer" parent="HudRoot/TopBar/StatusPanel/HBox/StatsVBox"]
+layout_mode = 2
+mouse_filter = 2
+theme_override_constants/separation = 8
+
+[node name="SpLabel" type="Label" parent="HudRoot/TopBar/StatusPanel/HBox/StatsVBox/SpRow"]
+custom_minimum_size = Vector2(38, 0)
+layout_mode = 2
+theme_override_font_sizes/font_size = 12
+text = "SP"
+
+[node name="SpBar" type="ProgressBar" parent="HudRoot/TopBar/StatusPanel/HBox/StatsVBox/SpRow"]
+custom_minimum_size = Vector2(0, 9)
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 4
+mouse_filter = 2
+theme_override_styles/fill = SubResource("StyleBoxFlat_sp_fill")
+value = 100.0
+show_percentage = false
+
+[node name="XpLabel" type="Label" parent="HudRoot/TopBar/StatusPanel/HBox/StatsVBox"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 11
+text = "XP 0 / 100"
+
+[node name="XpBar" type="ProgressBar" parent="HudRoot/TopBar/StatusPanel/HBox/StatsVBox"]
+custom_minimum_size = Vector2(0, 6)
+layout_mode = 2
+mouse_filter = 2
+theme_override_styles/fill = SubResource("StyleBoxFlat_mp_fill")
+show_percentage = false
+
+[node name="WalletLabel" type="Label" parent="HudRoot/TopBar/StatusPanel/HBox/StatsVBox"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 10
+text = "Gold 0 · Diamonds 0 · Crystals 0"
+
+[node name="Spacer" type="Control" parent="HudRoot/TopBar"]
+layout_mode = 2
+size_flags_horizontal = 3
+mouse_filter = 2
+
+[node name="RightCluster" type="VBoxContainer" parent="HudRoot/TopBar"]
+layout_mode = 2
+mouse_filter = 2
+theme_override_constants/separation = 6
+
+[node name="ZonePanel" type="PanelContainer" parent="HudRoot/TopBar/RightCluster"]
+layout_mode = 2
+mouse_filter = 2
+
+[node name="VBox" type="VBoxContainer" parent="HudRoot/TopBar/RightCluster/ZonePanel"]
+layout_mode = 2
+mouse_filter = 2
+theme_override_constants/separation = 1
+
+[node name="ZoneLabel" type="Label" parent="HudRoot/TopBar/RightCluster/ZonePanel/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.91, 0.65, 1)
+theme_override_font_sizes/font_size = 15
+text = "Twilight Cliffside Ruins"
+horizontal_alignment = 1
+
+[node name="ModeLabel" type="Label" parent="HudRoot/TopBar/RightCluster/ZonePanel/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.54, 0.94, 1, 1)
+theme_override_font_sizes/font_size = 12
+text = "CAM: SIDE-SCROLL"
+horizontal_alignment = 1
+
+[node name="StateLabel" type="Label" parent="HudRoot/TopBar/RightCluster/ZonePanel/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.84, 0.78, 1, 0.95)
+theme_override_font_sizes/font_size = 11
+text = "State: Idle · E"
+horizontal_alignment = 1
+
+[node name="ButtonRow" type="HBoxContainer" parent="HudRoot/TopBar/RightCluster"]
+layout_mode = 2
+alignment = 2
+theme_override_constants/separation = 8
+
+[node name="SwitchModeBtn" type="Button" parent="HudRoot/TopBar/RightCluster/ButtonRow"]
+layout_mode = 2
+focus_mode = 0
+theme_override_font_sizes/font_size = 14
+text = "Switch Mode"
+
+[node name="InventoryBtn" type="Button" parent="HudRoot/TopBar/RightCluster/ButtonRow"]
+custom_minimum_size = Vector2(80, 52)
+layout_mode = 2
+focus_mode = 0
+theme_override_font_sizes/font_size = 14
+text = "Satchel"
+
+[node name="PauseBtn" type="Button" parent="HudRoot/TopBar/RightCluster/ButtonRow"]
+layout_mode = 2
+focus_mode = 0
+theme_override_font_sizes/font_size = 14
+text = "Pause"
+
+[node name="SkillBtn" type="Button" parent="HudRoot/TopBar/RightCluster"]
+custom_minimum_size = Vector2(0, 54)
+layout_mode = 2
+focus_mode = 0
+theme_override_font_sizes/font_size = 14
+text = "Class Skill · Q"
+
+[node name="BossPanel" type="PanelContainer" parent="HudRoot"]
+visible = false
+layout_mode = 1
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -195.0
+offset_top = 14.0
+offset_right = 195.0
+offset_bottom = 86.0
+grow_horizontal = 2
+mouse_filter = 2
+
+[node name="VBox" type="VBoxContainer" parent="HudRoot/BossPanel"]
+layout_mode = 2
+mouse_filter = 2
+theme_override_constants/separation = 3
+
+[node name="BossNameLabel" type="Label" parent="HudRoot/BossPanel/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.9, 0.62, 1)
+theme_override_font_sizes/font_size = 14
+text = "Vaelor, Warden of the Eclipse"
+horizontal_alignment = 1
+
+[node name="BossPhaseLabel" type="Label" parent="HudRoot/BossPanel/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.76, 0.68, 1, 1)
+theme_override_font_sizes/font_size = 11
+text = "Phase I · Sealed Blade"
+horizontal_alignment = 1
+
+[node name="BossHpBar" type="ProgressBar" parent="HudRoot/BossPanel/VBox"]
+custom_minimum_size = Vector2(0, 12)
+layout_mode = 2
+mouse_filter = 2
+theme_override_styles/fill = SubResource("StyleBoxFlat_boss_fill")
+max_value = 320.0
+value = 320.0
+show_percentage = false
+
+[node name="RewardLabel" type="Label" parent="HudRoot"]
+visible = false
+layout_mode = 1
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -235.0
+offset_top = 104.0
+offset_right = 235.0
+offset_bottom = 176.0
+mouse_filter = 2
+theme_override_font_sizes/font_size = 15
+theme_override_colors/font_color = Color(1, 0.88, 0.54, 1)
+horizontal_alignment = 1
+autowrap_mode = 2
+
+[node name="HintBanner" type="PanelContainer" parent="HudRoot"]
+layout_mode = 1
+anchors_preset = 7
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = -260.0
+offset_top = -54.0
+offset_right = 260.0
+offset_bottom = -12.0
+grow_horizontal = 2
+grow_vertical = 0
+mouse_filter = 2
+
+[node name="HintLabel" type="Label" parent="HudRoot/HintBanner"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.92, 0.9, 1, 0.95)
+theme_override_font_sizes/font_size = 13
+text = "Run, Jump, Double-Jump & Slash totems."
+horizontal_alignment = 1
+autowrap_mode = 2
+
+[node name="PauseOverlay" type="Control" parent="."]
+visible = false
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme = ExtResource("2_theme")
+
+[node name="Dimmer" type="ColorRect" parent="PauseOverlay"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.03, 0.015, 0.08, 0.76)
+
+[node name="CenterContainer" type="CenterContainer" parent="PauseOverlay"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="PausePanel" type="PanelContainer" parent="PauseOverlay/CenterContainer"]
+custom_minimum_size = Vector2(380, 0)
+layout_mode = 2
+
+[node name="VBox" type="VBoxContainer" parent="PauseOverlay/CenterContainer/PausePanel"]
+layout_mode = 2
+theme_override_constants/separation = 6
+
+[node name="PauseTitle" type="Label" parent="PauseOverlay/CenterContainer/PausePanel/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.9, 0.62, 1)
+theme_override_font_sizes/font_size = 26
+text = "Game Paused"
+horizontal_alignment = 1
+
+[node name="ResumeBtn" type="Button" parent="PauseOverlay/CenterContainer/PausePanel/VBox"]
+layout_mode = 2
+text = "Resume"
+
+[node name="InventoryBtn" type="Button" parent="PauseOverlay/CenterContainer/PausePanel/VBox"]
+layout_mode = 2
+text = "Adventurer's Satchel"
+
+[node name="PauseModeBtn" type="Button" parent="PauseOverlay/CenterContainer/PausePanel/VBox"]
+layout_mode = 2
+text = "Switch Camera Mode"
+
+[node name="PauseZoomBtn" type="Button" parent="PauseOverlay/CenterContainer/PausePanel/VBox"]
+layout_mode = 2
+text = "Camera View: Standard"
+
+[node name="RespawnBtn" type="Button" parent="PauseOverlay/CenterContainer/PausePanel/VBox"]
+layout_mode = 2
+text = "Reset to Zone Spawn"
+
+[node name="PauseLangBtn" type="Button" parent="PauseOverlay/CenterContainer/PausePanel/VBox"]
+layout_mode = 2
+text = "Switch to العربية"
+
+[node name="MainMenuBtn" type="Button" parent="PauseOverlay/CenterContainer/PausePanel/VBox"]
+layout_mode = 2
+text = "Return to Main Menu"

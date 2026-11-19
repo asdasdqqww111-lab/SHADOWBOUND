@@ -1,0 +1,510 @@
+[gd_scene load_steps=32 format=3]
+
+[ext_resource type="Script" path="res://scripts/world/twilight_sanctum_level.gd" id="1_level"]
+[ext_resource type="PackedScene" path="res://scenes/player/player.tscn" id="2_player"]
+[ext_resource type="PackedScene" path="res://scenes/ui/game_hud.tscn" id="3_hud"]
+[ext_resource type="PackedScene" path="res://scenes/ui/touch_controls.tscn" id="4_touch"]
+[ext_resource type="PackedScene" path="res://scenes/props/rift_gate.tscn" id="5_rift"]
+[ext_resource type="PackedScene" path="res://scenes/props/training_totem.tscn" id="6_totem"]
+[ext_resource type="Texture2D" path="res://assets/sprites/environment/bg_twilight_sky.png" id="7_sky"]
+[ext_resource type="Texture2D" path="res://assets/sprites/environment/bg_distant_peaks.png" id="8_peaks"]
+[ext_resource type="Texture2D" path="res://assets/sprites/environment/bg_ruined_arches.png" id="9_arches"]
+[ext_resource type="Texture2D" path="res://assets/sprites/environment/platform_stone.png" id="10_plat"]
+[ext_resource type="Texture2D" path="res://assets/sprites/environment/topdown_sanctum_floor.png" id="11_floor"]
+[ext_resource type="Texture2D" path="res://assets/sprites/environment/topdown_wall_tile.png" id="12_wall"]
+[ext_resource type="Texture2D" path="res://assets/sprites/environment/topdown_rune_circle.png" id="13_rune"]
+[ext_resource type="Texture2D" path="res://assets/sprites/environment/mana_lantern.png" id="14_lantern"]
+[ext_resource type="Texture2D" path="res://assets/sprites/environment/oneway_bridge.png" id="15_oneway"]
+[ext_resource type="PackedScene" path="res://scenes/props/lore_runestone.tscn" id="16_lore"]
+[ext_resource type="PackedScene" path="res://scenes/props/camera_zone_trigger.tscn" id="17_camzone"]
+[ext_resource type="PackedScene" path="res://scenes/enemies/umbral_hound.tscn" id="18_hound"]
+[ext_resource type="PackedScene" path="res://scenes/enemies/rift_wisp.tscn" id="19_wisp"]
+[ext_resource type="PackedScene" path="res://scenes/enemies/obsidian_sentinel.tscn" id="20_sentinel"]
+[ext_resource type="PackedScene" path="res://scenes/enemies/eclipse_warden_boss.tscn" id="21_boss"]
+
+[ext_resource type="PackedScene" path="res://scenes/ui/inventory_panel.tscn" id="22_inventory"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_vbound"]
+size = Vector2(64, 1100)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_plat_768"]
+size = Vector2(768, 64)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_plat_512"]
+size = Vector2(512, 64)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_plat_256"]
+size = Vector2(256, 64)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_td_hwall"]
+size = Vector2(1600, 96)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_td_vwall"]
+size = Vector2(96, 1120)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_td_pillar"]
+size = Vector2(112, 92)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_oneway"]
+size = Vector2(256, 16)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_wall_pillar"]
+size = Vector2(64, 220)
+
+[node name="TwilightSanctum" type="Node2D"]
+script = ExtResource("1_level")
+
+[node name="ParallaxBackground" type="ParallaxBackground" parent="."]
+
+[node name="SkyLayer" type="ParallaxLayer" parent="ParallaxBackground"]
+motion_scale = Vector2(0, 0)
+
+[node name="SkySprite" type="Sprite2D" parent="ParallaxBackground/SkyLayer"]
+scale = Vector2(1.4, 1.3)
+texture = ExtResource("7_sky")
+centered = false
+offset = Vector2(-120, -80)
+
+[node name="PeaksLayer" type="ParallaxLayer" parent="ParallaxBackground"]
+motion_scale = Vector2(0.2, 0.06)
+motion_mirroring = Vector2(1280, 0)
+
+[node name="PeaksSprite" type="Sprite2D" parent="ParallaxBackground/PeaksLayer"]
+position = Vector2(0, 210)
+texture = ExtResource("8_peaks")
+centered = false
+
+[node name="ArchesLayer" type="ParallaxLayer" parent="ParallaxBackground"]
+motion_scale = Vector2(0.45, 0.12)
+motion_mirroring = Vector2(1280, 0)
+
+[node name="ArchesSprite" type="Sprite2D" parent="ParallaxBackground/ArchesLayer"]
+position = Vector2(0, 230)
+texture = ExtResource("9_arches")
+centered = false
+
+[node name="SideScrollZone" type="Node2D" parent="."]
+
+[node name="SideScrollSpawn" type="Marker2D" parent="SideScrollZone"]
+position = Vector2(120, 118)
+
+[node name="LeftBoundary" type="StaticBody2D" parent="SideScrollZone"]
+position = Vector2(-140, -120)
+collision_layer = 1
+collision_mask = 0
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="SideScrollZone/LeftBoundary"]
+shape = SubResource("RectangleShape2D_vbound")
+
+[node name="RightBoundary" type="StaticBody2D" parent="SideScrollZone"]
+position = Vector2(2568, -120)
+collision_layer = 1
+collision_mask = 0
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="SideScrollZone/RightBoundary"]
+shape = SubResource("RectangleShape2D_vbound")
+
+[node name="StartTerrace" type="StaticBody2D" parent="SideScrollZone"]
+position = Vector2(256, 152)
+collision_layer = 1
+collision_mask = 0
+
+[node name="Sprite2D" type="Sprite2D" parent="SideScrollZone/StartTerrace"]
+texture_repeat = 2
+texture = ExtResource("10_plat")
+region_enabled = true
+region_rect = Rect2(0, 0, 768, 64)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="SideScrollZone/StartTerrace"]
+shape = SubResource("RectangleShape2D_plat_768")
+
+[node name="LowStepPlatform" type="StaticBody2D" parent="SideScrollZone"]
+position = Vector2(860, 62)
+collision_layer = 1
+collision_mask = 0
+
+[node name="Sprite2D" type="Sprite2D" parent="SideScrollZone/LowStepPlatform"]
+texture_repeat = 2
+texture = ExtResource("10_plat")
+region_enabled = true
+region_rect = Rect2(0, 0, 256, 64)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="SideScrollZone/LowStepPlatform"]
+shape = SubResource("RectangleShape2D_plat_256")
+
+[node name="UpperOverlookLedge" type="StaticBody2D" parent="SideScrollZone"]
+position = Vector2(920, -178)
+collision_layer = 1
+collision_mask = 0
+
+[node name="Sprite2D" type="Sprite2D" parent="SideScrollZone/UpperOverlookLedge"]
+texture_repeat = 2
+texture = ExtResource("10_plat")
+region_enabled = true
+region_rect = Rect2(0, 0, 256, 64)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="SideScrollZone/UpperOverlookLedge"]
+shape = SubResource("RectangleShape2D_plat_256")
+
+[node name="HighShrinePlatform" type="StaticBody2D" parent="SideScrollZone"]
+position = Vector2(1320, -28)
+collision_layer = 1
+collision_mask = 0
+
+[node name="Sprite2D" type="Sprite2D" parent="SideScrollZone/HighShrinePlatform"]
+texture_repeat = 2
+texture = ExtResource("10_plat")
+region_enabled = true
+region_rect = Rect2(0, 0, 512, 64)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="SideScrollZone/HighShrinePlatform"]
+shape = SubResource("RectangleShape2D_plat_512")
+
+[node name="LowerBridgePlatform" type="StaticBody2D" parent="SideScrollZone"]
+position = Vector2(1820, 92)
+collision_layer = 1
+collision_mask = 0
+
+[node name="Sprite2D" type="Sprite2D" parent="SideScrollZone/LowerBridgePlatform"]
+texture_repeat = 2
+texture = ExtResource("10_plat")
+region_enabled = true
+region_rect = Rect2(0, 0, 512, 64)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="SideScrollZone/LowerBridgePlatform"]
+shape = SubResource("RectangleShape2D_plat_512")
+
+[node name="EastSanctumTerrace" type="StaticBody2D" parent="SideScrollZone"]
+position = Vector2(2280, -8)
+collision_layer = 1
+collision_mask = 0
+
+[node name="Sprite2D" type="Sprite2D" parent="SideScrollZone/EastSanctumTerrace"]
+texture_repeat = 2
+texture = ExtResource("10_plat")
+region_enabled = true
+region_rect = Rect2(0, 0, 512, 64)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="SideScrollZone/EastSanctumTerrace"]
+shape = SubResource("RectangleShape2D_plat_512")
+
+[node name="LanternStartA" type="Sprite2D" parent="SideScrollZone"]
+position = Vector2(24, 58)
+texture = ExtResource("14_lantern")
+
+[node name="LanternStartB" type="Sprite2D" parent="SideScrollZone"]
+position = Vector2(560, 58)
+texture = ExtResource("14_lantern")
+
+[node name="LanternOverlook" type="Sprite2D" parent="SideScrollZone"]
+position = Vector2(920, -272)
+texture = ExtResource("14_lantern")
+
+[node name="LanternShrineA" type="Sprite2D" parent="SideScrollZone"]
+position = Vector2(1140, -122)
+texture = ExtResource("14_lantern")
+
+[node name="LanternShrineB" type="Sprite2D" parent="SideScrollZone"]
+position = Vector2(1500, -122)
+texture = ExtResource("14_lantern")
+
+[node name="LanternEast" type="Sprite2D" parent="SideScrollZone"]
+position = Vector2(2140, -102)
+texture = ExtResource("14_lantern")
+
+[node name="TotemWest" parent="SideScrollZone" instance=ExtResource("6_totem")]
+position = Vector2(390, 120)
+
+[node name="TotemBridge" parent="SideScrollZone" instance=ExtResource("6_totem")]
+position = Vector2(1800, 60)
+
+[node name="RiftGateShrine" parent="SideScrollZone" instance=ExtResource("5_rift")]
+position = Vector2(1320, -60)
+target_mode = 1
+
+[node name="RiftGateEast" parent="SideScrollZone" instance=ExtResource("5_rift")]
+position = Vector2(2360, -40)
+target_mode = 1
+
+[node name="OneWaySkybridgeWest" type="StaticBody2D" parent="SideScrollZone"]
+position = Vector2(260, 44)
+collision_layer = 128
+collision_mask = 0
+
+[node name="Sprite2D" type="Sprite2D" parent="SideScrollZone/OneWaySkybridgeWest"]
+position = Vector2(0, 8)
+texture_repeat = 2
+texture = ExtResource("15_oneway")
+region_enabled = true
+region_rect = Rect2(0, 0, 256, 32)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="SideScrollZone/OneWaySkybridgeWest"]
+shape = SubResource("RectangleShape2D_oneway")
+one_way_collision = true
+
+[node name="OneWaySkybridgeEast" type="StaticBody2D" parent="SideScrollZone"]
+position = Vector2(1820, -6)
+collision_layer = 128
+collision_mask = 0
+
+[node name="Sprite2D" type="Sprite2D" parent="SideScrollZone/OneWaySkybridgeEast"]
+position = Vector2(0, 8)
+texture_repeat = 2
+texture = ExtResource("15_oneway")
+region_enabled = true
+region_rect = Rect2(0, 0, 256, 32)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="SideScrollZone/OneWaySkybridgeEast"]
+shape = SubResource("RectangleShape2D_oneway")
+one_way_collision = true
+
+[node name="WallJumpTower" type="StaticBody2D" parent="SideScrollZone"]
+position = Vector2(660, -210)
+collision_layer = 1
+collision_mask = 0
+
+[node name="Sprite2D" type="Sprite2D" parent="SideScrollZone/WallJumpTower"]
+texture_repeat = 2
+texture = ExtResource("12_wall")
+region_enabled = true
+region_rect = Rect2(0, 0, 64, 220)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="SideScrollZone/WallJumpTower"]
+shape = SubResource("RectangleShape2D_wall_pillar")
+
+[node name="OverlookVistaZone" parent="SideScrollZone" instance=ExtResource("17_camzone")]
+position = Vector2(920, -270)
+zone_id = "cliff_overlook"
+camera_priority = 2
+zoom_scale_override = 0.85
+
+[node name="EastRiftVistaZone" parent="SideScrollZone" instance=ExtResource("17_camzone")]
+position = Vector2(2350, -110)
+zone_id = "east_rift"
+camera_priority = 1
+zoom_scale_override = 0.92
+use_focal_pull = true
+focal_pull_weight = 0.28
+
+[node name="RiftWispStep" parent="SideScrollZone" instance=ExtResource("19_wisp")]
+position = Vector2(880, -42)
+gameplay_mode = 0
+patrol_half_span = 70.0
+
+[node name="UmbralHoundShrine" parent="SideScrollZone" instance=ExtResource("18_hound")]
+position = Vector2(1430, -62)
+gameplay_mode = 0
+patrol_half_span = 110.0
+
+[node name="UmbralHoundBridge" parent="SideScrollZone" instance=ExtResource("18_hound")]
+position = Vector2(1920, 58)
+gameplay_mode = 0
+patrol_half_span = 110.0
+
+[node name="ObsidianSentinelEast" parent="SideScrollZone" instance=ExtResource("20_sentinel")]
+position = Vector2(2190, -42)
+gameplay_mode = 0
+patrol_half_span = 95.0
+
+[node name="TopDownZone" type="Node2D" parent="."]
+visible = false
+
+[node name="CourtyardFloor" type="Sprite2D" parent="TopDownZone"]
+z_index = -5
+texture_repeat = 2
+position = Vector2(800, 2120)
+texture = ExtResource("11_floor")
+region_enabled = true
+region_rect = Rect2(0, 0, 1600, 1120)
+
+[node name="CenterRuneCircle" type="Sprite2D" parent="TopDownZone"]
+z_index = -4
+position = Vector2(800, 2120)
+texture = ExtResource("13_rune")
+
+[node name="TopDownSpawn" type="Marker2D" parent="TopDownZone"]
+position = Vector2(800, 2445)
+
+[node name="NorthWall" type="StaticBody2D" parent="TopDownZone"]
+position = Vector2(800, 1608)
+collision_layer = 2
+collision_mask = 0
+
+[node name="Sprite2D" type="Sprite2D" parent="TopDownZone/NorthWall"]
+texture_repeat = 2
+texture = ExtResource("12_wall")
+region_enabled = true
+region_rect = Rect2(0, 0, 1600, 128)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="TopDownZone/NorthWall"]
+shape = SubResource("RectangleShape2D_td_hwall")
+
+[node name="SouthWall" type="StaticBody2D" parent="TopDownZone"]
+position = Vector2(800, 2632)
+collision_layer = 2
+collision_mask = 0
+
+[node name="Sprite2D" type="Sprite2D" parent="TopDownZone/SouthWall"]
+texture_repeat = 2
+texture = ExtResource("12_wall")
+region_enabled = true
+region_rect = Rect2(0, 0, 1600, 128)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="TopDownZone/SouthWall"]
+shape = SubResource("RectangleShape2D_td_hwall")
+
+[node name="WestWall" type="StaticBody2D" parent="TopDownZone"]
+position = Vector2(48, 2120)
+collision_layer = 2
+collision_mask = 0
+
+[node name="Sprite2D" type="Sprite2D" parent="TopDownZone/WestWall"]
+texture_repeat = 2
+texture = ExtResource("12_wall")
+region_enabled = true
+region_rect = Rect2(0, 0, 128, 1120)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="TopDownZone/WestWall"]
+shape = SubResource("RectangleShape2D_td_vwall")
+
+[node name="EastWall" type="StaticBody2D" parent="TopDownZone"]
+position = Vector2(1552, 2120)
+collision_layer = 2
+collision_mask = 0
+
+[node name="Sprite2D" type="Sprite2D" parent="TopDownZone/EastWall"]
+texture_repeat = 2
+texture = ExtResource("12_wall")
+region_enabled = true
+region_rect = Rect2(0, 0, 128, 1120)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="TopDownZone/EastWall"]
+shape = SubResource("RectangleShape2D_td_vwall")
+
+[node name="PillarNW" type="StaticBody2D" parent="TopDownZone"]
+position = Vector2(420, 1880)
+collision_layer = 2
+collision_mask = 0
+
+[node name="Sprite2D" type="Sprite2D" parent="TopDownZone/PillarNW"]
+texture = ExtResource("12_wall")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="TopDownZone/PillarNW"]
+shape = SubResource("RectangleShape2D_td_pillar")
+
+[node name="PillarNE" type="StaticBody2D" parent="TopDownZone"]
+position = Vector2(1180, 1880)
+collision_layer = 2
+collision_mask = 0
+
+[node name="Sprite2D" type="Sprite2D" parent="TopDownZone/PillarNE"]
+texture = ExtResource("12_wall")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="TopDownZone/PillarNE"]
+shape = SubResource("RectangleShape2D_td_pillar")
+
+[node name="PillarSW" type="StaticBody2D" parent="TopDownZone"]
+position = Vector2(420, 2360)
+collision_layer = 2
+collision_mask = 0
+
+[node name="Sprite2D" type="Sprite2D" parent="TopDownZone/PillarSW"]
+texture = ExtResource("12_wall")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="TopDownZone/PillarSW"]
+shape = SubResource("RectangleShape2D_td_pillar")
+
+[node name="PillarSE" type="StaticBody2D" parent="TopDownZone"]
+position = Vector2(1180, 2360)
+collision_layer = 2
+collision_mask = 0
+
+[node name="Sprite2D" type="Sprite2D" parent="TopDownZone/PillarSE"]
+texture = ExtResource("12_wall")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="TopDownZone/PillarSE"]
+shape = SubResource("RectangleShape2D_td_pillar")
+
+[node name="CourtyardLantern1" type="Sprite2D" parent="TopDownZone"]
+position = Vector2(680, 1790)
+texture = ExtResource("14_lantern")
+
+[node name="CourtyardLantern2" type="Sprite2D" parent="TopDownZone"]
+position = Vector2(920, 1790)
+texture = ExtResource("14_lantern")
+
+[node name="CourtyardLantern3" type="Sprite2D" parent="TopDownZone"]
+position = Vector2(620, 2380)
+texture = ExtResource("14_lantern")
+
+[node name="CourtyardLantern4" type="Sprite2D" parent="TopDownZone"]
+position = Vector2(980, 2380)
+texture = ExtResource("14_lantern")
+
+[node name="TotemCourtyardWest" parent="TopDownZone" instance=ExtResource("6_totem")]
+position = Vector2(560, 2120)
+
+[node name="TotemCourtyardEast" parent="TopDownZone" instance=ExtResource("6_totem")]
+position = Vector2(1040, 2120)
+
+[node name="RiftGateSanctum" parent="TopDownZone" instance=ExtResource("5_rift")]
+position = Vector2(800, 1825)
+target_mode = 0
+
+[node name="LoreStoneWest" parent="TopDownZone" instance=ExtResource("16_lore")]
+position = Vector2(240, 2120)
+lore_key = "lore.west_tablet"
+
+[node name="LoreStoneEast" parent="TopDownZone" instance=ExtResource("16_lore")]
+position = Vector2(1360, 2120)
+lore_key = "lore.east_tablet"
+
+[node name="NorthAltarVistaZone" parent="TopDownZone" instance=ExtResource("17_camzone")]
+position = Vector2(800, 1900)
+zone_id = "sanctum_altar"
+camera_priority = 2
+zoom_scale_override = 0.86
+use_focal_pull = true
+focal_pull_weight = 0.25
+focal_offset = Vector2(0, -30)
+
+[node name="UmbralHoundCourtyard" parent="TopDownZone" instance=ExtResource("18_hound")]
+position = Vector2(235, 2360)
+gameplay_mode = 1
+patrol_half_span = 68.0
+
+[node name="RiftWispCourtyard" parent="TopDownZone" instance=ExtResource("19_wisp")]
+position = Vector2(1365, 2345)
+gameplay_mode = 1
+patrol_half_span = 68.0
+
+[node name="ObsidianSentinelCourtyard" parent="TopDownZone" instance=ExtResource("20_sentinel")]
+position = Vector2(235, 1915)
+gameplay_mode = 1
+patrol_half_span = 65.0
+
+[node name="VaelorEclipseBoss" parent="TopDownZone" instance=ExtResource("21_boss")]
+position = Vector2(800, 1945)
+gameplay_mode = 1
+patrol_half_span = 90.0
+
+[node name="Player" parent="." instance=ExtResource("2_player")]
+position = Vector2(120, 118)
+
+[node name="TouchControls" parent="." instance=ExtResource("4_touch")]
+
+[node name="GameHUD" parent="." instance=ExtResource("3_hud")]
+
+[node name="TransitionLayer" type="CanvasLayer" parent="."]
+layer = 25
+
+[node name="FadeRect" type="ColorRect" parent="TransitionLayer"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(0.45, 0.28, 0.92, 0)
+
+[node name="InventoryPanel" parent="." instance=ExtResource("22_inventory")]

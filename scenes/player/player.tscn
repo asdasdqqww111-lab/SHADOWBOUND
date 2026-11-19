@@ -1,0 +1,62 @@
+[gd_scene load_steps=11 format=3]
+
+[ext_resource type="Script" path="res://scripts/player/player_controller.gd" id="1_player"]
+[ext_resource type="SpriteFrames" path="res://resources/sprites/stickman_sprite_frames.tres" id="2_frames"]
+[ext_resource type="Script" path="res://scripts/player/side_scroll_controller.gd" id="3_ss_ctrl"]
+[ext_resource type="Script" path="res://scripts/player/top_down_controller.gd" id="4_td_ctrl"]
+[ext_resource type="Script" path="res://scripts/camera/dual_mode_camera.gd" id="5_cam"]
+[ext_resource type="Resource" path="res://resources/camera/side_scroll_camera_profile.tres" id="6_ss_cam"]
+[ext_resource type="Resource" path="res://resources/camera/top_down_camera_profile.tres" id="7_td_cam"]
+
+[ext_resource type="Script" path="res://scripts/combat/class_skill_controller.gd" id="8_skill"]
+
+[sub_resource type="CapsuleShape2D" id="CapsuleShape2D_body"]
+radius = 13.0
+height = 66.0
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_slash"]
+radius = 34.0
+
+[node name="Player" type="CharacterBody2D"]
+z_index = 10
+collision_layer = 4
+collision_mask = 129
+floor_snap_length = 6.0
+script = ExtResource("1_player")
+
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="."]
+position = Vector2(0, -52)
+sprite_frames = ExtResource("2_frames")
+animation = &"idle"
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+position = Vector2(0, -33)
+shape = SubResource("CapsuleShape2D_body")
+
+[node name="SideScrollController" type="Node" parent="."]
+script = ExtResource("3_ss_ctrl")
+
+[node name="TopDownController" type="Node" parent="."]
+script = ExtResource("4_td_ctrl")
+
+[node name="DualModeCamera" type="Camera2D" parent="."]
+offset = Vector2(0, -48)
+zoom = Vector2(1.14, 1.14)
+position_smoothing_enabled = true
+position_smoothing_speed = 8.0
+script = ExtResource("5_cam")
+side_scroll_profile = ExtResource("6_ss_cam")
+top_down_profile = ExtResource("7_td_cam")
+
+[node name="SlashHitbox" type="Area2D" parent="."]
+position = Vector2(38, -34)
+collision_layer = 32
+collision_mask = 88
+monitorable = false
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="SlashHitbox"]
+shape = SubResource("CircleShape2D_slash")
+disabled = true
+
+[node name="ClassSkillController" type="Node" parent="."]
+script = ExtResource("8_skill")

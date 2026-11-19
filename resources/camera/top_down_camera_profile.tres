@@ -1,0 +1,27 @@
+[gd_resource type="Resource" script_class="CameraModeProfile" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://resources/camera/camera_mode_profile.gd" id="1_cam_profile"]
+
+[resource]
+script = ExtResource("1_cam_profile")
+mode_id = 1
+mode_key = "top_down"
+base_zoom = Vector2(1.1, 1.1)
+min_zoom_scale = 0.82
+max_zoom_scale = 1.15
+speed_zoom_out = 0.07
+block_zoom_in = 0.04
+base_offset = Vector2(0, -10)
+lookahead_distance = Vector2(52, 40)
+idle_lookahead_ratio = 0.18
+fall_peek_offset_y = 0.0
+fall_peek_speed_threshold = 9999.0
+position_smoothing_speed = 7.2
+offset_smoothing_speed = 5.6
+zoom_smoothing_speed = 5.2
+drag_horizontal_enabled = true
+drag_vertical_enabled = true
+drag_left_margin = 0.07
+drag_right_margin = 0.07
+drag_top_margin = 0.07
+drag_bottom_margin = 0.07

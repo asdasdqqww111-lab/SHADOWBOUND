@@ -1,0 +1,21 @@
+[gd_resource type="Resource" script_class="PlayerProfile" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://resources/player/player_profile.gd" id="1_profile"]
+
+[resource]
+script = ExtResource("1_profile")
+character_name_en = "Kael"
+character_name_ar = "كايل"
+class_id = "warrior"
+rank_code = "F"
+level = 1
+max_hp = 120.0
+current_hp = 120.0
+max_mp = 80.0
+current_mp = 80.0
+max_stamina = 100.0
+current_stamina = 100.0
+base_attack = 18.0
+defense = 4.0
+crit_chance = 0.12
+crit_multiplier = 1.5

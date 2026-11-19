@@ -1,0 +1,190 @@
+name: Build Android preview APK
+
+on:
+  workflow_dispatch:
+  push:
+    branches: ['arena/1e3db61b-shadowbound']
+    paths:
+      - '.github/workflows/android-preview.yml'
+      - 'scripts/**'
+      - 'resources/**'
+      - 'scenes/**'
+      - 'data/**'
+      - 'assets/**'
+      - 'project.godot'
+      - 'export_presets.cfg.example'
+
+permissions:
+  contents: write
+  checks: write
+
+jobs:
+  android:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    env:
+      GODOT_VERSION: 4.3.stable
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/checkout@v7.0.1
+      - name: Read project version
+        run: |
+          python3 - <<'PY'
+          import os, re
+          from pathlib import Path
+          version = re.search(r'config/version="([0-9]+\.[0-9]+\.[0-9]+)"', Path('project.godot').read_text())[1]
+          with open(os.environ['GITHUB_ENV'], 'a') as stream:
+              stream.write(f'APP_VERSION={version}\nAPK_NAME=SHADOWBOUND-v{version}-preview.apk\n')
+          PY
+      - uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: '17'
+      - name: Install Godot and Android export template
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/godot" "$HOME/.local/share/godot/export_templates/$GODOT_VERSION"
+          base=https://github.com/godotengine/godot-builds/releases/download/4.3-stable
+          curl -fL --retry 3 "$base/Godot_v4.3-stable_linux.x86_64.zip" -o "$RUNNER_TEMP/godot.zip"
+          unzip -q "$RUNNER_TEMP/godot.zip" -d "$RUNNER_TEMP/godot"
+          mv "$RUNNER_TEMP/godot/Godot_v4.3-stable_linux.x86_64" "$RUNNER_TEMP/godot/godot"
+          chmod +x "$RUNNER_TEMP/godot/godot"
+          echo "$RUNNER_TEMP/godot" >> "$GITHUB_PATH"
+          curl -fL --retry 3 "$base/Godot_v4.3-stable_export_templates.tpz" -o "$RUNNER_TEMP/templates.tpz"
+          unzip -p "$RUNNER_TEMP/templates.tpz" templates/android_debug.apk \
+            > "$HOME/.local/share/godot/export_templates/$GODOT_VERSION/android_debug.apk"
+          unzip -p "$RUNNER_TEMP/templates.tpz" templates/android_source.zip > "$RUNNER_TEMP/android_source.zip"
+          mkdir -p android/build
+          unzip -q "$RUNNER_TEMP/android_source.zip" -d android/build
+          touch android/build/.gdignore
+          printf '%s\n' "$GODOT_VERSION" > android/.build_version
+          # Use Google's public Maven Central mirror before the canonical endpoint.
+          # This avoids a single repository outage blocking Android transitive dependencies.
+          python3 - <<'PY'
+          from pathlib import Path
+          count = 0
+          for path in Path('android/build').rglob('*.gradle'):
+              text = path.read_text()
+              if 'mavenCentral()' in text:
+                  text = text.replace('mavenCentral()',
+                      "maven { url 'https://maven-central.storage-download.googleapis.com/maven2/' }; mavenCentral()")
+                  path.write_text(text)
+                  count += 1
+          assert count, 'Expected Maven Central repository declarations in Godot Android template'
+          print(f'Configured Central mirror in {count} Gradle scripts')
+          PY
+          chmod +x android/build/gradlew
+      - name: Configure Android SDK and local-only debug signing
+        run: |
+          set -euo pipefail
+          "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" 'platform-tools' 'platforms;android-34' 'build-tools;34.0.0'
+          keytool -genkeypair -keystore "$RUNNER_TEMP/preview.keystore" -storepass android \
+            -alias androiddebugkey -keypass android -dname 'CN=SHADOWBOUND Preview,O=SHADOWBOUND,C=US' \
+            -keyalg RSA -keysize 2048 -validity 3650
+          mkdir -p "$HOME/.config/godot" builds/android
+          python3 - <<'PY'
+          import os, re
+          from pathlib import Path
+          settings = '[gd_resource type="EditorSettings" format=3]\n\n[resource]\n'
+          settings += 'export/android/android_sdk_path = "' + os.environ['ANDROID_HOME'] + '"\n'
+          settings += 'export/android/java_sdk_path = "' + os.environ['JAVA_HOME'] + '"\n'
+          Path.home().joinpath('.config/godot/editor_settings-4.3.tres').write_text(settings)
+          preset = Path('export_presets.cfg.example').read_text()
+          version = os.environ['APP_VERSION']
+          preset = re.sub(r'export_path="[^"]+"', 'export_path="builds/android/' + os.environ['APK_NAME'] + '"', preset)
+          preset = re.sub(r'version/name="[^"]+"', 'version/name="' + version + '-preview"', preset)
+          preset += '\nkeystore/debug="' + os.environ['RUNNER_TEMP'] + '/preview.keystore"\n'
+          preset += 'keystore/debug_user="androiddebugkey"\nkeystore/debug_password="android"\n'
+          Path('export_presets.cfg').write_text(preset)
+          PY
+      - name: Import and export signed APK
+        run: |
+          set -euo pipefail
+          godot --headless --editor --path . --import --quit 2>&1 | tee "$RUNNER_TEMP/import.log"
+          if grep -En 'SCRIPT ERROR:|ERROR:|WARNING:' "$RUNNER_TEMP/import.log"; then exit 1; fi
+          # Never publish a preview whose native regression suites fail.
+          for phase in 1 2 3 4 5; do
+            timeout 30 godot --headless --path . "res://tests/gdscript/test_phase${phase}_runner.tscn" 2>&1 \
+              | tee "$RUNNER_TEMP/phase${phase}.log"
+          done
+          if grep -En 'SCRIPT ERROR:|ERROR:|WARNING:' "$RUNNER_TEMP/"phase*.log; then exit 1; fi
+          # Maven/Gradle repository availability is external to the project.
+          # Retry a failed export, but never publish an unsuccessful/partial APK.
+          exported=false
+          for attempt in 1 2; do
+            rm -f "builds/android/$APK_NAME"
+            if timeout --kill-after=15s 300 godot --headless --path . --export-debug 'Android APK' "builds/android/$APK_NAME" \
+              2>&1 | tee "$RUNNER_TEMP/export.log"; then
+              exported=true
+              break
+            fi
+            echo "APK export attempt $attempt failed."
+          done
+          test "$exported" = true
+          test -s "builds/android/$APK_NAME"
+      - name: Verify APK signature, manifest and packaged game
+        run: |
+          set -euo pipefail
+          tools="$ANDROID_HOME/build-tools/34.0.0"
+          "$tools/apksigner" verify --verbose --print-certs "builds/android/$APK_NAME" | tee "$RUNNER_TEMP/signature.log"
+          "$tools/aapt" dump badging "builds/android/$APK_NAME" | tee "$RUNNER_TEMP/badging.log"
+          "$tools/aapt" dump permissions "builds/android/$APK_NAME" | tee "$RUNNER_TEMP/permissions.log"
+          python3 scripts/tools/verify_android_apk.py "builds/android/$APK_NAME" "$RUNNER_TEMP"
+          cd builds/android
+          sha256sum "$APK_NAME" > "$APK_NAME.sha256"
+      - name: Publish downloadable preview
+        env:
+          GH_REPO: ${{ github.repository }}
+        run: |
+          cat > "$RUNNER_TEMP/release-notes.md" <<EOF
+          ## SHADOWBOUND v$APP_VERSION — Android test build
+
+          Download **$APK_NAME** below. Android **9.0+**, ARM64 or ARMv7. Offline single-player.
+          Experimental debug-signed build for visual testing, not a production/store release.
+          Includes both gameplay modes, three enemy archetypes, the Eclipse Warden boss, XP/levels/ranks, three currencies, inventory, equipment/rarities, smith upgrades, five classes, talent trees and class skills.
+
+          Allow installation from your browser/file manager when Android asks. No network permissions are requested.
+          This preview uses a disposable test signing key; a later preview may require uninstalling this one first.
+          Phase 4 progression checkpoints migrate to schema 2 in this build, if Android retains app data.
+          Uninstalling removes app data, so back up any important checkpoints before reinstalling.
+
+          Verified: all five native Godot regression suites, successful Godot 4.3 export, Android signature, package/version/minimum SDK, ARM architectures,
+          no requested Android permissions, and packaged game resources. Physical-device gameplay remains to be tested.
+
+          Source commit: $GITHUB_SHA
+          Build: https://github.com/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID
+          SHA-256 checksum is supplied next to the APK.
+          EOF
+          gh release create "v$APP_VERSION-android-preview-$GITHUB_RUN_NUMBER" \
+            --target "$GITHUB_SHA" --prerelease --title "SHADOWBOUND v$APP_VERSION — Android Preview" \
+            --notes-file "$RUNNER_TEMP/release-notes.md" \
+            "builds/android/$APK_NAME" "builds/android/$APK_NAME.sha256"
+      - name: Publish build diagnostics
+        if: always()
+        env:
+          GH_REPO: ${{ github.repository }}
+        run: |
+          python3 - <<'PY'
+          import json, os
+          from pathlib import Path
+          logs = []
+          for name in ['import', 'phase1', 'phase2', 'phase3', 'phase4', 'phase5', 'export', 'signature', 'badging', 'permissions']:
+              path = Path(os.environ['RUNNER_TEMP']) / (name + '.log')
+              if path.exists():
+                  logs.append(name + '\n```text\n' + path.read_text()[-12000:] + '\n```')
+          payload = {'name': 'Android preview diagnostics', 'head_sha': os.environ['GITHUB_SHA'],
+                     'status': 'completed', 'conclusion': 'neutral',
+                     'output': {'title': 'APK export and verification logs',
+                                'summary': ('\n\n'.join(logs) or 'Export did not start; inspect workflow status.')[-60000:]}}
+          Path(os.environ['RUNNER_TEMP'], 'android-diagnostics.json').write_text(json.dumps(payload))
+          PY
+          gh api --method POST "repos/$GH_REPO/check-runs" --input "$RUNNER_TEMP/android-diagnostics.json" --silent
+      - uses: actions/upload-artifact@v7.0.2
+        if: always()
+        with:
+          name: android-preview-build
+          path: |
+            builds/android/*.apk
+            builds/android/*.sha256
+            ${{ runner.temp }}/*.log
+          if-no-files-found: ignore

@@ -1,0 +1,279 @@
+[gd_scene load_steps=11 format=3]
+
+[ext_resource type="Script" path="res://scripts/ui/touch_controls.gd" id="1_touch"]
+[ext_resource type="Script" path="res://scripts/ui/virtual_joystick.gd" id="2_joy"]
+[ext_resource type="Texture2D" path="res://assets/sprites/ui/joystick_base.png" id="3_jbase"]
+[ext_resource type="Texture2D" path="res://assets/sprites/ui/joystick_knob.png" id="4_jknob"]
+[ext_resource type="Texture2D" path="res://assets/sprites/ui/btn_attack.png" id="5_atk"]
+[ext_resource type="Texture2D" path="res://assets/sprites/ui/btn_jump.png" id="6_jmp"]
+[ext_resource type="Texture2D" path="res://assets/sprites/ui/btn_dodge.png" id="7_ddg"]
+[ext_resource type="Texture2D" path="res://assets/sprites/ui/btn_mode.png" id="8_mod"]
+[ext_resource type="FontFile" path="res://assets/fonts/Cairo-VariableFont.ttf" id="9_font"]
+[ext_resource type="Texture2D" path="res://assets/sprites/ui/btn_block.png" id="10_blk"]
+
+[node name="TouchControls" type="CanvasLayer"]
+layer = 15
+script = ExtResource("1_touch")
+
+[node name="Root" type="Control" parent="."]
+layout_direction = 2
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="VirtualJoystick" type="Control" parent="Root"]
+layout_mode = 1
+anchors_preset = 2
+anchor_top = 1.0
+anchor_bottom = 1.0
+offset_left = 34.0
+offset_top = -232.0
+offset_right = 234.0
+offset_bottom = -32.0
+grow_vertical = 0
+mouse_filter = 2
+script = ExtResource("2_joy")
+max_radius = 64.0
+deadzone = 0.14
+
+[node name="Base" type="TextureRect" parent="Root/VirtualJoystick"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+texture = ExtResource("3_jbase")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Knob" type="TextureRect" parent="Root/VirtualJoystick"]
+layout_mode = 0
+offset_left = 58.0
+offset_top = 58.0
+offset_right = 142.0
+offset_bottom = 142.0
+mouse_filter = 2
+texture = ExtResource("4_jknob")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="ActionCluster" type="Control" parent="Root"]
+layout_mode = 1
+anchors_preset = 3
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -382.0
+offset_top = -302.0
+offset_right = -22.0
+offset_bottom = -16.0
+grow_horizontal = 0
+grow_vertical = 0
+mouse_filter = 2
+
+[node name="AttackButton" type="Control" parent="Root/ActionCluster"]
+modulate = Color(1, 1, 1, 0.92)
+layout_mode = 0
+offset_left = 218.0
+offset_top = 148.0
+offset_right = 334.0
+offset_bottom = 264.0
+pivot_offset = Vector2(58, 58)
+mouse_filter = 2
+
+[node name="Icon" type="TextureRect" parent="Root/ActionCluster/AttackButton"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+texture = ExtResource("5_atk")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Label" type="Label" parent="Root/ActionCluster/AttackButton"]
+layout_mode = 1
+anchors_preset = 12
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_top = -24.0
+offset_bottom = 2.0
+grow_horizontal = 2
+grow_vertical = 0
+theme_override_colors/font_color = Color(1, 0.95, 0.98, 1)
+theme_override_colors/font_outline_color = Color(0.06, 0.02, 0.12, 1)
+theme_override_constants/outline_size = 5
+theme_override_fonts/font = ExtResource("9_font")
+theme_override_font_sizes/font_size = 13
+text = "ATK"
+horizontal_alignment = 1
+
+[node name="JumpButton" type="Control" parent="Root/ActionCluster"]
+modulate = Color(1, 1, 1, 0.92)
+layout_mode = 0
+offset_left = 100.0
+offset_top = 174.0
+offset_right = 196.0
+offset_bottom = 270.0
+pivot_offset = Vector2(48, 48)
+mouse_filter = 2
+
+[node name="Icon" type="TextureRect" parent="Root/ActionCluster/JumpButton"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+texture = ExtResource("6_jmp")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Label" type="Label" parent="Root/ActionCluster/JumpButton"]
+layout_mode = 1
+anchors_preset = 12
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_top = -22.0
+offset_bottom = 2.0
+grow_horizontal = 2
+grow_vertical = 0
+theme_override_colors/font_color = Color(0.88, 0.98, 1, 1)
+theme_override_colors/font_outline_color = Color(0.04, 0.04, 0.14, 1)
+theme_override_constants/outline_size = 5
+theme_override_fonts/font = ExtResource("9_font")
+theme_override_font_sizes/font_size = 13
+text = "JUMP"
+horizontal_alignment = 1
+
+[node name="BlockButton" type="Control" parent="Root/ActionCluster"]
+modulate = Color(1, 1, 1, 0.92)
+layout_mode = 0
+offset_left = 44.0
+offset_top = 72.0
+offset_right = 136.0
+offset_bottom = 164.0
+pivot_offset = Vector2(46, 46)
+mouse_filter = 2
+
+[node name="Icon" type="TextureRect" parent="Root/ActionCluster/BlockButton"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+texture = ExtResource("10_blk")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Label" type="Label" parent="Root/ActionCluster/BlockButton"]
+layout_mode = 1
+anchors_preset = 12
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_top = -22.0
+offset_bottom = 2.0
+grow_horizontal = 2
+grow_vertical = 0
+theme_override_colors/font_color = Color(0.86, 0.94, 1, 1)
+theme_override_colors/font_outline_color = Color(0.04, 0.03, 0.14, 1)
+theme_override_constants/outline_size = 5
+theme_override_fonts/font = ExtResource("9_font")
+theme_override_font_sizes/font_size = 13
+text = "GUARD"
+horizontal_alignment = 1
+
+[node name="DodgeButton" type="Control" parent="Root/ActionCluster"]
+modulate = Color(1, 1, 1, 0.92)
+layout_mode = 0
+offset_left = 140.0
+offset_top = 44.0
+offset_right = 234.0
+offset_bottom = 138.0
+pivot_offset = Vector2(47, 47)
+mouse_filter = 2
+
+[node name="Icon" type="TextureRect" parent="Root/ActionCluster/DodgeButton"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+texture = ExtResource("7_ddg")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Label" type="Label" parent="Root/ActionCluster/DodgeButton"]
+layout_mode = 1
+anchors_preset = 12
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_top = -22.0
+offset_bottom = 2.0
+grow_horizontal = 2
+grow_vertical = 0
+theme_override_colors/font_color = Color(0.93, 0.89, 1, 1)
+theme_override_colors/font_outline_color = Color(0.05, 0.02, 0.14, 1)
+theme_override_constants/outline_size = 5
+theme_override_fonts/font = ExtResource("9_font")
+theme_override_font_sizes/font_size = 13
+text = "DODGE"
+horizontal_alignment = 1
+
+[node name="ModeButton" type="Control" parent="Root/ActionCluster"]
+modulate = Color(1, 1, 1, 0.92)
+layout_mode = 0
+offset_left = 246.0
+offset_top = 28.0
+offset_right = 338.0
+offset_bottom = 120.0
+pivot_offset = Vector2(46, 46)
+mouse_filter = 2
+
+[node name="Icon" type="TextureRect" parent="Root/ActionCluster/ModeButton"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+texture = ExtResource("8_mod")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Label" type="Label" parent="Root/ActionCluster/ModeButton"]
+layout_mode = 1
+anchors_preset = 12
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_top = -22.0
+offset_bottom = 2.0
+grow_horizontal = 2
+grow_vertical = 0
+theme_override_colors/font_color = Color(1, 0.92, 0.66, 1)
+theme_override_colors/font_outline_color = Color(0.08, 0.04, 0.02, 1)
+theme_override_constants/outline_size = 5
+theme_override_fonts/font = ExtResource("9_font")
+theme_override_font_sizes/font_size = 13
+text = "MODE"
+horizontal_alignment = 1

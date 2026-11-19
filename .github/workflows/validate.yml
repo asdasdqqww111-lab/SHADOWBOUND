@@ -1,0 +1,79 @@
+name: Validate Godot project
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  checks: write
+
+jobs:
+  validate:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v7.0.1
+      - uses: actions/setup-python@v7.1.0
+        with:
+          python-version: '3.12'
+      - name: Install static validation tools
+        run: python -m pip install gdtoolkit==4.5.0 pillow==13.0.0
+      - name: Validate resources and gameplay contracts
+        run: |
+          python tests/validate_project.py
+          python tests/test_gameplay_logic.py
+      - name: Install Godot 4.3 stable
+        run: |
+          curl --fail --location --retry 3 -o "$RUNNER_TEMP/godot.zip" \
+            https://github.com/godotengine/godot-builds/releases/download/4.3-stable/Godot_v4.3-stable_linux.x86_64.zip
+          unzip -q "$RUNNER_TEMP/godot.zip" -d "$RUNNER_TEMP/godot"
+          mv "$RUNNER_TEMP/godot/Godot_v4.3-stable_linux.x86_64" "$RUNNER_TEMP/godot/godot"
+          chmod +x "$RUNNER_TEMP/godot/godot"
+          echo "$RUNNER_TEMP/godot" >> "$GITHUB_PATH"
+      - name: Import assets and run native regression suites
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/test-logs"
+          godot --headless --editor --path . --import --quit 2>&1 | tee "$RUNNER_TEMP/test-logs/import.log"
+          if grep -En 'SCRIPT ERROR:|ERROR:|WARNING:' "$RUNNER_TEMP/test-logs/import.log"; then
+            exit 1
+          fi
+          for phase in 1 2 3 4 5; do
+            timeout 30 godot --headless --path . "res://tests/gdscript/test_phase${phase}_runner.tscn" 2>&1 \
+              | tee "$RUNNER_TEMP/test-logs/phase${phase}.log"
+          done
+          if grep -En 'SCRIPT ERROR:|ERROR:|WARNING:' "$RUNNER_TEMP/test-logs/"*.log; then
+            echo 'Godot reported errors or warnings.'
+            exit 1
+          fi
+      - name: Publish native diagnostics as a check
+        if: always()
+        env:
+          GH_TOKEN: ${{ github.token }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+          GH_REPO: ${{ github.repository }}
+        shell: bash
+        run: |
+          python - <<'PYTHON'
+          import glob, json, os
+          logs = []
+          for path in sorted(glob.glob(os.environ['RUNNER_TEMP'] + '/test-logs/*.log')):
+              with open(path) as stream:
+                  logs.append(os.path.basename(path) + '\n```text\n' + stream.read() + '\n```')
+          summary = '\n\n'.join(logs) or 'Native tests did not start; inspect job status.'
+          payload = {'name': 'Native Godot diagnostics', 'head_sha': os.environ['HEAD_SHA'],
+                     'status': 'completed', 'conclusion': 'neutral',
+                     'output': {'title': 'Godot import and regression logs', 'summary': summary[-60000:]}}
+          with open(os.environ['RUNNER_TEMP'] + '/diagnostics.json', 'w') as stream:
+              json.dump(payload, stream)
+          PYTHON
+          gh api --method POST "repos/$GH_REPO/check-runs" --input "$RUNNER_TEMP/diagnostics.json" --silent
+      - uses: actions/upload-artifact@v7.0.2
+        if: always()
+        with:
+          name: godot-headless-logs
+          path: ${{ runner.temp }}/test-logs
+          if-no-files-found: ignore
