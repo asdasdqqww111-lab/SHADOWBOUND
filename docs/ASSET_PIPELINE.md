@@ -122,3 +122,10 @@ Run `python3 assets/tools/generate_placeholder_art.py` to regenerate all 28 PNGs
 The five IDs in `data/items/item_catalog.json` each map to `assets/sprites/items/<item_id>.png`, **64×64 RGBA**, transparent outer corners, violet/obsidian card, gold outline. Potions use red/blue/jade liquids; materials use a violet crystal and gold eclipse medallion. Inventory renders icons at 56px and uses the catalog's color/name/description/stack/effect metadata, not text painted into the images.
 
 Regenerate only icons with `python3 assets/tools/generate_inventory_icons.py`, or all **33 PNGs** with `python3 assets/tools/generate_placeholder_art.py`. Replacing art must preserve IDs/filenames and icon dimensions. Both routes are deterministic and CC0. Text remains localized by Godot/Cairo; do not bake translated labels into icons.
+
+
+## Phase 5 — Equipment Icons
+
+The catalog now has fourteen IDs: five Phase 4 supplies/materials plus nine unique equipment pieces. All map to **64×64 RGBA** icons at `assets/sprites/items/<id>.png`. Equipment border/fill accents use the catalog's five rarity colors. Filenames and transparent-card dimensions must remain stable; labels, rarity names and stats stay in localized text, not the artwork.
+
+Run `python3 assets/tools/generate_gear_icons.py` for the nine equipment icons, or `python3 assets/tools/generate_placeholder_art.py` for all **42 PNGs**. Both are deterministic. Bolts, spirit and beam are lightweight Godot draw primitives; more elaborate skill VFX/audio remain Phase 8.

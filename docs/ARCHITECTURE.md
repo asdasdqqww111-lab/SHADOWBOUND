@@ -19,6 +19,7 @@ Player (CharacterBody2D — scripts/player/player_controller.gd)
 │                         top_down_camera_profile.tres, fall-peek, 8-way lookahead,
 │                         dynamic sprint/guard zoom, Standard/Wide presets, trauma shake,
 │                         and priority-stacked CameraZoneTrigger vista / POI framing)
+├── ClassSkillController (shared MP/cooldown, five class abilities)
 └── SlashHitbox          (Area2D — directional strike detection shared across both modes)
 ```
 
@@ -68,7 +69,7 @@ Player (CharacterBody2D — scripts/player/player_controller.gd)
 | **Phase 2** | Dedicated data-driven Side-Scroll & Top-Down cameras (profiles, fall-peek, 8-way lookahead, vista/POI zones, Standard/Wide zoom) + separate full movement controllers (wall slide/jump, one-way drop-through, apex hang, 8-compass walk/run/sprint, dodge i-frames, Shadow Guard + perfect-parry window, Lore Runestones, 5-button touch fan) | **Completed** |
 | **Phase 3** | Multi-hit sword combos, damage/parry/i-frame combat resolution, 3 enemy archetypes, 1 multi-phase boss | **Completed** |
 | **Phase 4** | XP, levels, Ranks (F–SSS), currencies (Gold, Diamonds, Magic Crystals), inventory | **Completed** |
-| **Phase 5** | Equipment/rarity/blacksmith upgrades, 5 classes (Warrior, Mage, Assassin, Knight, Summoner), skill trees, loot | Planned |
+| **Phase 5** | Equipment/rarity/menu smith upgrades, 5 classes (Warrior, Mage, Assassin, Knight, Summoner), three-node class talent trees, weighted loot | **Completed** |
 | **Phase 6** | Towns, shops, NPC dialogue, dungeons, world/zone maps, main & side quests, monster encyclopedia | Planned |
 | **Phase 7** | Complete offline Guild simulation (HQ, NPC roster, ranks, missions, contribution, storage, shop, reputation, progression; extensible for future online) + full local save/load | Planned |
 | **Phase 8** | Visual VFX polish, audio/SFX/music, full Arabic RTL polish, Android touch customization | Planned |
@@ -117,3 +118,14 @@ XP needed from level `L` to `L+1` is `100 + 40 × (L−1)`; cap **60** costs **7
 Writes flush a same-directory `.tmp` and rename it over the primary. One validated previous document is retained as `.bak`. Load checks the 64 KiB limit, containers, numeric XP range and version before applying anything. Balances and item counts are sanitized against finite limits; unknown items are ignored. Corrupt primary may recover the previous backup; when neither is usable, a fresh profile gets starter supplies. Unsupported newer primary schemas are not overwritten. I/O failures leave in-memory progression intact and are signaled to the inventory UI. No encryption/anti-cheat is claimed for this offline checkpoint.
 
 `GameState.set_inventory_open` owns pause restoration so opening from gameplay resumes gameplay, while opening from Pause returns to Pause. Android Back delegates to the same close path. Touch movement is released through existing pause signals. Use rejects fallen players, materials, empty stacks and already-full vitals; Discard requires confirmation and removes one unit.
+
+
+## Phase 5 — Builds, Equipment & Class Skills
+
+- `BuildState` stores three equipped item IDs, per-owned-item enhancement levels and learned talent IDs. Equipment stays in the bounded inventory and is unique; equipped pieces cannot be discarded. Import validates ownership/slot compatibility, enhancement range, prerequisites, level gates and the shared point budget.
+- `BuildRules` derives active-class, active-tree and equipped-gear bonuses. `PlayerProfile.apply_progression()` always reconstructs canonical level stats before applying these additive modifiers; crit is reset before bonuses. Enhancements scale original item stats by `1 + 0.2 × N`, not the whole character. Recalculation never revives or refills vitals; only living level-ups restore them.
+- `ArmoryService` handles equip toggles, class changes, talent unlocks, prevalidated smith transactions and weighted gear loot. Mutations recalculate and emit `modified(profile)` to the same progression save/notification boundary. Duplicate unique drops give bounded gold, while a full bag reports gear rejection. Regular drop chance is 35%; boss pool is guaranteed to roll, not guaranteed to fit.
+- `ClassSkillController`, a separate child of Player, owns one cooldown shared across all classes/modes. It rejects pause, death, hurt stun, insufficient MP and cooldown. Class switching cannot refill MP or reset cooldown. Warrior cleaves; Mage creates three `ClassSkillBolt` areas (friendly layer 32, hurtbox mask 16, world ray sweeps); Assassin moves the real collider; Knight grants a short ward/heal; Summoner creates one timed `SpiritCompanion` with same-mode, line-of-sight attacks. Mode changes, trial reset and victory clear projectiles/spirits. Active cooldown and spirits are session state, not saved.
+- `CharacterBuildPanel` is a scrollable second tab in the paused inventory modal. It exposes five class options, three sequential talent buttons, shared remaining points, final stats and equipped-slot buttons. Inventory equipment details expose Equip/Unequip and Forge, rarity, scaled stats and exact next-step cost. UI inherits root Arabic RTL and uses the Cairo font.
+- The current checkpoint is schema **2**: Phase 4 fields plus `class_id` and `build`. Schema **1** still loads with Warrior and an empty build, preserving XP/wallet/items. The next checkpoint writes schema 2; no old starters are re-granted. Unknown optional build data is sanitized. JSON numeric versions are normalized through strict integer decoding rather than typed Array membership (Godot JSON numbers are floats).
+- Full world/vital/quest/guild persistence remains Phase 7. Town shops/NPC smiths remain Phase 6, audiovisual polish Phase 8 and device/performance certification Phase 9.

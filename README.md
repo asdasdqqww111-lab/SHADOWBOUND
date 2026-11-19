@@ -2,11 +2,11 @@
 
 **SHADOWBOUND** (*عهد الظلال*) is an offline single-player 2D Anime Fantasy Stickman RPG built with **Godot 4.x stable** and **GDScript**, designed for **Android (9.0 / API 28+)** and desktop testing with full **English (LTR)** and **Arabic (RTL)** support.
 
-> **Current Milestone:** **Phase 4 — XP, Levels, Ranks, Currencies & Inventory (`v0.4.0`)**
+> **Current Milestone:** **Phase 5 — Equipment, Classes, Talent Trees & Loot (`v0.5.0`)**
 
 ---
 
-## Delivered Features (Phases 1–4)
+## Delivered Features (Phases 1–5)
 
 1. **Dedicated Dual-Mode Camera System (`resources/camera/`, `scripts/camera/`)**
    - Data-driven **`CameraModeProfile`** resources for both modes (`side_scroll_camera_profile.tres` and `top_down_camera_profile.tres`).
@@ -27,7 +27,7 @@
    - 112 frames across `idle`, `run`, `jump`, `fall`, `dodge`, `attack`, `block`, `wall_slide`, `td_idle_down/up/side`, `td_walk_down/up/side`, `td_dodge`, `td_attack`, `td_block`, `attack_2/3`, `hurt`, `td_attack_2/3`, and `td_hurt`.
    - Upgraded `scenes/levels/twilight_sanctum.tscn` with two pass-through **One-Way Skybridges**, a **Wall-Jump Ruin Tower** leading to the upper overlook, two bilingual **Lore Runestones** in the courtyard wings, and three **Camera Vista Zones**.
 5. **Android 9+ Multi-Touch & Bilingual English / Arabic (RTL) UI**
-   - Non-overlapping 5-button right-thumb fan (`ATK`, `JUMP/ACT`, hold-capable `GUARD`, `DODGE`, `MODE`) + left-thumb analog `VirtualJoystick`, live HUD movement-state/compass/`[VISTA]` readout, Camera View settings in Main & Pause menus, and 140 paired EN/AR RTL localization keys bundled with the SIL OFL **Cairo** font.
+   - Non-overlapping 5-button right-thumb fan (`ATK`, `JUMP/ACT`, hold-capable `GUARD`, `DODGE`, `MODE`) + left-thumb analog `VirtualJoystick`, live HUD movement-state/compass/`[VISTA]` readout, Camera View settings in Main & Pause menus, and 217 paired EN/AR RTL localization keys bundled with the SIL OFL **Cairo** font.
 
 6. **Shared Full Combat System**
    - Buffered **3-hit sword combo**: Shadow Cut → Crescent Reverse → Eclipse Finisher (shield-breaking); 5/9 stamina follow-ups, critical hits, knockback, hurt stun and one hit per target per swing.
@@ -47,7 +47,16 @@
    - **24-slot stackable inventory**, three usable restorative consumables, two materials, five new original icons, selected-item details, and confirmed single-item discard. Full vitals never waste a potion; full bags reject materials without losing XP/currency rewards.
    - Open **Satchel** from HUD/Pause or press **I**. Combat pauses; closing restores the previous pause state. Arabic RTL, item labels/descriptions, wallet and XP displays update live.
    - Versioned **local progression checkpoints** (`user://progression.json`) preserve XP, currencies and item counts across restarts. Atomic temporary-file replacement, one previous backup, file-size/type/range validation and future-schema overwrite protection. This is **not** a full world/quest save; full save remains Phase 7.
-   - Starter supplies: 3 Health Potions, 2 Mana Potions, 2 Stamina Draughts. Used items stay used after retries/relaunch; retrying a trial permits earning rewards from revived foes again. No paid currency purchases, shops, equipment, skill trees or randomized loot yet.
+   - Starter supplies: 3 Health Potions, 2 Mana Potions, 2 Stamina Draughts. Used items stay used after retries/relaunch; retrying a trial permits earning rewards from revived foes again. Fresh Phase 5 profiles also receive a Rust Blade. No paid currency purchases or town shops yet.
+
+
+9. **Equipment, Classes & Skills (Phase 5)**
+   - **Nine unique equipment pieces** across Weapon / Armor / Charm slots and **Common / Uncommon / Rare / Epic / Legendary** rarities; equipped bonuses modify actual combat stats without compounding. Unequip before discarding.
+   - **Satchel forge**: deterministic enhancements **+1 to +5**. Step `N` costs `25N Gold + 2N Shadow Fragments`, plus one Magic Crystal at +4/+5. Every step adds 20% of the item's original stats. Unaffordable transactions spend nothing. This is a menu forge; town/blacksmith NPCs remain Phase 6.
+   - **Five freely selectable classes**, each with an active ability: Warrior's shield-breaking cleave, Mage's three-bolt volley, Assassin's collision-aware blink strike, Knight's healing/immunity ward and Summoner's timed attacking spirit. Press **Q** or tap the HUD skill button. MP costs and shared cooldown prevent free class-switch recasts.
+   - **Three-node linear talent tree per class** (15 nodes): Focus (+2 ATK), Mastery (+10 MP, ×1.2 skill power), Awakening (+15 HP, ×1.35 skill power). One point per level, globally shared; previous-node/level requirements apply. Learned talents persist on switching, but only the active class contributes bonuses. No respec yet.
+   - **Weighted equipment loot**: regular enemies have a 35% gear chance; bosses always roll gear. Full bags explicitly reject new gear while preserving XP/currencies. Owned unique duplicates convert to up to 15 Gold. All nine pieces are obtainable through the two pools.
+   - **Satchel → Character & Skills** for classes/talents/equipment summary. **Schema 2 checkpoints** now include class, equipment, enhancements and learned talents; Phase 4 schema 1 checkpoints migrate without duplicating starter supplies. This requires app data to remain installed; uninstalling Android previews deletes it.
 
 ---
 
@@ -64,6 +73,7 @@
 | **Shadow Dodge (w/ i-frames)** | `DODGE` | `Shift` or `K` | B / Circle |
 | **Interact (Rift Gate / Lore Runestone)** | `ACT` *(when in range)* | `E` or `F` | Y / Triangle |
 | **Switch Camera & Gameplay Mode** | `MODE` or HUD Button | `Tab` or `M` | R1 / RB |
+| **Class Skill** | HUD skill button | `Q` | HUD button |
 | **Satchel / Inventory** | HUD `Satchel` / Pause menu | `I` (Esc closes) | HUD / Pause menu |
 | **Pause / Resume** | HUD `Pause` / Android Back | `Esc` or `P` | Start |
 
@@ -82,13 +92,14 @@
 
 ## Running Tests & Validation
 
-### 1. Godot Headless Runtime Test Suites (Phases 1–4)
+### 1. Godot Headless Runtime Test Suites (Phases 1–5)
 ```bash
 godot --headless --editor --path . --import --quit
 godot --headless --path . res://tests/gdscript/test_phase1_runner.tscn
 godot --headless --path . res://tests/gdscript/test_phase2_runner.tscn
 godot --headless --path . res://tests/gdscript/test_phase3_runner.tscn
 godot --headless --path . res://tests/gdscript/test_phase4_runner.tscn
+godot --headless --path . res://tests/gdscript/test_phase5_runner.tscn
 ```
 
 ### 2. Static AST, Linter, Scene/Resource, Signal & Geometry Suites
@@ -100,9 +111,13 @@ python3 tests/test_gameplay_logic.py
 
 ---
 
-The Python suites validate static contracts and geometry; they do **not** replace native Godot execution or device playtesting. `.github/workflows/validate.yml` imports assets and runs all four native suites on Godot 4.3. See [Phase 4 verification report](docs/PHASE_4_TEST_REPORT.md) for actual results and remaining checks.
+The Python suites validate static contracts and geometry; they do **not** replace native Godot execution or device playtesting. `.github/workflows/validate.yml` imports assets and runs all five native suites on Godot 4.3. See [Phase 5 verification report](docs/PHASE_5_TEST_REPORT.md) for actual results and remaining checks.
 
-## Download Android Preview — Phase 4
+## Android Preview
+
+**Phase 5:** corrected source passes all five native suites; the refreshed APK is being built. Do not use the obsolete early v0.5.0 preview 5 for save testing. See the [Phase 5 report](docs/PHASE_5_TEST_REPORT.md).
+
+### Previous verified download — Phase 4
 
 [**Download SHADOWBOUND v0.4.0 APK**](https://github.com/asdasdqqww111-lab/SHADOWBOUND/releases/download/v0.4.0-android-preview-4/SHADOWBOUND-v0.4.0-preview.apk) · [Release and checksum](https://github.com/asdasdqqww111-lab/SHADOWBOUND/releases/tag/v0.4.0-android-preview-4)
 
@@ -123,17 +138,17 @@ The APK was built and signature/manifest/resource-verified by [GitHub Actions](h
 
 ```text
 SHADOWBOUND/
-├── project.godot                 # Godot 4.x project config (v0.4.0, 13 actions, 8 physics layers)
+├── project.godot                 # Godot 4.x project config (v0.5.0, 14 actions, 8 physics layers)
 ├── export_presets.cfg.example    # Android 9+ (API 28) offline APK preset template
 ├── icon.svg                      # Original SHADOWBOUND application icon
 ├── ASSET_CREDITS.md              # Asset evaluation & complete licensing provenance ledger
 ├── scenes/                       # Main menu, player, HUD, touch UI, props, Twilight Sanctum level
 ├── scripts/                      # Autoloads, separate movement controllers, dual camera/zones, world, UI
-├── assets/                       # Cairo Arabic/Latin font, 33 CC0 PNGs, deterministic art generator
+├── assets/                       # Cairo Arabic/Latin font, 42 CC0 PNGs, deterministic art generator
 ├── resources/                    # CameraModeProfiles, PlayerProfile, player/enemy SpriteFrames (23 player anims), Fantasy Theme
-├── data/                         # Movement/camera/combat/progression JSON config + item catalog + English & Arabic RTL localization (140 keys)
+├── data/                         # Movement/camera/combat/progression JSON config + item catalog + English & Arabic RTL localization (217 keys)
 ├── addons/                       # Reserved for Godot 4 editor plugins
-├── tests/                        # Godot Phase 1–4 headless suites + Python AST/resource/physics validators
+├── tests/                        # Godot Phase 1–5 headless suites + Python AST/resource/physics validators
 ├── licenses/                     # Full license texts (SIL OFL 1.1, CC0 1.0)
-└── docs/                         # Architecture, asset replacement pipeline, Phase 1–4 test reports
+└── docs/                         # Architecture, asset replacement pipeline, Phase 1–5 test reports
 ```
