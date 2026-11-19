@@ -1,4 +1,4 @@
-[gd_scene load_steps=31 format=3]
+[gd_scene load_steps=32 format=3]
 
 [ext_resource type="Script" path="res://scripts/world/twilight_sanctum_level.gd" id="1_level"]
 [ext_resource type="PackedScene" path="res://scenes/player/player.tscn" id="2_player"]
@@ -21,6 +21,8 @@
 [ext_resource type="PackedScene" path="res://scenes/enemies/rift_wisp.tscn" id="19_wisp"]
 [ext_resource type="PackedScene" path="res://scenes/enemies/obsidian_sentinel.tscn" id="20_sentinel"]
 [ext_resource type="PackedScene" path="res://scenes/enemies/eclipse_warden_boss.tscn" id="21_boss"]
+
+[ext_resource type="PackedScene" path="res://scenes/ui/inventory_panel.tscn" id="22_inventory"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_vbound"]
 size = Vector2(64, 1100)
@@ -504,3 +506,5 @@ grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
 color = Color(0.45, 0.28, 0.92, 0)
+
+[node name="InventoryPanel" parent="." instance=ExtResource("22_inventory")]

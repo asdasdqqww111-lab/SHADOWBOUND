@@ -6,6 +6,7 @@ extends CanvasLayer
 signal mode_switch_requested
 signal respawn_requested
 
+@onready var reward_label: Label = $HudRoot/RewardLabel
 @onready var hud_root: Control = $HudRoot
 @onready var name_label: Label = $HudRoot/TopBar/StatusPanel/HBox/StatsVBox/HeaderRow/NameLabel
 @onready var rank_label: Label = $HudRoot/TopBar/StatusPanel/HBox/StatsVBox/HeaderRow/RankLabel
@@ -14,12 +15,17 @@ signal respawn_requested
 @onready var mp_label: Label = $HudRoot/TopBar/StatusPanel/HBox/StatsVBox/MpRow/MpLabel
 @onready var mp_bar: ProgressBar = $HudRoot/TopBar/StatusPanel/HBox/StatsVBox/MpRow/MpBar
 @onready var sp_label: Label = $HudRoot/TopBar/StatusPanel/HBox/StatsVBox/SpRow/SpLabel
+@onready var xp_label: Label = $HudRoot/TopBar/StatusPanel/HBox/StatsVBox/XpLabel
+@onready var xp_bar: ProgressBar = $HudRoot/TopBar/StatusPanel/HBox/StatsVBox/XpBar
+@onready var wallet_label: Label = $HudRoot/TopBar/StatusPanel/HBox/StatsVBox/WalletLabel
 @onready var sp_bar: ProgressBar = $HudRoot/TopBar/StatusPanel/HBox/StatsVBox/SpRow/SpBar
 
 @onready var zone_label: Label = $HudRoot/TopBar/RightCluster/ZonePanel/VBox/ZoneLabel
 @onready var mode_label: Label = $HudRoot/TopBar/RightCluster/ZonePanel/VBox/ModeLabel
 @onready var state_label: Label = $HudRoot/TopBar/RightCluster/ZonePanel/VBox/StateLabel
 @onready var switch_mode_btn: Button = $HudRoot/TopBar/RightCluster/ButtonRow/SwitchModeBtn
+@onready var inventory_btn: Button = $HudRoot/TopBar/RightCluster/ButtonRow/InventoryBtn
+@onready var pause_inventory_btn: Button = $PauseOverlay/CenterContainer/PausePanel/VBox/InventoryBtn
 @onready var pause_btn: Button = $HudRoot/TopBar/RightCluster/ButtonRow/PauseBtn
 
 @onready var boss_panel: PanelContainer = $HudRoot/BossPanel
@@ -36,6 +42,9 @@ signal respawn_requested
 @onready var respawn_btn: Button = $PauseOverlay/CenterContainer/PausePanel/VBox/RespawnBtn
 @onready var pause_lang_btn: Button = $PauseOverlay/CenterContainer/PausePanel/VBox/PauseLangBtn
 @onready var main_menu_btn: Button = $PauseOverlay/CenterContainer/PausePanel/VBox/MainMenuBtn
+
+var _reward_timer: float = 0.0
+var _last_reward: Dictionary = {}
 
 var _displayed_mode: int = 0
 var _state_key: String = "idle"
@@ -70,6 +79,9 @@ func _ready() -> void:
 	pause_lang_btn.pressed.connect(_on_pause_lang_pressed)
 	main_menu_btn.pressed.connect(_on_main_menu_pressed)
 
+	inventory_btn.pressed.connect(_on_inventory_pressed)
+	pause_inventory_btn.pressed.connect(_on_inventory_pressed)
+	GameState.progression.rewards_granted.connect(_on_rewards_granted)
 	GameState.profile_updated.connect(_refresh_profile_bars)
 	GameState.pause_state_changed.connect(_on_pause_state_changed)
 	GameState.settings_changed.connect(_refresh_button_texts)
@@ -80,6 +92,11 @@ func _ready() -> void:
 
 
 func _process(delta: float) -> void:
+	if get_tree().paused:
+		return
+	if _reward_timer > 0.0:
+		_reward_timer = maxf(0.0, _reward_timer - delta)
+		reward_label.visible = _reward_timer > 0.0
 	if _banner_timer > 0.0:
 		_banner_timer = maxf(0.0, _banner_timer - delta)
 		if _banner_timer <= 0.0:
@@ -193,6 +210,7 @@ func _refresh_all() -> void:
 	_refresh_boss_panel()
 	_refresh_hint_text()
 	_refresh_button_texts()
+	_refresh_reward_feedback()
 
 
 func _refresh_profile_bars() -> void:
@@ -222,6 +240,13 @@ func _refresh_profile_bars() -> void:
 	mp_bar.value = profile.current_mp
 	sp_bar.max_value = profile.max_stamina
 	sp_bar.value = profile.current_stamina
+	var progress: Dictionary = ProgressionRules.describe(profile.total_xp, GameState.progression.config)
+	xp_label.text = LocalizationManager.translate_key(
+		"progress.max_level" if int(progress.required) == 0 else "progress.xp", progress
+	)
+	xp_bar.max_value = maxf(1.0, float(progress.required))
+	xp_bar.value = float(progress.xp) if int(progress.required) > 0 else 1.0
+	wallet_label.text = LocalizationManager.translate_key("progress.wallet_short", profile.wallet.to_dictionary())
 
 
 func _refresh_boss_panel() -> void:
@@ -303,6 +328,8 @@ func _refresh_hint_text() -> void:
 
 
 func _refresh_button_texts() -> void:
+	inventory_btn.text = LocalizationManager.translate_key("inventory.button")
+	pause_inventory_btn.text = LocalizationManager.translate_key("inventory.title")
 	switch_mode_btn.text = LocalizationManager.translate_key("hud.switch_mode")
 	pause_btn.text = LocalizationManager.translate_key("hud.pause")
 	pause_title.text = LocalizationManager.translate_key("pause.title")
@@ -364,3 +391,35 @@ func _on_pause_state_changed(paused: bool) -> void:
 
 func _on_locale_changed(_new_locale: String) -> void:
 	_refresh_all()
+
+
+func _on_inventory_pressed() -> void:
+	GameState.set_inventory_open(true)
+
+
+func _on_rewards_granted(summary: Dictionary) -> void:
+	_last_reward = summary.duplicate()
+	_reward_timer = 4.5
+	_refresh_reward_feedback()
+
+
+func _refresh_reward_feedback() -> void:
+	reward_label.visible = _reward_timer > 0.0
+	if _last_reward.is_empty():
+		return
+	var summary: Dictionary = _last_reward
+	# Separate reward readout persists alongside combat/victory banners.
+	var text: String = LocalizationManager.translate_key("progress.reward", {
+		"xp": summary.xp_awarded, "gold": summary.gold_awarded,
+	})
+	if int(summary.levels_gained) > 0:
+		text += " · " + LocalizationManager.translate_key("progress.level_up", {
+			"level": summary.level, "rank": summary.rank,
+		})
+	if not bool(summary.item_added):
+		text += " · " + LocalizationManager.translate_key("inventory.full")
+	if int(summary.diamonds_awarded) > 0:
+		text += " · " + LocalizationManager.translate_key("progress.boss_bonus", {
+			"diamonds": summary.diamonds_awarded, "crystals": summary.crystals_awarded,
+		})
+	reward_label.text = text

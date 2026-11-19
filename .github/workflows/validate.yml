@@ -41,7 +41,7 @@ jobs:
           if grep -En 'SCRIPT ERROR:|ERROR:|WARNING:' "$RUNNER_TEMP/test-logs/import.log"; then
             exit 1
           fi
-          for phase in 1 2 3; do
+          for phase in 1 2 3 4; do
             timeout 30 godot --headless --path . "res://tests/gdscript/test_phase${phase}_runner.tscn" 2>&1 \
               | tee "$RUNNER_TEMP/test-logs/phase${phase}.log"
           done

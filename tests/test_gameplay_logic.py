@@ -283,13 +283,36 @@ def test_combat_arena_geometry() -> None:
           "Reflected projectiles gain speed and damage")
 
 
+def test_progression_math() -> None:
+    print("\n--- 6. Phase 4 Independent Progression Math ---")
+    cfg = json.loads((ROOT / "data/config/progression_config.json").read_text())
+    curve = [cfg["xp_base"] + (level - 1) * cfg["xp_step"] for level in range(1, cfg["level_cap"])]
+    check(curve[0] == 100 and curve[1] == 140 and curve[-1] == 2420,
+          "XP curve matches first, second and final advancement costs")
+    check(sum(curve) == 74340, "Total XP to level 60 is 74,340")
+    for rank in cfg["ranks"]:
+        required = sum(curve[:rank["level"] - 1])
+        check(required >= 0 and (rank["level"] == 1 or required > sum(curve[:rank["level"] - 2])),
+              f"Rank {rank['code']} at level {rank['level']} has an increasing cumulative threshold")
+    catalog = json.loads((ROOT / "data/items/item_catalog.json").read_text())
+    slots = sum(math.ceil(count / catalog[item]["stack_limit"]) for item, count in cfg["starter_items"].items())
+    check(slots == 3 and slots < cfg["inventory_capacity"], "Starter inventory occupies 3 of 24 slots")
+    g = cfg["growth"]
+    check(120 + 59 * g["hp"] == 828 and 18 + 59 * g["attack"] == 136,
+          "Max-level base HP and attack derive deterministically without compounding")
+    modal = (ROOT / "scenes/ui/inventory_panel.tscn").read_text()
+    check('custom_minimum_size = Vector2(0, 64)' in modal and 'Vector2(120, 58)' in modal,
+          "Inventory Use/Close buttons have touch-friendly target heights")
+
+
 def main() -> int:
-    print("=== SHADOWBOUND Phase 3 Static Gameplay, Combat & Geometry Tests ===")
+    print("=== SHADOWBOUND Phase 4 Static Gameplay, Progression & Geometry Tests ===")
     test_sidescroll_controller_and_level()
     test_topdown_8dir_controller_and_courtyard()
     test_dual_camera_profiles_and_zones()
     test_touch_controls_ergonomics()
     test_combat_arena_geometry()
+    test_progression_math()
     print(f"\nSUMMARY: {passed} passed, {failed} failed")
     return 0 if failed == 0 else 1
 

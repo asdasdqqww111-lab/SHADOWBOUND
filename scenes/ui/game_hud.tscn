@@ -55,7 +55,7 @@ anchor_right = 1.0
 offset_left = 18.0
 offset_top = 14.0
 offset_right = -18.0
-offset_bottom = 132.0
+offset_bottom = 170.0
 grow_horizontal = 2
 mouse_filter = 2
 
@@ -166,6 +166,23 @@ theme_override_styles/fill = SubResource("StyleBoxFlat_sp_fill")
 value = 100.0
 show_percentage = false
 
+[node name="XpLabel" type="Label" parent="HudRoot/TopBar/StatusPanel/HBox/StatsVBox"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 11
+text = "XP 0 / 100"
+
+[node name="XpBar" type="ProgressBar" parent="HudRoot/TopBar/StatusPanel/HBox/StatsVBox"]
+custom_minimum_size = Vector2(0, 6)
+layout_mode = 2
+mouse_filter = 2
+theme_override_styles/fill = SubResource("StyleBoxFlat_mp_fill")
+show_percentage = false
+
+[node name="WalletLabel" type="Label" parent="HudRoot/TopBar/StatusPanel/HBox/StatsVBox"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 10
+text = "Gold 0 · Diamonds 0 · Crystals 0"
+
 [node name="Spacer" type="Control" parent="HudRoot/TopBar"]
 layout_mode = 2
 size_flags_horizontal = 3
@@ -217,6 +234,13 @@ focus_mode = 0
 theme_override_font_sizes/font_size = 14
 text = "Switch Mode"
 
+[node name="InventoryBtn" type="Button" parent="HudRoot/TopBar/RightCluster/ButtonRow"]
+custom_minimum_size = Vector2(80, 52)
+layout_mode = 2
+focus_mode = 0
+theme_override_font_sizes/font_size = 14
+text = "Satchel"
+
 [node name="PauseBtn" type="Button" parent="HudRoot/TopBar/RightCluster/ButtonRow"]
 layout_mode = 2
 focus_mode = 0
@@ -263,6 +287,21 @@ theme_override_styles/fill = SubResource("StyleBoxFlat_boss_fill")
 max_value = 320.0
 value = 320.0
 show_percentage = false
+
+[node name="RewardLabel" type="Label" parent="HudRoot"]
+visible = false
+layout_mode = 1
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -235.0
+offset_top = 104.0
+offset_right = 235.0
+offset_bottom = 176.0
+mouse_filter = 2
+theme_override_font_sizes/font_size = 15
+theme_override_colors/font_color = Color(1, 0.88, 0.54, 1)
+horizontal_alignment = 1
+autowrap_mode = 2
 
 [node name="HintBanner" type="PanelContainer" parent="HudRoot"]
 layout_mode = 1
@@ -320,7 +359,7 @@ layout_mode = 2
 
 [node name="VBox" type="VBoxContainer" parent="PauseOverlay/CenterContainer/PausePanel"]
 layout_mode = 2
-theme_override_constants/separation = 12
+theme_override_constants/separation = 6
 
 [node name="PauseTitle" type="Label" parent="PauseOverlay/CenterContainer/PausePanel/VBox"]
 layout_mode = 2
@@ -332,6 +371,10 @@ horizontal_alignment = 1
 [node name="ResumeBtn" type="Button" parent="PauseOverlay/CenterContainer/PausePanel/VBox"]
 layout_mode = 2
 text = "Resume"
+
+[node name="InventoryBtn" type="Button" parent="PauseOverlay/CenterContainer/PausePanel/VBox"]
+layout_mode = 2
+text = "Adventurer's Satchel"
 
 [node name="PauseModeBtn" type="Button" parent="PauseOverlay/CenterContainer/PausePanel/VBox"]
 layout_mode = 2

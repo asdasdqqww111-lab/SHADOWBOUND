@@ -333,6 +333,7 @@ func _handle_defeat() -> void:
 		hurtbox_shape.set_deferred("disabled", true)
 	if stats != null:
 		GameState.record_enemy_defeated(stats.enemy_id, stats.is_boss)
+		GameState.progression.award_enemy(GameState.get_player_profile(), stats)
 	enemy_defeated.emit(self, stats)
 	_on_enemy_defeated()
 

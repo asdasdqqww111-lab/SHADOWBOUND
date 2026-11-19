@@ -1,0 +1,7 @@
+{
+  "health_potion": {"name_key": "item.health_potion", "description_key": "item.health_potion_desc", "kind": "consumable", "stat": "hp", "amount": 50, "stack_limit": 20, "color": "#E43662"},
+  "mana_potion": {"name_key": "item.mana_potion", "description_key": "item.mana_potion_desc", "kind": "consumable", "stat": "mp", "amount": 35, "stack_limit": 20, "color": "#609EFF"},
+  "stamina_draught": {"name_key": "item.stamina_draught", "description_key": "item.stamina_draught_desc", "kind": "consumable", "stat": "stamina", "amount": 40, "stack_limit": 20, "color": "#47DBB8"},
+  "shadow_fragment": {"name_key": "item.shadow_fragment", "description_key": "item.shadow_fragment_desc", "kind": "material", "stack_limit": 99, "color": "#9B7EFF"},
+  "eclipse_sigil": {"name_key": "item.eclipse_sigil", "description_key": "item.eclipse_sigil_desc", "kind": "material", "stack_limit": 10, "color": "#FFE08A"}
+}

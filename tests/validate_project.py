@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-SHADOWBOUND — Phase 3 Automated Project Validation Suite.
+SHADOWBOUND — Phase 4 Automated Project Validation Suite.
 
 Validates:
 1. Repository structure & security hygiene (zero secrets/keystores/APKs).
@@ -53,6 +53,7 @@ REQUIRED_INPUT_ACTIONS = [
     "interact",
     "switch_mode",
     "pause",
+    "inventory",
 ]
 
 REQUIRED_ANIMATIONS = [
@@ -126,7 +127,7 @@ def validate_structure_and_security() -> None:
 
     leaked = []
     for p in ROOT.rglob("*"):
-        if ".git" in p.parts:
+        if ".git" in p.parts or p.relative_to(ROOT).parts[0] == ".venv":
             continue
         if p.is_file() and p.suffix.lower() in FORBIDDEN_SECRET_PATTERNS:
             leaked.append(str(p.relative_to(ROOT)))
@@ -196,7 +197,7 @@ def validate_gdscripts(autoload_names: set[str]) -> None:
         check(proc.returncode == 0, f"gdlint clean across all {len(gd_files)} scripts" + (f"\n{out_msg}" if proc.returncode != 0 else ""))
 
     # Verify zero autoload vs class_name collisions & zero unsafe JSON := inference
-    all_signals: set[str] = {"pressed", "area_entered", "body_entered", "body_exited"}
+    all_signals: set[str] = {"pressed", "area_entered", "body_entered", "body_exited", "item_selected"}
     all_funcs: set[str] = set()
     script_funcs: dict[Path, set[str]] = {}
     for gd in gd_files:
@@ -556,6 +557,47 @@ def validate_phase3_combat() -> None:
     check((ROOT / "tests/gdscript/test_phase3_runner.tscn").is_file(), "Native Phase 3 regression runner exists")
 
 
+def validate_phase4_progression() -> None:
+    print("\n--- 8. Phase 4 Progression, Catalog & Inventory Contracts ---")
+    cfg = json.loads((ROOT / "data/config/progression_config.json").read_text())
+    catalog = json.loads((ROOT / "data/items/item_catalog.json").read_text())
+    en = json.loads((ROOT / "data/localization/en.json").read_text())
+    check(cfg["level_cap"] == 60 and cfg["xp_base"] > 0 and cfg["xp_step"] >= 0,
+          "Level cap and XP curve are valid")
+    check([entry["code"] for entry in cfg["ranks"]] == ["F", "E", "D", "C", "B", "A", "S", "SS", "SSS"],
+          "All nine ranks from F to SSS are ordered")
+    levels = [entry["level"] for entry in cfg["ranks"]]
+    check(levels == sorted(set(levels)) and levels[0] == 1 and levels[-1] == cfg["level_cap"],
+          "Rank thresholds are unique, ascending and reach the cap")
+    check(all(value > 0 for value in cfg["growth"].values()), "Every level grants positive stat growth")
+    check(cfg["inventory_capacity"] == 24 and cfg["max_currency"] == 999999999,
+          "Inventory and wallet have finite configured bounds")
+    for item_id, spec in catalog.items():
+        check(spec["name_key"] in en and spec["description_key"] in en, f"{item_id}: catalog keys localized")
+        check(spec["kind"] in {"consumable", "material"} and 0 < spec["stack_limit"] <= 99,
+              f"{item_id}: valid kind and stack limit")
+        icon = ROOT / f"assets/sprites/items/{item_id}.png"
+        with Image.open(icon) as image:
+            check(image.size == (64, 64) and image.mode == "RGBA", f"{item_id}: 64px RGBA icon exists")
+        if spec["kind"] == "consumable":
+            check(spec["stat"] in {"hp", "mp", "stamina"} and spec["amount"] > 0,
+                  f"{item_id}: safe positive restorative effect")
+    check(all(item in catalog and count > 0 for item, count in cfg["starter_items"].items()),
+          "Starter supplies reference real items with positive counts")
+    check(cfg["enemy_material"] in catalog and cfg["boss_rewards"]["item"] in catalog,
+          "Enemy/boss reward items exist")
+    check(cfg["boss_rewards"]["diamonds"] > 0 and cfg["boss_rewards"]["magic_crystals"] > 0,
+          "Boss grants both special currencies")
+    manager = (ROOT / "scripts/progression/progression_manager.gd").read_text()
+    check('SAVE_VERSION: int = 1' in manager and 'MAX_SAVE_BYTES: int = 65536' in manager,
+          "Progression checkpoint schema and file-size cap declared")
+    check('DirAccess.rename_absolute(save_path + ".tmp", save_path)' in manager,
+          "Progression replaces saves through same-directory temporary file")
+    level = (ROOT / "scenes/levels/twilight_sanctum.tscn").read_text()
+    check('res://scenes/ui/inventory_panel.tscn' in level, "Playable level mounts inventory modal")
+    check((ROOT / "tests/gdscript/test_phase4_runner.tscn").is_file(), "Phase 4 native runner exists")
+
+
 def main() -> int:
     print("=======================================================")
     print("  SHADOWBOUND — Automated Project Validation Runner")
@@ -567,6 +609,7 @@ def main() -> int:
     validate_data_and_localization()
     validate_assets_and_licenses()
     validate_phase3_combat()
+    validate_phase4_progression()
 
     print("\n=======================================================")
     print(f"  SUMMARY: {passed} passed, {failed} failed")

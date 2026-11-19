@@ -5,6 +5,7 @@ extends Node
 signal gameplay_mode_changed(new_mode: int)
 signal pause_state_changed(is_paused: bool)
 signal settings_changed
+signal inventory_visibility_changed(is_open: bool)
 signal profile_updated
 signal enemy_defeated_recorded(enemy_id: String, is_boss: bool, total_count: int)
 
@@ -39,6 +40,9 @@ var is_in_gameplay: bool = false
 var player_profile: PlayerProfile = null
 var movement_config: Dictionary = {}
 var combat_config: Dictionary = {}
+var progression: ProgressionManager = ProgressionManager.new()
+var inventory_open: bool = false
+var _pause_before_inventory: bool = false
 var defeated_enemy_counts: Dictionary = {}
 
 
@@ -47,6 +51,7 @@ func _ready() -> void:
 	get_tree().set_auto_accept_quit(true)
 	_load_movement_config()
 	_load_combat_config()
+	progression.changed.connect(notify_profile_updated)
 	_ensure_player_profile()
 	load_settings()
 
@@ -130,6 +135,7 @@ func _ensure_player_profile() -> void:
 		player_profile = loaded.duplicate(true) as PlayerProfile
 	else:
 		player_profile = PlayerProfile.new()
+	progression.initialize(player_profile)
 
 
 func get_player_profile() -> PlayerProfile:
@@ -179,6 +185,7 @@ func start_game(initial_mode: int = GameplayMode.SIDE_SCROLL) -> Error:
 
 
 func return_to_main_menu() -> Error:
+	set_inventory_open(false)
 	set_paused(false)
 	is_in_gameplay = false
 	save_settings()
@@ -193,6 +200,9 @@ func set_paused(paused: bool) -> void:
 
 
 func toggle_pause() -> bool:
+	if inventory_open:
+		set_inventory_open(false)
+		return get_tree().paused
 	var next_paused: bool = not get_tree().paused
 	set_paused(next_paused)
 	return next_paused
@@ -273,3 +283,15 @@ func load_settings() -> void:
 	camera_zoom_preset = clampi(camera_zoom_preset, CameraZoomPreset.STANDARD, CameraZoomPreset.WIDE)
 	LocalizationManager.set_locale(saved_locale, true)
 	settings_changed.emit()
+
+
+func set_inventory_open(open: bool) -> void:
+	if inventory_open == open:
+		return
+	inventory_open = open
+	if open:
+		_pause_before_inventory = get_tree().paused
+		set_paused(true)
+	else:
+		set_paused(_pause_before_inventory)
+	inventory_visibility_changed.emit(open)

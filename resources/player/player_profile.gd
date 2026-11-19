@@ -21,6 +21,10 @@ extends Resource
 @export var crit_chance: float = 0.12
 @export var crit_multiplier: float = 1.5
 
+var total_xp: int = 0
+var wallet: CurrencyWallet = CurrencyWallet.new()
+var inventory: InventoryState = InventoryState.new()
+
 var session_slash_hits: int = 0
 var session_mode_switches: int = 0
 var session_enemies_defeated: int = 0
@@ -48,7 +52,7 @@ func heal(amount: float) -> float:
 
 
 func consume_mp(amount: float) -> bool:
-	if current_mp < amount:
+	if amount < 0.0 or not is_finite(amount) or current_mp < amount:
 		return false
 	current_mp = maxf(0.0, current_mp - amount)
 	return true
@@ -81,6 +85,31 @@ func restore_all() -> void:
 	current_stamina = max_stamina
 
 
+func apply_progression(cfg: Dictionary, refill_on_level_up: bool = false) -> Dictionary:
+	var old_level: int = level
+	var old_rank: String = rank_code
+	total_xp = clampi(total_xp, 0, ProgressionRules.max_total_xp(cfg))
+	var state: Dictionary = ProgressionRules.describe(total_xp, cfg)
+	level = int(state.level)
+	rank_code = str(state.rank)
+	var growth: Dictionary = cfg.get("growth", {})
+	var steps: int = level - 1
+	max_hp = 120.0 + steps * float(growth.get("hp", 12.0))
+	max_mp = 80.0 + steps * float(growth.get("mp", 6.0))
+	max_stamina = 100.0 + steps * float(growth.get("stamina", 2.0))
+	base_attack = 18.0 + steps * float(growth.get("attack", 2.0))
+	defense = 4.0 + steps * float(growth.get("defense", 0.5))
+	if refill_on_level_up and level > old_level:
+		restore_all()
+	else:
+		current_hp = minf(current_hp, max_hp)
+		current_mp = minf(current_mp, max_mp)
+		current_stamina = minf(current_stamina, max_stamina)
+	state["levels_gained"] = maxi(0, level - old_level)
+	state["rank_changed"] = rank_code != old_rank
+	return state
+
+
 func to_dictionary() -> Dictionary:
 	return {
 		"character_name_en": character_name_en,
@@ -98,6 +127,9 @@ func to_dictionary() -> Dictionary:
 		"defense": defense,
 		"crit_chance": crit_chance,
 		"crit_multiplier": crit_multiplier,
+		"total_xp": total_xp,
+		"wallet": wallet.to_dictionary(),
+		"inventory": inventory.to_dictionary(),
 		"session_slash_hits": session_slash_hits,
 		"session_mode_switches": session_mode_switches,
 		"session_enemies_defeated": session_enemies_defeated,
