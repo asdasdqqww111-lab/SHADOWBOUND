@@ -178,7 +178,8 @@ func _validated_save(path: String) -> Dictionary:
 	if file == null or file.get_length() > MAX_SAVE_BYTES:
 		return {}
 	var data: Dictionary = _read_dictionary(path)
-	if data.get("version") not in [1, SAVE_VERSION] or not data.get("wallet") is Dictionary:
+	var version: int = ProgressionRules.safe_int(data.get("version"), -1, 1, SAVE_VERSION)
+	if version < 1 or not data.get("wallet") is Dictionary:
 		return {}
 	if not data.get("inventory") is Dictionary:
 		return {}

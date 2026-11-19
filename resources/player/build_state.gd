@@ -31,9 +31,9 @@ func load_dictionary(data: Dictionary, inventory: InventoryState, definitions: D
 	if upgrade_data is Dictionary:
 		for item_id: String in inventory.catalog:
 			if inventory.count(item_id) > 0 and inventory.catalog[item_id].get("kind") == "equipment":
-				upgrades[item_id] = ProgressionRules.safe_int(
-					upgrade_data.get(item_id, 0), 0, 0, int(definitions.get("upgrade_cap", 5))
-				)
+				upgrades[item_id] = mini(int(definitions.get("upgrade_cap", 5)), ProgressionRules.safe_int(
+					upgrade_data.get(item_id, 0), 0, 0, 2147483647
+				))
 	var talent_data: Variant = data.get("talents", [])
 	if talent_data is Array:
 		var remaining: int = level

@@ -46,6 +46,9 @@ func _cast_paid() -> String:
 	var spec: Dictionary = classes.get(profile.class_id, {})
 	if spec.is_empty() or not profile.consume_mp(float(spec.get("mp_cost", 20))):
 		return "skill.no_mana"
+	if _last_class != profile.class_id:
+		_clear_companions()
+		_last_class = profile.class_id
 	cooldown_remaining = float(spec.get("cooldown", 7))
 	var power: float = BuildRules.skill_power(profile)
 	var damage: float = profile.base_attack * float(spec.get("damage_multiplier", 1.0)) * power
