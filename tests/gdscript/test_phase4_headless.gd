@@ -188,6 +188,10 @@ func _test_persistence() -> void:
 	_check(not _manager.load_progress(loaded) and _manager.save_progress(profile) == ERR_FILE_UNRECOGNIZED,
 		"Newer save schema is neither loaded nor overwritten")
 	_cleanup()
+	var path_before: String = _manager.save_path
+	_manager.save_path = "user://nonexistent_phase4_directory/progress.json"
+	_check(_manager.save_progress(profile) != OK, "Save failure is returned rather than reported as success")
+	_manager.save_path = path_before
 	_manager.initialize(loaded)
 	_check(loaded.inventory.count("health_potion") == 3, "Fresh save grants starter supplies")
 	loaded.inventory.remove("health_potion", 3)
@@ -242,10 +246,22 @@ func _test_live_level() -> void:
 	GameState.set_inventory_open(false)
 	_check(get_tree().paused, "Opening from Pause preserves previous paused state")
 	GameState.set_paused(false)
+	_check(InputMap.has_action("inventory"), "Inventory shortcut action is registered")
 	var xp_before: int = player.profile.total_xp
 	GameState.toggle_gameplay_mode()
 	_check(player.profile.total_xp == xp_before and player.profile.inventory.count("health_potion") == 1,
 		"Mode switching preserves XP and inventory")
+	GameState.set_inventory_open(true)
+	panel.set("_selected_id", "shadow_fragment")
+	panel.call("_request_discard")
+	var dialog: ConfirmationDialog = panel.get("discard_dialog") as ConfirmationDialog
+	_check(dialog.visible and player.profile.inventory.count("shadow_fragment") == 1,
+		"Discard requires explicit confirmation before mutating inventory")
+	dialog.hide()
+	_check(player.profile.inventory.count("shadow_fragment") == 1, "Cancelling discard keeps item")
+	panel.call("_confirm_discard")
+	_check(player.profile.inventory.count("shadow_fragment") == 0, "Confirmed discard removes one selected item")
+	GameState.set_inventory_open(false)
 	LocalizationManager.set_locale("en", true)
 	level.free()
 	GameState.player_profile = old_profile
