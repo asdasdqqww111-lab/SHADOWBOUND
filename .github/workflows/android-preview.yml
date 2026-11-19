@@ -6,7 +6,11 @@ on:
     branches: ['arena/1e3db61b-shadowbound']
     paths:
       - '.github/workflows/android-preview.yml'
-      - 'scripts/tools/verify_android_apk.py'
+      - 'scripts/**'
+      - 'resources/**'
+      - 'scenes/**'
+      - 'data/**'
+      - 'assets/**'
       - 'project.godot'
       - 'export_presets.cfg.example'
 

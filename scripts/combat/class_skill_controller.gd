@@ -22,13 +22,16 @@ func _physics_process(delta: float) -> void:
 	if _last_class != player.profile.class_id:
 		_clear_companions()
 		_last_class = player.profile.class_id
-	if player.is_defeated():
+	if player.is_defeated() or player.profile.is_defeated():
 		_clear_companions()
 
 
 func try_cast() -> String:
 	var outcome: String = "skill.cast"
-	if player == null or player.profile == null or get_tree().paused or player.is_defeated():
+	if (
+		player == null or player.profile == null or get_tree().paused
+		or player.is_defeated() or player.profile.is_defeated()
+	):
 		outcome = "skill.busy"
 	elif player.active_controller == null or player.active_controller.is_hurt_stunned():
 		outcome = "skill.busy"

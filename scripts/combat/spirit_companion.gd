@@ -22,7 +22,7 @@ func _physics_process(delta: float) -> void:
 		return
 	_age += delta
 	_beam_timer = maxf(0.0, _beam_timer - delta)
-	if _age >= duration or player.profile.class_id != "summoner":
+	if _age >= duration or player.profile.is_defeated() or player.profile.class_id != "summoner":
 		queue_free()
 		return
 	global_position = player.global_position + Vector2(-36, -84 + sin(_age * 4) * 7)
@@ -34,7 +34,7 @@ func _physics_process(delta: float) -> void:
 
 
 func attack_nearest() -> bool:
-	if not is_instance_valid(player) or player.is_defeated():
+	if not is_instance_valid(player) or player.is_defeated() or player.profile.is_defeated():
 		return false
 	var nearest: EnemyBase = null
 	var best: float = 360.0
