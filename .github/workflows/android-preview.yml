@@ -93,8 +93,19 @@ jobs:
               | tee "$RUNNER_TEMP/phase${phase}.log"
           done
           if grep -En 'SCRIPT ERROR:|ERROR:|WARNING:' "$RUNNER_TEMP/"phase*.log; then exit 1; fi
-          godot --headless --path . --export-debug 'Android APK' "builds/android/$APK_NAME" \
-            2>&1 | tee "$RUNNER_TEMP/export.log"
+          # Maven/Gradle repository availability is external to the project.
+          # Retry a failed export, but never publish an unsuccessful/partial APK.
+          exported=false
+          for attempt in 1 2 3; do
+            rm -f "builds/android/$APK_NAME"
+            if godot --headless --path . --export-debug 'Android APK' "builds/android/$APK_NAME" \
+              2>&1 | tee "$RUNNER_TEMP/export.log"; then
+              exported=true
+              break
+            fi
+            echo "APK export attempt $attempt failed."
+          done
+          test "$exported" = true
           test -s "builds/android/$APK_NAME"
       - name: Verify APK signature, manifest and packaged game
         run: |
